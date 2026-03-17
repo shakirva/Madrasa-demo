@@ -2,11 +2,11 @@
 import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { ibadahRecords, students } from "@/mock-data";
+import { ibadahRecords, students, studentIbadahSubmissions } from "@/mock-data";
 import {
   Moon, Save, CheckCircle2, AlertTriangle, Star, ChevronDown,
   ChevronUp, BookOpen, Heart, Sparkles,
-  TrendingUp, MessageSquare,
+  TrendingUp, MessageSquare, Send,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -118,6 +118,8 @@ export default function TeacherIbadahPage() {
   const [showToast, setShowToast]     = useState(false);
   const [editRemarks, setEditRemarks] = useState<string | null>(null);
   const [remarksText, setRemarksText] = useState("");
+  const [viewMode, setViewMode]       = useState<"entry" | "submissions">("entry");
+  const [expandedSubId, setExpandedSubId] = useState<string | null>(null);
 
   const getRecord = (id: string) => records.find((r) => r.studentId === id)!;
 
@@ -177,6 +179,22 @@ export default function TeacherIbadahPage() {
     <DashboardLayout>
       <PageHeader title="Ibadah Tracking" subtitle={`Class 4 · ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`} icon={Moon} back backHref="/teacher" />
 
+      {/* ── View Mode Toggle ──────────────────────────────────── */}
+      <div className="flex gap-1.5 mb-5 bg-white border border-gray-100 rounded-xl p-1">
+        <button
+          onClick={() => setViewMode("entry")}
+          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${viewMode === "entry" ? "bg-emerald-600 text-white" : "text-gray-500 hover:bg-gray-50"}`}
+        >
+          Teacher Entry
+        </button>
+        <button
+          onClick={() => setViewMode("submissions")}
+          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${viewMode === "submissions" ? "bg-emerald-600 text-white" : "text-gray-500 hover:bg-gray-50"}`}
+        >
+          <Send className="w-3.5 h-3.5" /> Student Submissions
+        </button>
+      </div>
+
       {/* ── Toast ────────────────────────────────────────────── */}
       <AnimatePresence>
         {showToast && (
@@ -188,6 +206,8 @@ export default function TeacherIbadahPage() {
         )}
       </AnimatePresence>
 
+      {/* ══════════════ TEACHER ENTRY MODE ═══════════════════ */}
+      {viewMode === "entry" && (<>
       {/* ── Class overview stats ──────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
         {[
@@ -525,6 +545,247 @@ export default function TeacherIbadahPage() {
           {saved ? <><CheckCircle2 className="w-5 h-5" /> Records Saved!</> : <><Save className="w-5 h-5" /> Save Ibadah Records</>}
         </button>
       </div>
+      </>)}
+
+      {/* ══════════════ STUDENT SUBMISSIONS MODE ════════════════ */}
+      {viewMode === "submissions" && (
+        <div className="space-y-4 pb-24">
+          {/* Summary header */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3">
+            <div className="flex-1">
+              <p className="text-sm font-bold text-gray-900">Student Self-Reports</p>
+              <p className="text-xs text-gray-400">Ibadah submitted by parents on behalf of students</p>
+            </div>
+            <div className="bg-emerald-50 rounded-xl px-3 py-1.5 text-center">
+              <p className="text-lg font-bold text-emerald-700">{studentIbadahSubmissions.length}</p>
+              <p className="text-[10px] text-emerald-600">Entries</p>
+            </div>
+          </div>
+
+          {/* Group by student */}
+          {class4Students.map((student) => {
+            const submissions = studentIbadahSubmissions
+              .filter((s) => s.studentId === student.id)
+              .sort((a, b) => b.date.localeCompare(a.date));
+            if (submissions.length === 0) return (
+              <div key={student.id} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 opacity-50">
+                <div className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500 font-bold text-sm shrink-0">
+                  {student.name.split(" ").slice(0, 2).map((n) => n[0]).join("")}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">{student.name}</p>
+                  <p className="text-xs text-gray-400">No submissions yet</p>
+                </div>
+              </div>
+            );
+
+            return (
+              <div key={student.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                {/* Student header */}
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-50">
+                  <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-700 font-bold text-sm shrink-0">
+                    {student.name.split(" ").slice(0, 2).map((n) => n[0]).join("")}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-gray-900">{student.name}</p>
+                    <p className="text-xs text-gray-400">{submissions.length} submission{submissions.length > 1 ? "s" : ""}</p>
+                  </div>
+                  <div className="bg-emerald-50 rounded-lg px-2 py-1">
+                    <p className="text-xs font-bold text-emerald-700">{submissions.length} days</p>
+                  </div>
+                </div>
+
+                {/* Submission entries */}
+                <div className="divide-y divide-gray-50">
+                  {submissions.map((sub) => {
+                    const fardMissed = ["fajr", "zuhr", "asr", "maghrib", "isha"].filter((p) => (sub as Record<string, unknown>)[p] === "missed").length;
+                    const isExpanded = expandedSubId === sub.id;
+                    const dateLabel = new Date(sub.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+
+                    return (
+                      <div key={sub.id}>
+                        {/* Row header */}
+                        <div
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-50/60 transition-colors"
+                          onClick={() => setExpandedSubId(isExpanded ? null : sub.id)}
+                        >
+                          <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
+                            <Moon className="w-3.5 h-3.5 text-emerald-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900">{dateLabel}</p>
+                            <p className="text-xs text-gray-400">
+                              {fardMissed === 0 ? "All Fard ✓" : `${fardMissed} missed`}
+                              {(sub as Record<string, unknown>).remarks ? " · Has remarks" : ""}
+                            </p>
+                          </div>
+                          {/* Prayer mini pills */}
+                          <div className="hidden sm:flex gap-1 shrink-0">
+                            {(["fajr", "zuhr", "asr", "maghrib", "isha"] as const).map((p) => {
+                              const st = (sub as Record<string, unknown>)[p] as string;
+                              const bg = st === "jama" ? "bg-emerald-500 text-white" : st === "individual" ? "bg-amber-400 text-white" : "bg-red-400 text-white";
+                              const lbl = st === "jama" ? "J" : st === "individual" ? "I" : "✗";
+                              return <span key={p} className={`w-6 h-6 rounded-lg flex items-center justify-center text-[9px] font-bold ${bg}`}>{lbl}</span>;
+                            })}
+                          </div>
+                          {fardMissed > 0 && <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />}
+                          {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />}
+                        </div>
+
+                        {/* Expanded details */}
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="bg-gray-50/60 px-4 py-3 space-y-3 border-t border-gray-50">
+                                {/* Fard prayers grid */}
+                                <div>
+                                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Fard Prayers</p>
+                                  <div className="grid grid-cols-5 gap-1.5">
+                                    {(["fajr", "zuhr", "asr", "maghrib", "isha"] as const).map((p) => {
+                                      const st = (sub as Record<string, unknown>)[p] as string;
+                                      const bg = st === "jama" ? "bg-emerald-500 text-white" : st === "individual" ? "bg-amber-400 text-white" : "bg-red-400 text-white";
+                                      const lbl = st === "jama" ? "J" : st === "individual" ? "I" : "✗";
+                                      const name = { fajr: "Fajr", zuhr: "Zuhr", asr: "Asr", maghrib: "Mag", isha: "Isha" }[p];
+                                      return (
+                                        <div key={p} className={`rounded-lg py-2 text-center text-[10px] font-bold ${bg}`}>
+                                          <div>{lbl}</div>
+                                          <div className="opacity-70 mt-0.5">{name}</div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
+                                {/* Sunnah + Quran */}
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                  <div className="bg-white rounded-xl p-2.5 border border-gray-100">
+                                    <p className="text-gray-400 font-medium mb-1 flex items-center gap-1">
+                                      <Star className="w-3 h-3 text-amber-400" /> Sunnah
+                                    </p>
+                                    {[
+                                      { key: "tahajjud", label: "Tahajjud" },
+                                      { key: "ishraq",   label: "Ishraq"   },
+                                      { key: "duha",     label: "Duha"     },
+                                      { key: "awwabin",  label: "Awwabin"  },
+                                    ].map(({ key, label }) => {
+                                      const v = (sub as Record<string, unknown>)[key] as string;
+                                      return (
+                                        <div key={key} className="flex justify-between py-0.5">
+                                          <span className="text-gray-600">{label}</span>
+                                          <span className={v === "yes" ? "text-emerald-600 font-bold" : v === "partial" ? "text-amber-600" : "text-gray-300"}>
+                                            {v === "yes" ? "✓" : v === "partial" ? "~" : "—"}
+                                          </span>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                  <div className="bg-white rounded-xl p-2.5 border border-gray-100">
+                                    <p className="text-gray-400 font-medium mb-1 flex items-center gap-1">
+                                      <BookOpen className="w-3 h-3 text-blue-500" /> Quran
+                                    </p>
+                                    {[
+                                      { key: "tilawah",  label: "Tilawah"   },
+                                      { key: "hifz",     label: "Hifz"      },
+                                      { key: "tajweed",  label: "Tajweed"   },
+                                      { key: "revision", label: "Muraja'ah" },
+                                    ].map(({ key, label }) => {
+                                      const v = (sub as Record<string, unknown>)[key] as string;
+                                      return (
+                                        <div key={key} className="flex justify-between py-0.5">
+                                          <span className="text-gray-600">{label}</span>
+                                          <span className={v === "yes" ? "text-blue-600 font-bold" : v === "partial" ? "text-amber-600" : "text-gray-300"}>
+                                            {v === "yes" ? "✓" : v === "partial" ? "~" : "—"}
+                                          </span>
+                                        </div>
+                                      );
+                                    })}
+                                    <div className="mt-1 pt-1 border-t border-gray-100 flex justify-between text-[10px]">
+                                      <span className="text-gray-400">Pages: {String((sub as Record<string, unknown>).tilawahPages)}</span>
+                                      <span className="text-gray-400">Lines: {String((sub as Record<string, unknown>).hifzLines)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Zikr */}
+                                <div className="bg-white rounded-xl p-2.5 border border-gray-100">
+                                  <p className="text-[10px] text-gray-400 font-medium mb-1.5 flex items-center gap-1">
+                                    <Sparkles className="w-3 h-3 text-purple-500" /> Zikr
+                                  </p>
+                                  <div className="flex gap-2 flex-wrap">
+                                    {[
+                                      { key: "subhanallah",   label: "SubhanAllah", target: 33  },
+                                      { key: "alhamdulillah", label: "Alhamdulillah", target: 33  },
+                                      { key: "allahuakbar",   label: "Allahu Akbar", target: 34  },
+                                      { key: "istighfar",     label: "Istighfar", target: 100 },
+                                      { key: "durood",        label: "Durood", target: 100 },
+                                    ].map(({ key, label, target }) => {
+                                      const level = (sub as Record<string, unknown>)[key] as number;
+                                      const bg = level === 0 ? "bg-gray-100 text-gray-400" : level === 1 ? "bg-purple-100 text-purple-600" : level === 2 ? "bg-purple-400 text-white" : "bg-purple-600 text-white";
+                                      const lbl = level === 0 ? "—" : level === 1 ? `~${Math.floor(target * 0.33)}` : level === 2 ? `~${Math.floor(target * 0.66)}` : `${target}+`;
+                                      return (
+                                        <div key={key} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${bg}`}>
+                                          {label.split(" ")[0]}: {lbl}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
+                                {/* Akhlaq */}
+                                <div className="bg-white rounded-xl p-2.5 border border-gray-100">
+                                  <p className="text-[10px] text-gray-400 font-medium mb-1.5 flex items-center gap-1">
+                                    <Heart className="w-3 h-3 text-rose-500" /> Akhlaq
+                                  </p>
+                                  <div className="flex gap-2 flex-wrap">
+                                    {[
+                                      { key: "punctual",   label: "Punctuality", icon: "⏰" },
+                                      { key: "respectful", label: "Respectful",  icon: "🤝" },
+                                      { key: "helpful",    label: "Helpful",     icon: "💚" },
+                                      { key: "honest",     label: "Honest",      icon: "✨" },
+                                    ].map(({ key, label, icon }) => {
+                                      const v = (sub as Record<string, unknown>)[key] as string;
+                                      const bg = v === "yes" ? "bg-emerald-500 text-white" : v === "partial" ? "bg-amber-400 text-white" : "bg-gray-200 text-gray-500";
+                                      return (
+                                        <div key={key} className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${bg}`}>
+                                          {icon} {label}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
+                                {/* Parent Remarks */}
+                                {sub.remarks && (
+                                  <div className="bg-white rounded-xl p-2.5 border border-gray-100">
+                                    <p className="text-[10px] text-gray-400 font-medium mb-1 flex items-center gap-1">
+                                      <MessageSquare className="w-3 h-3" /> Parent Remarks
+                                    </p>
+                                    <p className="text-xs text-gray-600 italic">{sub.remarks}</p>
+                                  </div>
+                                )}
+
+                                {/* Submitted at */}
+                                <p className="text-[10px] text-gray-300 text-right">
+                                  Submitted: {new Date(sub.submittedAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                                </p>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </DashboardLayout>
   );
 }

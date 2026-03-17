@@ -33,6 +33,7 @@ const parentLinks = [
   { href: "/parent", icon: Home, label: "Home" },
   { href: "/parent/attendance", icon: ClipboardList, label: "Attendance" },
   { href: "/parent/homework", icon: BookOpen, label: "Homework" },
+  { href: "/parent/ibadah", icon: Moon, label: "Ibadah" },
   { href: "/parent/fees", icon: CreditCard, label: "Fees" },
   { href: "/parent/results", icon: GraduationCap, label: "Results" },
   { href: "/parent/notifications", icon: Bell, label: "Alerts" },

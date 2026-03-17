@@ -676,6 +676,100 @@ export const ibadahRecords = [
   },
 ];
 
+// ── Student Ibadah Submissions (submitted by parent on behalf of student) ──
+export const studentIbadahSubmissions = [
+  // S001 – Ahmed Bin Abdullah – 3 days
+  {
+    id: "IBS001-1", studentId: "S001", date: "2026-03-17",
+    fajr: "jama", zuhr: "jama", asr: "individual", maghrib: "jama", isha: "jama",
+    tahajjud: "no", ishraq: "yes", duha: "yes", awwabin: "yes",
+    tilawah: "yes", hifz: "yes", tajweed: "partial", revision: "yes",
+    tilawahPages: 3, hifzLines: 5,
+    subhanallah: 3, alhamdulillah: 3, allahuakbar: 3, istighfar: 2, durood: 2,
+    punctual: "yes", respectful: "yes", helpful: "yes", honest: "yes",
+    remarks: "Alhamdulillah, completed all prayers on time today.",
+    submittedAt: "2026-03-17T20:30:00",
+  },
+  {
+    id: "IBS001-2", studentId: "S001", date: "2026-03-16",
+    fajr: "jama", zuhr: "individual", asr: "jama", maghrib: "jama", isha: "jama",
+    tahajjud: "no", ishraq: "yes", duha: "partial", awwabin: "yes",
+    tilawah: "yes", hifz: "partial", tajweed: "yes", revision: "yes",
+    tilawahPages: 2, hifzLines: 3,
+    subhanallah: 3, alhamdulillah: 2, allahuakbar: 3, istighfar: 2, durood: 1,
+    punctual: "yes", respectful: "yes", helpful: "partial", honest: "yes",
+    remarks: "Missed Duha due to school timing.",
+    submittedAt: "2026-03-16T21:00:00",
+  },
+  {
+    id: "IBS001-3", studentId: "S001", date: "2026-03-15",
+    fajr: "individual", zuhr: "jama", asr: "jama", maghrib: "jama", isha: "individual",
+    tahajjud: "no", ishraq: "no", duha: "yes", awwabin: "yes",
+    tilawah: "yes", hifz: "yes", tajweed: "yes", revision: "partial",
+    tilawahPages: 2, hifzLines: 4,
+    subhanallah: 2, alhamdulillah: 2, allahuakbar: 2, istighfar: 1, durood: 2,
+    punctual: "partial", respectful: "yes", helpful: "yes", honest: "yes",
+    remarks: "",
+    submittedAt: "2026-03-15T20:45:00",
+  },
+  {
+    id: "IBS001-4", studentId: "S001", date: "2026-03-14",
+    fajr: "jama", zuhr: "jama", asr: "missed", maghrib: "jama", isha: "jama",
+    tahajjud: "no", ishraq: "yes", duha: "yes", awwabin: "no",
+    tilawah: "partial", hifz: "yes", tajweed: "yes", revision: "yes",
+    tilawahPages: 1, hifzLines: 5,
+    subhanallah: 3, alhamdulillah: 3, allahuakbar: 3, istighfar: 3, durood: 3,
+    punctual: "yes", respectful: "yes", helpful: "yes", honest: "yes",
+    remarks: "Missed Asr, was travelling.",
+    submittedAt: "2026-03-14T21:15:00",
+  },
+  {
+    id: "IBS001-5", studentId: "S001", date: "2026-03-13",
+    fajr: "jama", zuhr: "jama", asr: "jama", maghrib: "jama", isha: "jama",
+    tahajjud: "yes", ishraq: "yes", duha: "yes", awwabin: "yes",
+    tilawah: "yes", hifz: "yes", tajweed: "yes", revision: "yes",
+    tilawahPages: 4, hifzLines: 6,
+    subhanallah: 3, alhamdulillah: 3, allahuakbar: 3, istighfar: 3, durood: 3,
+    punctual: "yes", respectful: "yes", helpful: "yes", honest: "yes",
+    remarks: "Excellent day! All ibadah complete. 🌟",
+    submittedAt: "2026-03-13T20:00:00",
+  },
+  // S006 – Umar Farooq – 3 days
+  {
+    id: "IBS006-1", studentId: "S006", date: "2026-03-17",
+    fajr: "individual", zuhr: "jama", asr: "jama", maghrib: "jama", isha: "jama",
+    tahajjud: "no", ishraq: "partial", duha: "yes", awwabin: "no",
+    tilawah: "yes", hifz: "partial", tajweed: "yes", revision: "yes",
+    tilawahPages: 2, hifzLines: 2,
+    subhanallah: 2, alhamdulillah: 2, allahuakbar: 2, istighfar: 1, durood: 1,
+    punctual: "partial", respectful: "yes", helpful: "yes", honest: "yes",
+    remarks: "Fajr prayed alone at home.",
+    submittedAt: "2026-03-17T21:30:00",
+  },
+  {
+    id: "IBS006-2", studentId: "S006", date: "2026-03-16",
+    fajr: "jama", zuhr: "jama", asr: "individual", maghrib: "jama", isha: "jama",
+    tahajjud: "no", ishraq: "yes", duha: "no", awwabin: "yes",
+    tilawah: "yes", hifz: "yes", tajweed: "partial", revision: "partial",
+    tilawahPages: 1, hifzLines: 3,
+    subhanallah: 3, alhamdulillah: 2, allahuakbar: 3, istighfar: 2, durood: 2,
+    punctual: "yes", respectful: "partial", helpful: "yes", honest: "yes",
+    remarks: "",
+    submittedAt: "2026-03-16T20:50:00",
+  },
+  {
+    id: "IBS006-3", studentId: "S006", date: "2026-03-15",
+    fajr: "missed", zuhr: "jama", asr: "jama", maghrib: "individual", isha: "jama",
+    tahajjud: "no", ishraq: "no", duha: "partial", awwabin: "no",
+    tilawah: "partial", hifz: "yes", tajweed: "yes", revision: "yes",
+    tilawahPages: 1, hifzLines: 2,
+    subhanallah: 1, alhamdulillah: 1, allahuakbar: 1, istighfar: 1, durood: 1,
+    punctual: "partial", respectful: "yes", helpful: "partial", honest: "yes",
+    remarks: "Not feeling well, missed Fajr.",
+    submittedAt: "2026-03-15T22:00:00",
+  },
+];
+
 // Mock Fees Records
 export const feesRecords = [
   // ── March 2026 ──
