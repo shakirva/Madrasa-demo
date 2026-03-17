@@ -78,7 +78,7 @@ export default function ParentAttendancePage() {
       <div className="space-y-3">
         {records.map((rec, i) => (
           <motion.div
-            key={rec.date}
+            key={`${rec.date}-${i}`}
             initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
             className="bg-white rounded-2xl p-4 border border-gray-100 flex items-center justify-between"
           >

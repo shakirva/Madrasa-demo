@@ -1,123 +1,627 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { students, attendanceRecords } from "@/mock-data";
-import { ClipboardList, Check, X, Save } from "lucide-react";
-import { motion } from "framer-motion";
+import {
+  ClipboardList, ChevronLeft, ChevronRight, Check, X,
+  Clock, FileText, BarChart2, Users, Bell, Save,
+  AlertCircle,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import {
+  BarChart, Bar, XAxis, YAxis, ResponsiveContainer,
+  Tooltip, CartesianGrid,
+} from "recharts";
 
+// ── Types ─────────────────────────────────────────────────────────────────
+type AttStatus = "present" | "absent" | "late" | "excused";
+type ViewTab = "mark" | "history" | "stats";
+
+const STATUS_CYCLE: AttStatus[] = ["present", "absent", "late", "excused"];
+
+const STATUS_META: Record<AttStatus, { label: string; color: string; bg: string; border: string; icon: React.ReactNode }> = {
+  present: { label: "Present", color: "text-emerald-700", bg: "bg-emerald-600", border: "border-emerald-200", icon: <Check className="w-4 h-4" /> },
+  absent:  { label: "Absent",  color: "text-red-600",     bg: "bg-red-500",     border: "border-red-200",     icon: <X className="w-4 h-4" /> },
+  late:    { label: "Late",    color: "text-amber-700",   bg: "bg-amber-500",   border: "border-amber-200",   icon: <Clock className="w-4 h-4" /> },
+  excused: { label: "Excused", color: "text-blue-700",    bg: "bg-blue-500",    border: "border-blue-200",    icon: <FileText className="w-4 h-4" /> },
+};
+
+const STATUS_ROW_BG: Record<AttStatus, string> = {
+  present: "bg-emerald-50 border-emerald-200",
+  absent:  "bg-red-50    border-red-200",
+  late:    "bg-amber-50  border-amber-200",
+  excused: "bg-blue-50   border-blue-200",
+};
+
+// last 8 working days (Mon-Sat)
+const DATES = [
+  "2026-03-17","2026-03-14","2026-03-13","2026-03-12",
+  "2026-03-11","2026-03-10","2026-03-07","2026-03-06",
+];
+
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString("en-GB", { weekday:"short", day:"2-digit", month:"short" });
+}
+
+function getStudent(id: string) {
+  return students.find((s) => s.id === id);
+}
+
+// ── Component ─────────────────────────────────────────────────────────────
 export default function TeacherAttendancePage() {
-  const class4Students = students.filter((s) => s.class === "Class 4");
-  const todayRecord = attendanceRecords[0];
+  const [activeClass, setActiveClass]   = useState("Class 4");
+  const [dateIdx,     setDateIdx]       = useState(0);   // index into DATES
+  const [view,        setView]          = useState<ViewTab>("mark");
+  const [saved,       setSaved]         = useState(false);
+  const [showRemark,  setShowRemark]    = useState<string | null>(null);  // studentId
 
-  const [attendance, setAttendance] = useState<Record<string, "present" | "absent">>(
+  const selectedDate = DATES[dateIdx];
+  const classStudents = useMemo(
+    () => students.filter((s) => s.class === activeClass),
+    [activeClass]
+  );
+
+  // Seed from mock data if available, else default to "present"
+  const seedRecord = attendanceRecords.find(
+    (r) => r.date === selectedDate && r.classId === activeClass
+  );
+
+  const [attendance, setAttendance] = useState<Record<string, AttStatus>>(() =>
     Object.fromEntries(
-      class4Students.map((s) => [
+      classStudents.map((s) => [
         s.id,
-        (todayRecord?.records.find((r) => r.studentId === s.id)?.status as "present" | "absent") ?? "present",
+        (seedRecord?.records.find((r) => r.studentId === s.id)?.status as AttStatus) ?? "present",
       ])
     )
   );
-  const [saved, setSaved] = useState(false);
+  const [remarks, setRemarks] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      classStudents.map((s) => [
+        s.id,
+        seedRecord?.records.find((r) => r.studentId === s.id)?.remark ?? "",
+      ])
+    )
+  );
 
-  const toggle = (id: string) => {
-    setAttendance((prev) => ({ ...prev, [id]: prev[id] === "present" ? "absent" : "present" }));
+  // re-seed when date or class changes
+  const changeContext = (newClass: string, newDateIdx: number) => {
+    const newStudents = students.filter((s) => s.class === newClass);
+    const rec = attendanceRecords.find(
+      (r) => r.date === DATES[newDateIdx] && r.classId === newClass
+    );
+    setAttendance(Object.fromEntries(
+      newStudents.map((s) => [
+        s.id,
+        (rec?.records.find((r) => r.studentId === s.id)?.status as AttStatus) ?? "present",
+      ])
+    ));
+    setRemarks(Object.fromEntries(
+      newStudents.map((s) => [
+        s.id,
+        rec?.records.find((r) => r.studentId === s.id)?.remark ?? "",
+      ])
+    ));
+    setSaved(false);
   };
 
-  const presentCount = Object.values(attendance).filter((v) => v === "present").length;
-  const absentCount = Object.values(attendance).filter((v) => v === "absent").length;
+  const cycleStatus = (id: string) => {
+    setAttendance((prev) => {
+      const cur = prev[id];
+      const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(cur) + 1) % STATUS_CYCLE.length];
+      return { ...prev, [id]: next };
+    });
+    setSaved(false);
+  };
+
+  const markAll = (status: AttStatus) => {
+    setAttendance(Object.fromEntries(classStudents.map((s) => [s.id, status])));
+    setSaved(false);
+  };
+
+  const counts = useMemo(() => {
+    const vals = Object.values(attendance);
+    return {
+      present: vals.filter((v) => v === "present").length,
+      absent:  vals.filter((v) => v === "absent").length,
+      late:    vals.filter((v) => v === "late").length,
+      excused: vals.filter((v) => v === "excused").length,
+      total:   classStudents.length,
+    };
+  }, [attendance, classStudents]);
+
+  const pct = counts.total > 0 ? Math.round((counts.present / counts.total) * 100) : 0;
 
   const handleSave = () => {
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => setSaved(false), 3000);
   };
+
+  // ── Per-student historical attendance stats ──
+  const studentStats = useMemo(() =>
+    classStudents.map((stu) => {
+      const recs = attendanceRecords
+        .filter((r) => r.classId === activeClass)
+        .map((r) => r.records.find((x) => x.studentId === stu.id))
+        .filter(Boolean);
+      const present = recs.filter((r) => r?.status === "present").length;
+      const absent  = recs.filter((r) => r?.status === "absent").length;
+      const late    = recs.filter((r) => r?.status === "late").length;
+      const total   = recs.length;
+      return { stu, present, absent, late, total, pct: total > 0 ? Math.round((present / total) * 100) : 0 };
+    }),
+  [classStudents, activeClass]);
+
+  // ── Weekly heatmap data (last 8 days × students) ──
+  const heatmapDates = DATES.slice(0, 6);
+
+  // ── History records for selected class ──
+  const historyRecs = attendanceRecords
+    .filter((r) => r.classId === activeClass)
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  // ── Bar chart data for stats tab ──
+  const barData = historyRecs.slice(0, 8).reverse().map((rec) => ({
+    date: new Date(rec.date).toLocaleDateString("en-GB", { day:"2-digit", month:"short" }),
+    P: rec.records.filter((r) => r.status === "present").length,
+    A: rec.records.filter((r) => r.status === "absent").length,
+    L: rec.records.filter((r) => r.status === "late").length,
+  }));
 
   return (
     <DashboardLayout>
       <PageHeader
         title="Attendance"
-        subtitle="Class 4 · 14 March 2026"
+        subtitle={`${activeClass} · ${fmtDate(selectedDate)}`}
         icon={ClipboardList}
         back
         backHref="/teacher"
       />
 
-      {/* Summary */}
-      <div className="flex gap-4 mb-5">
-        <div className="flex-1 bg-emerald-50 rounded-2xl p-4 text-center">
-          <p className="text-2xl font-bold text-emerald-700">{presentCount}</p>
-          <p className="text-xs text-emerald-600 mt-1">Present</p>
-        </div>
-        <div className="flex-1 bg-red-50 rounded-2xl p-4 text-center">
-          <p className="text-2xl font-bold text-red-600">{absentCount}</p>
-          <p className="text-xs text-red-500 mt-1">Absent</p>
-        </div>
-        <div className="flex-1 bg-gray-50 rounded-2xl p-4 text-center">
-          <p className="text-2xl font-bold text-gray-700">{class4Students.length}</p>
-          <p className="text-xs text-gray-500 mt-1">Total</p>
-        </div>
-      </div>
-
-      {/* Tap to toggle instruction */}
-      <p className="text-xs text-gray-500 mb-3 text-center">Tap a student card to toggle presence</p>
-
-      {/* Student list */}
-      <div className="space-y-3 mb-6">
-        {class4Students.map((student, i) => {
-          const isPresent = attendance[student.id] === "present";
-          return (
-            <motion.button
-              key={student.id}
-              initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
-              onClick={() => toggle(student.id)}
-              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all active:scale-98 ${
-                isPresent ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${isPresent ? "bg-emerald-600 text-white" : "bg-red-500 text-white"}`}>
-                  {student.name.charAt(0)}
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold text-gray-900 text-sm">{student.name}</p>
-                  <p className="text-xs text-gray-500">{student.admissionNumber}</p>
-                </div>
-              </div>
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isPresent ? "bg-emerald-600" : "bg-red-500"}`}>
-                {isPresent ? <Check className="w-5 h-5 text-white" /> : <X className="w-5 h-5 text-white" />}
-              </div>
-            </motion.button>
-          );
-        })}
-      </div>
-
-      {/* Save */}
-      <button
-        onClick={handleSave}
-        className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-semibold text-sm transition-colors sticky bottom-20 lg:bottom-6 ${
-          saved ? "bg-emerald-100 text-emerald-700" : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-100"
-        }`}
-      >
-        <Save className="w-5 h-5" />
-        {saved ? "✅ Attendance Saved! Parents notified." : "Save Attendance"}
-      </button>
-
-      {/* History */}
-      <div className="mt-8">
-        <p className="text-sm font-semibold text-gray-700 mb-3">Recent Records</p>
-        {attendanceRecords.map((rec) => (
-          <div key={rec.date} className="bg-white rounded-2xl p-4 border border-gray-100 mb-3">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-gray-900">{rec.date}</p>
-              <div className="flex gap-2">
-                <StatusBadge status="present" label={`${rec.records.filter((r) => r.status === "present").length} P`} size="sm" />
-                <StatusBadge status="absent" label={`${rec.records.filter((r) => r.status === "absent").length} A`} size="sm" />
-              </div>
-            </div>
-          </div>
+      {/* ── Class selector ── */}
+      <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+        {["Class 4","Class 3","Class 2"].map((cls) => (
+          <button key={cls} onClick={() => { setActiveClass(cls); changeContext(cls, dateIdx); }}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all",
+              activeClass === cls ? "bg-gray-900 text-white" : "bg-white border border-gray-200 text-gray-500"
+            )}
+          >
+            <Users className="w-3.5 h-3.5" />{cls}
+            <span className={cn(
+              "text-xs px-1.5 py-0.5 rounded-full font-bold",
+              activeClass === cls ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+            )}>
+              {students.filter((s) => s.class === cls).length}
+            </span>
+          </button>
         ))}
       </div>
+
+      {/* ── Date navigator ── */}
+      <div className="flex items-center gap-3 mb-4">
+        <button onClick={() => { const n = Math.min(dateIdx+1, DATES.length-1); setDateIdx(n); changeContext(activeClass, n); }}
+          className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0"
+          disabled={dateIdx >= DATES.length - 1}
+        >
+          <ChevronLeft className="w-5 h-5 text-gray-600" />
+        </button>
+        <div className="flex-1 overflow-x-auto flex gap-1.5 scrollbar-hide">
+          {DATES.map((d, i) => (
+            <button key={d} onClick={() => { setDateIdx(i); changeContext(activeClass, i); }}
+              className={cn(
+                "flex flex-col items-center px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all min-w-13",
+                i === dateIdx ? "bg-emerald-600 text-white" : "bg-white border border-gray-200 text-gray-500"
+              )}
+            >
+              <span className="font-bold">{new Date(d).toLocaleDateString("en-GB", { day:"2-digit" })}</span>
+              <span className="opacity-70">{new Date(d).toLocaleDateString("en-GB", { weekday:"short" })}</span>
+            </button>
+          ))}
+        </div>
+        <button onClick={() => { const n = Math.max(dateIdx-1, 0); setDateIdx(n); changeContext(activeClass, n); }}
+          className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center shrink-0"
+          disabled={dateIdx === 0}
+        >
+          <ChevronRight className="w-5 h-5 text-gray-600" />
+        </button>
+      </div>
+
+      {/* ── View tabs ── */}
+      <div className="flex gap-1.5 mb-5 bg-gray-100 p-1 rounded-2xl">
+        {([["mark","Mark","✏️"],["history","History","📋"],["stats","Stats","📊"]] as const).map(([key,label,emoji]) => (
+          <button key={key} onClick={() => setView(key)}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all",
+              view === key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+            )}
+          >
+            <span>{emoji}</span>{label}
+          </button>
+        ))}
+      </div>
+
+      {/* ════════════════════════════════════
+          VIEW: MARK ATTENDANCE
+      ════════════════════════════════════ */}
+      {view === "mark" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="mark">
+
+          {/* Summary stats */}
+          <div className="grid grid-cols-4 gap-2 mb-4">
+            {(["present","absent","late","excused"] as AttStatus[]).map((s) => {
+              const m = STATUS_META[s];
+              return (
+                <div key={s} className={cn("rounded-2xl p-2.5 text-center border", STATUS_ROW_BG[s])}>
+                  <p className={cn("text-xl font-bold", m.color)}>{counts[s]}</p>
+                  <p className={cn("text-xs mt-0.5", m.color)}>{m.label}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Collection progress bar */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-semibold text-gray-700">Today&apos;s Attendance</p>
+              <p className="text-sm font-bold text-emerald-700">{pct}%</p>
+            </div>
+            <div className="h-3 bg-gray-100 rounded-full overflow-hidden flex">
+              <motion.div className="h-full bg-emerald-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${(counts.present/counts.total)*100}%` }}
+                transition={{ duration: 0.6 }}
+              />
+              <motion.div className="h-full bg-amber-400"
+                initial={{ width: 0 }}
+                animate={{ width: `${(counts.late/counts.total)*100}%` }}
+                transition={{ duration: 0.6 }}
+              />
+              <motion.div className="h-full bg-blue-400"
+                initial={{ width: 0 }}
+                animate={{ width: `${(counts.excused/counts.total)*100}%` }}
+                transition={{ duration: 0.6 }}
+              />
+            </div>
+            <div className="flex gap-3 mt-2 text-xs text-gray-500">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"/>Present</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block"/>Late</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-400 inline-block"/>Excused</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block"/>Absent</span>
+            </div>
+          </div>
+
+          {/* Bulk actions */}
+          <div className="flex gap-2 mb-4">
+            <p className="text-xs text-gray-500 my-auto mr-1 shrink-0">Mark all:</p>
+            {(["present","absent","late"] as AttStatus[]).map((s) => {
+              const m = STATUS_META[s];
+              return (
+                <button key={s} onClick={() => markAll(s)}
+                  className={cn(
+                    "flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all",
+                    STATUS_ROW_BG[s], m.color
+                  )}
+                >
+                  {m.icon}{m.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Student list — tap to cycle status */}
+          <p className="text-xs text-gray-400 text-center mb-3">Tap card to cycle: Present → Absent → Late → Excused</p>
+          <div className="space-y-2.5 mb-5">
+            {classStudents.map((student, i) => {
+              const status = attendance[student.id] ?? "present";
+              const meta   = STATUS_META[status];
+              const hasRemark = remarks[student.id];
+              return (
+                <motion.div key={student.id}
+                  initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
+                  className={cn("rounded-2xl border-2 overflow-hidden transition-all", STATUS_ROW_BG[status])}
+                >
+                  <button
+                    onClick={() => cycleStatus(student.id)}
+                    className="w-full flex items-center justify-between p-4 active:opacity-80"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm text-white shrink-0", meta.bg)}>
+                        {student.name.charAt(0)}
+                      </div>
+                      <div className="text-left">
+                        <p className="font-semibold text-gray-900 text-sm">{student.name}</p>
+                        <p className="text-xs text-gray-400">{student.admissionNumber} · {student.division}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {hasRemark && <AlertCircle className="w-4 h-4 text-amber-500" />}
+                      <span className={cn("flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-white", meta.bg)}>
+                        {meta.icon}{meta.label}
+                      </span>
+                    </div>
+                  </button>
+                  {/* Remark row — shown for absent/late/excused */}
+                  {status !== "present" && (
+                    <div className="px-4 pb-3">
+                      <input
+                        type="text"
+                        placeholder="Add remark (optional)…"
+                        value={remarks[student.id] ?? ""}
+                        onChange={(e) => setRemarks((p) => ({ ...p, [student.id]: e.target.value }))}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs text-gray-700 focus:outline-none focus:border-emerald-400"
+                      />
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Save button */}
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={handleSave}
+            className={cn(
+              "w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm transition-all sticky bottom-20 lg:bottom-6 shadow-lg",
+              saved
+                ? "bg-emerald-100 text-emerald-700 shadow-emerald-100"
+                : "bg-emerald-600 text-white shadow-emerald-200"
+            )}
+          >
+            {saved ? (
+              <>
+                <Check className="w-5 h-5" />
+                Saved! {counts.absent > 0 ? `${counts.absent} parent${counts.absent > 1 ? "s" : ""} notified` : "All present 🎉"}
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                Save Attendance
+                {counts.absent > 0 && (
+                  <span className="ml-1 flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full text-xs">
+                    <Bell className="w-3 h-3" />Notify {counts.absent}
+                  </span>
+                )}
+              </>
+            )}
+          </motion.button>
+        </motion.div>
+      )}
+
+      {/* ════════════════════════════════════
+          VIEW: HISTORY
+      ════════════════════════════════════ */}
+      {view === "history" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="history" className="space-y-3">
+
+          {/* Student heatmap */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-4 overflow-x-auto">
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Weekly Heatmap</p>
+            <div className="min-w-max">
+              {/* Header row */}
+              <div className="flex gap-2 mb-2 pl-28">
+                {heatmapDates.map((d) => (
+                  <div key={d} className="w-10 text-center text-xs text-gray-400 font-medium">
+                    {new Date(d).toLocaleDateString("en-GB", { day:"2-digit" })}
+                    <br />
+                    <span className="text-gray-300">{new Date(d).toLocaleDateString("en-GB", { weekday:"short" })}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Student rows */}
+              {classStudents.map((stu) => (
+                <div key={stu.id} className="flex items-center gap-2 mb-1.5">
+                  <div className="w-28 flex items-center gap-2 shrink-0">
+                    <div className={cn(
+                      "w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0",
+                      stu.gender === "female" ? "bg-pink-400" : "bg-emerald-500"
+                    )}>{stu.name.charAt(0)}</div>
+                    <p className="text-xs text-gray-700 font-semibold truncate max-w-18">{stu.name.split(" ")[0]}</p>
+                  </div>
+                  {heatmapDates.map((d) => {
+                    const rec = attendanceRecords.find((r) => r.date === d && r.classId === activeClass);
+                    const s = rec?.records.find((r) => r.studentId === stu.id)?.status as AttStatus | undefined;
+                    return (
+                      <div key={d} className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold",
+                        s === "present" ? "bg-emerald-100 text-emerald-700"
+                        : s === "absent"  ? "bg-red-100 text-red-600"
+                        : s === "late"    ? "bg-amber-100 text-amber-700"
+                        : s === "excused" ? "bg-blue-100 text-blue-700"
+                        :                   "bg-gray-100 text-gray-300"
+                      )}>
+                        {s === "present" ? "✓" : s === "absent" ? "✗" : s === "late" ? "L" : s === "excused" ? "E" : "–"}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+            {/* Legend */}
+            <div className="flex gap-3 mt-3 flex-wrap text-xs text-gray-500">
+              {[["✓","bg-emerald-100","Present"],["✗","bg-red-100","Absent"],["L","bg-amber-100","Late"],["E","bg-blue-100","Excused"]].map(([sym,bg,label]) => (
+                <span key={label} className="flex items-center gap-1.5">
+                  <span className={cn("w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold", bg)}>{sym}</span>{label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Daily records */}
+          {historyRecs.map((rec) => {
+            const p = rec.records.filter((r) => r.status === "present").length;
+            const a = rec.records.filter((r) => r.status === "absent").length;
+            const l = rec.records.filter((r) => r.status === "late").length;
+            const e = rec.records.filter((r) => r.status === "excused").length;
+            const total = rec.records.length;
+            const recPct = total > 0 ? Math.round((p / total) * 100) : 0;
+            return (
+              <div key={rec.date + rec.classId} className="bg-white rounded-2xl border border-gray-100 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="font-bold text-gray-900 text-sm">{fmtDate(rec.date)}</p>
+                    <p className="text-xs text-gray-400">{total} students</p>
+                  </div>
+                  <span className={cn(
+                    "text-sm font-bold px-2.5 py-1 rounded-xl",
+                    recPct >= 80 ? "bg-emerald-100 text-emerald-700" : recPct >= 60 ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-600"
+                  )}>{recPct}%</span>
+                </div>
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-3">
+                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${recPct}%` }} />
+                </div>
+                <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                  {[[p,"P","text-emerald-700"],[a,"A","text-red-600"],[l,"L","text-amber-700"],[e,"E","text-blue-700"]].map(([val,lbl,col]) => (
+                    <div key={String(lbl)} className="bg-gray-50 rounded-xl py-2">
+                      <p className={cn("font-bold text-base", col)}>{val}</p>
+                      <p className="text-gray-400">{lbl}</p>
+                    </div>
+                  ))}
+                </div>
+                {/* Absent students listed */}
+                {rec.records.filter((r) => r.status === "absent" || r.status === "late").map((r) => {
+                  const stu = getStudent(r.studentId);
+                  return (
+                    <div key={r.studentId} className={cn(
+                      "mt-2 flex items-center gap-2 px-3 py-2 rounded-xl text-xs",
+                      r.status === "absent" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700"
+                    )}>
+                      <span className="font-bold capitalize">{r.status}</span>
+                      <span>·</span>
+                      <span className="font-semibold">{stu?.name}</span>
+                      {r.remark && <span className="text-gray-500 ml-auto">&ldquo;{r.remark}&rdquo;</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </motion.div>
+      )}
+
+      {/* ════════════════════════════════════
+          VIEW: STATS
+      ════════════════════════════════════ */}
+      {view === "stats" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="stats" className="space-y-4">
+
+          {/* Bar chart */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+              <BarChart2 className="w-3.5 h-3.5" />Daily Attendance Trend
+            </p>
+            {barData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={barData} barSize={14}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="P" fill="#10b981" radius={[4,4,0,0]} name="Present" />
+                  <Bar dataKey="A" fill="#f87171" radius={[4,4,0,0]} name="Absent"  />
+                  <Bar dataKey="L" fill="#fbbf24" radius={[4,4,0,0]} name="Late"    />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-center text-sm text-gray-400 py-8">No data available</p>
+            )}
+          </div>
+
+          {/* Per-student attendance percentage */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Student Attendance %</p>
+            <div className="space-y-3">
+              {studentStats.map(({ stu, present, absent, late, total, pct: sPct }) => (
+                <div key={stu.id}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white",
+                        stu.gender === "female" ? "bg-pink-400" : "bg-emerald-500"
+                      )}>{stu.name.charAt(0)}</div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900 leading-tight">{stu.name}</p>
+                        <p className="text-xs text-gray-400">{present}P · {absent}A · {late}L · {total} days</p>
+                      </div>
+                    </div>
+                    <span className={cn(
+                      "text-sm font-bold px-2.5 py-1 rounded-xl",
+                      sPct >= 90 ? "bg-emerald-100 text-emerald-700"
+                      : sPct >= 75 ? "bg-amber-100 text-amber-700"
+                      :             "bg-red-100 text-red-600"
+                    )}>{sPct}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }} animate={{ width: `${sPct}%` }}
+                      transition={{ duration: 0.6 }}
+                      className={cn(
+                        "h-full rounded-full",
+                        sPct >= 90 ? "bg-emerald-500" : sPct >= 75 ? "bg-amber-400" : "bg-red-400"
+                      )}
+                    />
+                  </div>
+                  {sPct < 75 && (
+                    <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />Below 75% — notify parents
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Monthly overview */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-4">
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">This Month Summary</p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label:"Total Days Recorded", val: historyRecs.length, color:"text-gray-800" },
+                { label:"Class Average",        val: `${historyRecs.length > 0 ? Math.round(historyRecs.reduce((a,r) => a + (r.records.filter((x) => x.status==="present").length / r.records.length)*100, 0) / historyRecs.length) : 0}%`, color:"text-emerald-700" },
+                { label:"Chronic Absent (<75%)", val: studentStats.filter((s) => s.pct < 75).length, color:"text-red-600" },
+                { label:"Perfect Attendance",  val: studentStats.filter((s) => s.pct === 100).length, color:"text-emerald-700" },
+              ].map(({ label, val, color }) => (
+                <div key={label} className="bg-gray-50 rounded-2xl p-3 text-center">
+                  <p className={cn("text-2xl font-bold", color)}>{val}</p>
+                  <p className="text-xs text-gray-400 mt-0.5 leading-tight">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Low attendance warning */}
+          {studentStats.filter((s) => s.pct < 75).length > 0 && (
+            <div className="bg-red-50 rounded-2xl border border-red-200 p-4">
+              <p className="text-sm font-bold text-red-700 flex items-center gap-2 mb-2">
+                <AlertCircle className="w-4 h-4" />Low Attendance Alert
+              </p>
+              {studentStats.filter((s) => s.pct < 75).map(({ stu, pct: sPct }) => (
+                <div key={stu.id} className="flex items-center justify-between py-2 border-b border-red-100 last:border-0">
+                  <p className="text-sm text-red-800 font-semibold">{stu.name}</p>
+                  <span className="text-xs font-bold bg-red-100 text-red-700 px-2 py-1 rounded-lg">{sPct}%</span>
+                </div>
+              ))}
+              <button className="w-full mt-3 py-2.5 bg-red-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2">
+                <Bell className="w-3.5 h-3.5" />Send Alert to Parents
+              </button>
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* ── Remark drawer (unused — inline instead) ── */}
+      <AnimatePresence>
+        {showRemark && (
+          <motion.div key="rm-bd" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-40"
+            onClick={() => setShowRemark(null)}
+          />
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 }
+

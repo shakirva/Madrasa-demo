@@ -125,8 +125,8 @@ export function BottomNav() {
   const links = getLinksByRole(user.role).slice(0, 5);
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 px-2 pb-safe">
-      <div className="flex items-center justify-around">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 pb-safe">
+      <div className="flex items-stretch justify-around px-1">
         {links.map(({ href, icon: Icon, label }) => {
           const active = pathname === href || (href !== "/admin" && href !== "/teacher" && href !== "/parent" && pathname.startsWith(href));
           return (
@@ -134,12 +134,20 @@ export function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-0.5 py-3 px-3 rounded-xl transition-all min-w-0",
+                "flex flex-col items-center justify-center gap-1 py-2.5 px-2 min-w-0 flex-1 relative transition-all active:scale-95",
                 active ? "text-emerald-600" : "text-gray-400"
               )}
             >
-              <Icon className={cn("w-6 h-6", active && "stroke-[2.5]")} />
-              <span className="text-[10px] font-medium truncate">{label}</span>
+              {active && (
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-emerald-500 rounded-full" />
+              )}
+              <div className={cn(
+                "flex items-center justify-center rounded-xl transition-all",
+                active ? "bg-emerald-50 w-10 h-7" : "w-10 h-7"
+              )}>
+                <Icon className={cn("w-5 h-5 shrink-0", active && "stroke-[2.5]")} />
+              </div>
+              <span className={cn("text-[10px] font-semibold leading-none", active ? "text-emerald-600" : "text-gray-400")}>{label}</span>
             </Link>
           );
         })}

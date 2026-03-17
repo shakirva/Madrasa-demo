@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
-  status: "green" | "yellow" | "red" | "paid" | "pending" | "unpaid" | "present" | "absent" | "jama" | "individual" | "missed";
+  status: "green" | "yellow" | "red" | "paid" | "pending" | "unpaid" | "present" | "absent" | "jama" | "individual" | "missed" | "returned";
   label?: string;
   size?: "sm" | "md";
 }
@@ -19,6 +19,7 @@ const statusConfig = {
   jama:       { bg: "bg-emerald-100", text: "text-emerald-700", dot: "bg-emerald-500", label: "Jama'a" },
   individual: { bg: "bg-amber-100",   text: "text-amber-700",   dot: "bg-amber-400",   label: "Individual" },
   missed:     { bg: "bg-red-100",     text: "text-red-600",     dot: "bg-red-500",     label: "Missed" },
+  returned:   { bg: "bg-blue-100",    text: "text-blue-700",    dot: "bg-blue-500",    label: "Returned" },
 };
 
 export function StatusBadge({ status, label, size = "md" }: StatusBadgeProps) {

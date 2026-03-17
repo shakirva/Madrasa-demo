@@ -7,31 +7,39 @@ import { useAuthStore } from "@/store/auth";
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore();
 
+  const roleLabel: Record<string, string> = { teacher: "Teacher", parent: "Parent", admin: "Admin" };
+
   return (
     <div className="min-h-screen bg-[#faf9f6]">
       <Sidebar />
       {/* Main */}
       <div className="lg:ml-64">
-        {/* Top bar (mobile) */}
-        <header className="lg:hidden sticky top-0 z-30 bg-[#faf9f6]/90 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs">DH</span>
+
+        {/* ── Mobile top bar ─────────────────────────────────── */}
+        <header className="lg:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-100 px-4 py-0 flex items-center justify-between" style={{ minHeight: 56 }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center shrink-0">
+              <span className="text-white font-extrabold text-xs tracking-wide">DH</span>
             </div>
-            <span className="font-bold text-gray-900 text-sm">Darul Huda</span>
+            <div className="leading-tight">
+              <p className="font-bold text-gray-900 text-sm leading-none">Darul Huda</p>
+              <p className="text-[10px] text-emerald-600 font-semibold capitalize mt-0.5">{roleLabel[user?.role ?? ""] ?? user?.role}</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link href={`/${user?.role}/notifications`} className="p-2 rounded-xl bg-white border border-gray-200 relative">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+            <Link href={`/${user?.role}/notifications`}
+              className="relative w-9 h-9 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center active:scale-95 transition-transform"
+            >
+              <Bell className="w-4.5 h-4.5 text-gray-600" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white" />
             </Link>
-            <div className="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+            <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0">
               {user?.name?.charAt(0) ?? "U"}
             </div>
           </div>
         </header>
 
-        {/* Desktop top bar */}
+        {/* ── Desktop top bar ────────────────────────────────── */}
         <header className="hidden lg:flex sticky top-0 z-30 bg-[#faf9f6]/90 backdrop-blur-md border-b border-gray-100 px-8 py-4 items-center justify-between">
           <div className="text-sm text-gray-500">
             {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
@@ -50,7 +58,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="p-4 lg:p-8 pb-24 lg:pb-8">
+        <main className="p-4 lg:p-8 pb-28 lg:pb-8">
           {children}
         </main>
       </div>
