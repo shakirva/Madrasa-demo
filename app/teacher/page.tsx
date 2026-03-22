@@ -30,18 +30,24 @@ export default function TeacherDashboard() {
         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
         className="grid grid-cols-3 gap-2 lg:gap-4 mb-4 lg:mb-6"
       >
-        <div className="bg-emerald-50 rounded-2xl p-3 lg:p-4 text-center border border-emerald-100">
-          <p className="text-xl lg:text-2xl font-bold text-emerald-700">{presentCount}</p>
-          <p className="text-[10px] lg:text-xs text-emerald-600 mt-0.5 font-medium">Present</p>
-        </div>
-        <div className="bg-red-50 rounded-2xl p-3 lg:p-4 text-center border border-red-100">
-          <p className="text-xl lg:text-2xl font-bold text-red-600">{absentCount}</p>
-          <p className="text-[10px] lg:text-xs text-red-500 mt-0.5 font-medium">Absent</p>
-        </div>
-        <div className="bg-amber-50 rounded-2xl p-3 lg:p-4 text-center border border-amber-100">
-          <p className="text-xl lg:text-2xl font-bold text-amber-600">{pendingHW}</p>
-          <p className="text-[10px] lg:text-xs text-amber-600 mt-0.5 font-medium">HW Pending</p>
-        </div>
+        <button onClick={() => router.push("/teacher/present")} className="text-left">
+          <div className="bg-emerald-50 rounded-2xl p-3 lg:p-4 text-center border border-emerald-100 hover:shadow-sm transition-all">
+            <p className="text-xl lg:text-2xl font-bold text-emerald-700">{presentCount}</p>
+            <p className="text-[10px] lg:text-xs text-emerald-600 mt-0.5 font-medium">Present</p>
+          </div>
+        </button>
+        <button onClick={() => router.push("/teacher/absent")} className="text-left">
+          <div className="bg-red-50 rounded-2xl p-3 lg:p-4 text-center border border-red-100 hover:shadow-sm transition-all">
+            <p className="text-xl lg:text-2xl font-bold text-red-600">{absentCount}</p>
+            <p className="text-[10px] lg:text-xs text-red-500 mt-0.5 font-medium">Absent</p>
+          </div>
+        </button>
+        <button onClick={() => router.push("/teacher/homework-list")} className="text-left">
+          <div className="bg-amber-50 rounded-2xl p-3 lg:p-4 text-center border border-amber-100 hover:shadow-sm transition-all">
+            <p className="text-xl lg:text-2xl font-bold text-amber-600">{pendingHW}</p>
+            <p className="text-[10px] lg:text-xs text-amber-600 mt-0.5 font-medium">HW Pending</p>
+          </div>
+        </button>
       </motion.div>
 
       {/* ── Quick Actions ─────────────────────────────────────── */}

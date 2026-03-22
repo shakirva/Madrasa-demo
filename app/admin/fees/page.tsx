@@ -9,6 +9,7 @@ import {
   Clock, AlertCircle, BarChart2, Receipt, QrCode, Upload,
   TrendingUp, Users,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
@@ -34,6 +35,7 @@ const monthlyChartData = ALL_MONTHS.slice().reverse().map((month) => {
 
 // ── Component ───────────────────────────────────────────────────────────────
 export default function AdminFeesPage() {
+  const router = useRouter();
   const [activeMonth, setActiveMonth]     = useState("March 2026");
   const [activeClass, setActiveClass]     = useState("All Classes");
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
@@ -136,18 +138,27 @@ export default function AdminFeesPage() {
 
       {/* ── Summary stats ── */}
       <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="bg-emerald-50 rounded-2xl p-3.5 text-center border border-emerald-100">
-          <p className="text-xl font-bold text-emerald-700">{paidRecs.length}</p>
-          <p className="text-xs text-emerald-600 mt-0.5">Paid</p>
-        </div>
-        <div className="bg-amber-50 rounded-2xl p-3.5 text-center border border-amber-100">
-          <p className="text-xl font-bold text-amber-700">{pendingRecs.length}</p>
-          <p className="text-xs text-amber-600 mt-0.5">Proof Sent</p>
-        </div>
-        <div className="bg-red-50 rounded-2xl p-3.5 text-center border border-red-100">
-          <p className="text-xl font-bold text-red-600">{unpaidRecs.length}</p>
-          <p className="text-xs text-red-500 mt-0.5">Unpaid</p>
-        </div>
+        {/* Wrap stats as buttons to navigate to filtered lists */}
+        <button onClick={() => { router.push(`/admin/fees/paid?month=${encodeURIComponent(activeMonth)}&class=${encodeURIComponent(activeClass)}`); }} className="text-left">
+          <div className="bg-emerald-50 rounded-2xl p-3.5 text-center border border-emerald-100 hover:shadow-sm">
+            <p className="text-xl font-bold text-emerald-700">{paidRecs.length}</p>
+            <p className="text-xs text-emerald-600 mt-0.5">Paid</p>
+          </div>
+        </button>
+
+        <button onClick={() => { router.push(`/admin/fees/pending?month=${encodeURIComponent(activeMonth)}&class=${encodeURIComponent(activeClass)}`); }} className="text-left">
+          <div className="bg-amber-50 rounded-2xl p-3.5 text-center border border-amber-100 hover:shadow-sm">
+            <p className="text-xl font-bold text-amber-700">{pendingRecs.length}</p>
+            <p className="text-xs text-amber-600 mt-0.5">Proof Sent</p>
+          </div>
+        </button>
+
+        <button onClick={() => { router.push(`/admin/fees/unpaid?month=${encodeURIComponent(activeMonth)}&class=${encodeURIComponent(activeClass)}`); }} className="text-left">
+          <div className="bg-red-50 rounded-2xl p-3.5 text-center border border-red-100 hover:shadow-sm">
+            <p className="text-xl font-bold text-red-600">{unpaidRecs.length}</p>
+            <p className="text-xs text-red-500 mt-0.5">Unpaid</p>
+          </div>
+        </button>
       </div>
 
       {/* ── Collected vs Pending bar ── */}

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen, FileText,
   CreditCard, BarChart3, Bell, Settings, Star, BookMarked,
-  UserCircle, Home, GraduationCap, Moon
+  UserCircle, Home, GraduationCap, Moon, Image
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 
@@ -16,6 +16,7 @@ const adminLinks = [
   { href: "/admin/exams", icon: GraduationCap, label: "Exams" },
   { href: "/admin/reports", icon: BarChart3, label: "Reports" },
   { href: "/admin/seats", icon: BookMarked, label: "Seats" },
+  { href: "/admin/posters", icon: Image, label: "Posters" },
   { href: "/admin/config", icon: Settings, label: "Config" },
 ];
 

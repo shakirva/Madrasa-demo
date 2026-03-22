@@ -110,7 +110,8 @@ const SECTIONS: { key: Section; label: string; icon: React.ComponentType<{ class
 
 // ── Component ─────────────────────────────────────────────────
 export default function TeacherIbadahPage() {
-  const class4Students = students.filter((s) => s.class === "Class 4");
+  const [activeClass, setActiveClass] = useState("Class 4");
+  const classStudents = students.filter((s) => s.class === activeClass);
   const [records, setRecords]         = useState<ExtRecord[]>(buildInitial);
   const [saved, setSaved]             = useState(false);
   const [activeSection, setActiveSection] = useState<Section>("prayers");
@@ -148,7 +149,7 @@ export default function TeacherIbadahPage() {
 
   // ── Stats ──────────────────────────────────────────────────
   const classStats = useMemo(() => {
-    const total = class4Students.length;
+    const total = classStudents.length;
     let fullPrayer = 0, sunnahAny = 0, quranDone = 0, zikrDone = 0;
     records.forEach((r) => {
       const allFard = FARD_PRAYERS.every((p) => r[p] !== "missed");
@@ -158,7 +159,7 @@ export default function TeacherIbadahPage() {
       if ((r.subhanallah as ZikrLevel) === 3) zikrDone++;
     });
     return { total, fullPrayer, sunnahAny, quranDone, zikrDone };
-  }, [records, class4Students.length]);
+  }, [records, classStudents.length]);
 
   const handleSave = () => {
     setSaved(true);
@@ -177,7 +178,24 @@ export default function TeacherIbadahPage() {
 
   return (
     <DashboardLayout>
-      <PageHeader title="Ibadah Tracking" subtitle={`Class 4 · ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`} icon={Moon} back backHref="/teacher" />
+      <PageHeader title="Ibadah Tracking" subtitle={`${activeClass} · ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`} icon={Moon} back backHref="/teacher" />
+
+      {/* ── Class Selector ────────────────────────────────────── */}
+      <div className="mb-4 flex gap-2">
+        {["Class 4", "Class 3"].map((cls) => (
+          <button
+            key={cls}
+            onClick={() => setActiveClass(cls)}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+              activeClass === cls
+                ? "bg-emerald-600 text-white shadow-md"
+                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            {cls}
+          </button>
+        ))}
+      </div>
 
       {/* ── View Mode Toggle ──────────────────────────────────── */}
       <div className="flex gap-1.5 mb-5 bg-white border border-gray-100 rounded-xl p-1">
@@ -274,13 +292,13 @@ export default function TeacherIbadahPage() {
 
       {/* ── Student cards ──────────────────────────────────────── */}
       <div className="space-y-4 pb-28">
-        {class4Students.map((student, i) => {
+        {classStudents.map((student: typeof students[0], i: number) => {
           const rec = getRecord(student.id);
           if (!rec) return null;
           const expanded = expandedId === student.id;
           const score = scoreOf(rec);
           const fardMissed = FARD_PRAYERS.filter((p) => rec[p] === "missed").length;
-          const initials = student.name.split(" ").slice(0, 2).map((n) => n[0]).join("");
+          const initials = student.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("");
 
           return (
             <motion.div key={student.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
@@ -563,14 +581,14 @@ export default function TeacherIbadahPage() {
           </div>
 
           {/* Group by student */}
-          {class4Students.map((student) => {
+          {classStudents.map((student: typeof students[0]) => {
             const submissions = studentIbadahSubmissions
               .filter((s) => s.studentId === student.id)
               .sort((a, b) => b.date.localeCompare(a.date));
             if (submissions.length === 0) return (
               <div key={student.id} className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 opacity-50">
                 <div className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center text-gray-500 font-bold text-sm shrink-0">
-                  {student.name.split(" ").slice(0, 2).map((n) => n[0]).join("")}
+                  {student.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("")}
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900">{student.name}</p>
@@ -584,7 +602,7 @@ export default function TeacherIbadahPage() {
                 {/* Student header */}
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-50">
                   <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-700 font-bold text-sm shrink-0">
-                    {student.name.split(" ").slice(0, 2).map((n) => n[0]).join("")}
+                    {student.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("")}
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-bold text-gray-900">{student.name}</p>

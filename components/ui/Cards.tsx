@@ -11,10 +11,12 @@ interface StatCardProps {
   trend?: string;
   trendUp?: boolean;
   subtitle?: string;
+  onClick?: () => void;
 }
 
-export function StatCard({ title, value, icon: Icon, iconColor = "text-emerald-600", iconBg = "bg-emerald-50", trend, trendUp, subtitle }: StatCardProps) {
-  return (
+export function StatCard({ title, value, icon: Icon, iconColor = "text-emerald-600", iconBg = "bg-emerald-50", trend, trendUp, subtitle, onClick }: StatCardProps) {
+  // If onClick provided, render as a button for interactivity
+  const Content = (
     <div className="bg-white rounded-2xl p-4 lg:p-5 shadow-sm border border-gray-100 card-hover">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
@@ -33,6 +35,17 @@ export function StatCard({ title, value, icon: Icon, iconColor = "text-emerald-6
       </div>
     </div>
   );
+
+  // Render button wrapper if clickable
+  if (onClick) {
+    return (
+      <button onClick={onClick} className="w-full text-left">
+        {Content}
+      </button>
+    );
+  }
+
+  return Content;
 }
 
 interface ActionCardProps {

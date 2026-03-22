@@ -30,10 +30,10 @@ export default function AdminDashboard() {
         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
         className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 lg:gap-4 mb-4 lg:mb-6"
       >
-        <StatCard title="Total Students" value={adminStats.totalStudents} icon={Users} subtitle="Enrolled this year" />
-        <StatCard title="Present Today" value={adminStats.presentToday} icon={UserCheck} iconColor="text-emerald-600" iconBg="bg-emerald-50" trend="94% rate" trendUp />
-        <StatCard title="Absent Today" value={adminStats.absentToday} icon={UserX} iconColor="text-red-500" iconBg="bg-red-50" />
-        <StatCard title="Teachers" value={adminStats.totalTeachers} icon={GraduationCap} iconColor="text-teal-600" iconBg="bg-teal-50" />
+  <StatCard title="Total Students" value={adminStats.totalStudents} icon={Users} subtitle="Enrolled this year" onClick={() => router.push('/admin/students')} />
+  <StatCard title="Present Today" value={adminStats.presentToday} icon={UserCheck} iconColor="text-emerald-600" iconBg="bg-emerald-50" trend="94% rate" trendUp onClick={() => router.push('/admin/present')} />
+  <StatCard title="Absent Today" value={adminStats.absentToday} icon={UserX} iconColor="text-red-500" iconBg="bg-red-50" onClick={() => router.push('/admin/absent')} />
+  <StatCard title="Teachers" value={adminStats.totalTeachers} icon={GraduationCap} iconColor="text-teal-600" iconBg="bg-teal-50" onClick={() => router.push('/admin/teachers')} />
       </motion.div>
 
       {/* ── Fee Stats ─────────────────────────────────────────── */}

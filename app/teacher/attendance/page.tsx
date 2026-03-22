@@ -19,8 +19,6 @@ import {
 type AttStatus = "present" | "absent" | "late" | "excused";
 type ViewTab = "mark" | "history" | "stats";
 
-const STATUS_CYCLE: AttStatus[] = ["present", "absent", "late", "excused"];
-
 const STATUS_META: Record<AttStatus, { label: string; color: string; bg: string; border: string; icon: React.ReactNode }> = {
   present: { label: "Present", color: "text-emerald-700", bg: "bg-emerald-600", border: "border-emerald-200", icon: <Check className="w-4 h-4" /> },
   absent:  { label: "Absent",  color: "text-red-600",     bg: "bg-red-500",     border: "border-red-200",     icon: <X className="w-4 h-4" /> },
@@ -103,15 +101,6 @@ export default function TeacherAttendancePage() {
         rec?.records.find((r) => r.studentId === s.id)?.remark ?? "",
       ])
     ));
-    setSaved(false);
-  };
-
-  const cycleStatus = (id: string) => {
-    setAttendance((prev) => {
-      const cur = prev[id];
-      const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(cur) + 1) % STATUS_CYCLE.length];
-      return { ...prev, [id]: next };
-    });
     setSaved(false);
   };
 
@@ -310,8 +299,7 @@ export default function TeacherAttendancePage() {
             })}
           </div>
 
-          {/* Student list — tap to cycle status */}
-          <p className="text-xs text-gray-400 text-center mb-3">Tap card to cycle: Present → Absent → Late → Excused</p>
+          {/* Student list — dropdown status selector */}
           <div className="space-y-2.5 mb-5">
             {classStudents.map((student, i) => {
               const status = attendance[student.id] ?? "present";
@@ -322,10 +310,7 @@ export default function TeacherAttendancePage() {
                   initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}
                   className={cn("rounded-2xl border-2 overflow-hidden transition-all", STATUS_ROW_BG[status])}
                 >
-                  <button
-                    onClick={() => cycleStatus(student.id)}
-                    className="w-full flex items-center justify-between p-4 active:opacity-80"
-                  >
+                  <div className="w-full flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
                       <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm text-white shrink-0", meta.bg)}>
                         {student.name.charAt(0)}
@@ -337,11 +322,21 @@ export default function TeacherAttendancePage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {hasRemark && <AlertCircle className="w-4 h-4 text-amber-500" />}
-                      <span className={cn("flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-white", meta.bg)}>
-                        {meta.icon}{meta.label}
-                      </span>
+                      <select
+                        value={status}
+                        onChange={(e) => setAttendance((p) => ({ ...p, [student.id]: e.target.value as AttStatus }))}
+                        className={cn(
+                          "px-3 py-1.5 rounded-xl text-xs font-bold text-white border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-0",
+                          meta.bg
+                        )}
+                      >
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="late">Late</option>
+                        <option value="excused">Excused</option>
+                      </select>
                     </div>
-                  </button>
+                  </div>
                   {/* Remark row — shown for absent/late/excused */}
                   {status !== "present" && (
                     <div className="px-4 pb-3">

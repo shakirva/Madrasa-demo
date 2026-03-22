@@ -521,15 +521,17 @@ export default function TeacherHomeworkPage() {
                   </div>
                 </div>
 
-                {/* Due date */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                    Due Date {hwType === "long" && <span className="text-red-500">*</span>}
-                  </label>
-                  <input type="date" value={formDue} onChange={(e) => setFormDue(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                  />
-                </div>
+                {/* Due date — only for long-term homework */}
+                {hwType === "long" && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                      Due Date <span className="text-red-500">*</span>
+                    </label>
+                    <input type="date" value={formDue} onChange={(e) => setFormDue(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                    />
+                  </div>
+                )}
 
                 {/* Notify toggle info */}
                 <div className="flex items-center gap-3 bg-emerald-50 rounded-xl p-3 border border-emerald-100">
