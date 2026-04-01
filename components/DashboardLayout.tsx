@@ -1,13 +1,18 @@
 "use client";
 import { Sidebar, BottomNav } from "@/components/Navigation";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Bell } from "lucide-react";
 import Link from "next/link";
 import { useAuthStore } from "@/store/auth";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore();
+  const { lang } = useLanguageStore();
 
-  const roleLabel: Record<string, string> = { teacher: "Teacher", parent: "Parent", admin: "Admin" };
+  const roleLabel = (role: string) =>
+    t("common", role as "admin" | "teacher" | "parent", lang);
 
   return (
     <div className="min-h-screen bg-[#faf9f6]">
@@ -22,11 +27,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <span className="text-white font-extrabold text-xs tracking-wide">DH</span>
             </div>
             <div className="leading-tight">
-              <p className="font-bold text-gray-900 text-sm leading-none">Darul Huda</p>
-              <p className="text-[10px] text-emerald-600 font-semibold capitalize mt-0.5">{roleLabel[user?.role ?? ""] ?? user?.role}</p>
+              <p className="font-bold text-gray-900 text-sm leading-none">{t("common", "appName", lang)}</p>
+              <p className="text-[10px] text-emerald-600 font-semibold capitalize mt-0.5">{roleLabel(user?.role ?? "")}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageSwitcher />
             <Link href={`/${user?.role}/notifications`}
               className="relative w-9 h-9 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center active:scale-95 transition-transform"
             >
@@ -42,9 +48,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         {/* ── Desktop top bar ────────────────────────────────── */}
         <header className="hidden lg:flex sticky top-0 z-30 bg-[#faf9f6]/90 backdrop-blur-md border-b border-gray-100 px-8 py-4 items-center justify-between">
           <div className="text-sm text-gray-500">
-            {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+            {new Date().toLocaleDateString(lang === "ml" ? "ml-IN" : "en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <Link href={`/${user?.role}/notifications`} className="p-2 rounded-xl bg-white border border-gray-200 relative hover:bg-gray-50">
               <Bell className="w-5 h-5 text-gray-600" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />

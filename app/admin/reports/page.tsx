@@ -11,14 +11,17 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
 import { motion } from "framer-motion";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 export default function AdminReportsPage() {
+  const { lang } = useLanguageStore();
   const bestBoy = performanceRankingData.find((s) => s.gender === "male" && s.crown);
   const bestGirl = performanceRankingData.find((s) => s.gender === "female" && s.crown);
 
   return (
     <DashboardLayout>
-      <PageHeader title="Reports & Analytics" subtitle="Full overview" icon={BarChart3} />
+      <PageHeader title={t("adminPages", "reportsTitle", lang)} subtitle={t("adminPages", "reportsSubtitle", lang)} icon={BarChart3} />
 
       {/* Best of Month */}
       <div className="grid grid-cols-2 gap-4 mb-6">
@@ -29,9 +32,9 @@ export default function AdminReportsPage() {
             className="bg-linear-to-br from-amber-400 to-amber-500 rounded-2xl p-4 text-white text-center"
           >
             <Crown className="w-6 h-6 mx-auto mb-2" />
-            <p className="text-xs font-medium opacity-80">{s!.gender === "male" ? "Best Boy" : "Best Girl"} of Month</p>
+            <p className="text-xs font-medium opacity-80">{s!.gender === "male" ? t("adminPages", "bestBoyMonth", lang) : t("adminPages", "bestGirlMonth", lang)}</p>
             <p className="font-bold text-sm mt-1">{s!.name.split(" ")[0]}</p>
-            <p className="text-xs opacity-80 mt-0.5">Score: {s!.total}</p>
+            <p className="text-xs opacity-80 mt-0.5">{t("adminPages", "scoreLabel", lang)}: {s!.total}</p>
           </motion.div>
         ))}
       </div>
@@ -39,7 +42,7 @@ export default function AdminReportsPage() {
       {/* Charts */}
       <div className="space-y-6">
         <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <SectionHeader title="Monthly Attendance Rate (%)" />
+          <SectionHeader title={t("adminPages", "monthlyAttRate", lang)} />
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={monthlyAttendanceData}>
               <defs>
@@ -58,7 +61,7 @@ export default function AdminReportsPage() {
         </div>
 
         <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <SectionHeader title="Fee Collection vs Pending (₹)" />
+          <SectionHeader title={t("adminPages", "feeCollVsPending", lang)} />
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={feeCollectionData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -66,15 +69,15 @@ export default function AdminReportsPage() {
               <YAxis tick={{ fontSize: 12, fill: "#9ca3af" }} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "none" }} />
               <Legend />
-              <Bar dataKey="collected" name="Collected" fill="#059669" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="pending" name="Pending" fill="#fbbf24" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="collected" name={t("adminPages", "collectedLabel", lang)} fill="#059669" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="pending" name={t("adminPages", "pendingChartLabel", lang)} fill="#fbbf24" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white rounded-2xl p-5 border border-gray-100">
-            <SectionHeader title="Parent Cooperation" />
+            <SectionHeader title={t("adminPages", "parentCooperation", lang)} />
             <div className="flex items-center gap-4">
               <ResponsiveContainer width={160} height={160}>
                 <PieChart>
@@ -99,15 +102,15 @@ export default function AdminReportsPage() {
           </div>
 
           <div className="bg-white rounded-2xl p-5 border border-gray-100">
-            <SectionHeader title="Homework Completion (%)" />
+            <SectionHeader title={t("adminPages", "hwCompletionPct", lang)} />
             <ResponsiveContainer width="100%" height={160}>
               <BarChart data={homeworkCompletionData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="week" tick={{ fontSize: 11, fill: "#9ca3af" }} />
                 <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} />
                 <Tooltip contentStyle={{ borderRadius: 12, border: "none" }} />
-                <Bar dataKey="completed" name="Done" fill="#059669" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="missing" name="Missing" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="completed" name={t("adminPages", "doneLabel", lang)} fill="#059669" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="missing" name={t("adminPages", "missingLabel", lang)} fill="#ef4444" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -115,7 +118,7 @@ export default function AdminReportsPage() {
 
         {/* Student Rankings */}
         <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <SectionHeader title="Student Performance Ranking" />
+          <SectionHeader title={t("adminPages", "studentPerfRank", lang)} />
           <div className="space-y-3">
             {performanceRankingData.map((s, i) => (
               <div key={s.studentId} className="flex items-center gap-3">
@@ -128,9 +131,9 @@ export default function AdminReportsPage() {
                     {s.crown && <Crown className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
                   </div>
                   <div className="flex gap-3 mt-0.5">
-                    <span className="text-xs text-gray-500">Exam: {s.examScore}</span>
-                    <span className="text-xs text-gray-500">Ibadah: {s.ibadah}</span>
-                    <span className="text-xs text-gray-500">HW: {s.homework}</span>
+                    <span className="text-xs text-gray-500">{t("teacherPages", "exam", lang)}: {s.examScore}</span>
+                    <span className="text-xs text-gray-500">{t("teacherPages", "ibadahLabel", lang)}: {s.ibadah}</span>
+                    <span className="text-xs text-gray-500">{t("teacherPages", "hw", lang)}: {s.homework}</span>
                   </div>
                 </div>
                 <span className="text-base font-bold text-emerald-700">{s.total}</span>
@@ -142,10 +145,10 @@ export default function AdminReportsPage() {
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Avg Attendance", value: "91%", color: "emerald" },
-            { label: "HW Completion", value: `${adminStats.homeworkCompletionRate}%`, color: "teal" },
-            { label: "Fee Collection", value: "64%", color: "amber" },
-            { label: "Active Parents", value: "60%", color: "blue" },
+            { label: t("adminPages", "avgAttendance", lang), value: "91%", color: "emerald" },
+            { label: t("adminPages", "hwCompLabel", lang), value: `${adminStats.homeworkCompletionRate}%`, color: "teal" },
+            { label: t("adminPages", "feeCollLabel", lang), value: "64%", color: "amber" },
+            { label: t("adminPages", "activeParents", lang), value: "60%", color: "blue" },
           ].map(({ label, value, color }) => (
             <div key={label} className={`bg-${color}-50 rounded-2xl p-4 text-center`}>
               <p className={`text-2xl font-bold text-${color}-700`}>{value}</p>

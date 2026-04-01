@@ -7,9 +7,12 @@ import { ActionCard } from "@/components/ui/Cards";
 import { ClipboardList, BookOpen, CreditCard, GraduationCap, Bell, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 export default function ParentDashboard() {
   const router = useRouter();
+  const { lang } = useLanguageStore();
   // P001 has two children: S001 (Ahmed) and S006 (Umar)
   const myChildren = students.filter((s) => ["S001", "S006"].includes(s.id));
   const unreadNotifs = notifications.filter((n) => !n.read).length;
@@ -28,12 +31,12 @@ export default function ParentDashboard() {
     <DashboardLayout>
       {/* ── Greeting ──────────────────────────────────────────── */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4 lg:mb-6">
-        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Assalamu Alaikum 👋</h1>
-        <p className="text-gray-500 text-xs lg:text-sm mt-0.5">Welcome, Abdullah Rahman</p>
+        <h1 className="text-xl lg:text-2xl font-bold text-gray-900">{t("common", "greeting", lang)}</h1>
+        <p className="text-gray-500 text-xs lg:text-sm mt-0.5">{t("parentDash", "welcome", lang)}, Abdullah Rahman</p>
       </motion.div>
 
       {/* ── Children Cards ─────────────────────────────────────── */}
-      <SectionHeader title="My Children" className="mb-2" />
+      <SectionHeader title={t("parentDash", "myChildren", lang)} className="mb-2" />
       <div className="space-y-3 mb-5">
         {myChildren.map((child, i) => (
           <motion.div
@@ -53,17 +56,17 @@ export default function ParentDashboard() {
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div className="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
-                <p className="text-[10px] text-gray-500 font-medium">Attendance</p>
-                <p className="text-xs font-bold text-emerald-700 mt-0.5">Today ✓</p>
+                <p className="text-[10px] text-gray-500 font-medium">{t("nav", "attendance", lang)}</p>
+                <p className="text-xs font-bold text-emerald-700 mt-0.5">{t("common", "today", lang)} ✓</p>
               </div>
               <div className={`rounded-xl p-2 text-center border ${pendingHW(child.id) > 0 ? "bg-red-50 border-red-100" : "bg-emerald-50 border-emerald-100"}`}>
-                <p className="text-[10px] text-gray-500 font-medium">Homework</p>
+                <p className="text-[10px] text-gray-500 font-medium">{t("nav", "homework", lang)}</p>
                 <p className={`text-xs font-bold mt-0.5 ${pendingHW(child.id) > 0 ? "text-red-600" : "text-emerald-700"}`}>
-                  {pendingHW(child.id) > 0 ? `${pendingHW(child.id)} Due` : "All Done"}
+                  {pendingHW(child.id) > 0 ? `${pendingHW(child.id)} ${t("parentDash", "due", lang)}` : t("parentDash", "allDone", lang)}
                 </p>
               </div>
               <div className="bg-gray-50 rounded-xl p-2 text-center border border-gray-100">
-                <p className="text-[10px] text-gray-500 font-medium">Class</p>
+                <p className="text-[10px] text-gray-500 font-medium">{t("common", "class", lang)}</p>
                 <p className="text-xs font-bold text-gray-700 mt-0.5">{child.class}</p>
               </div>
             </div>
@@ -72,15 +75,15 @@ export default function ParentDashboard() {
       </div>
 
       {/* ── Quick Actions ─────────────────────────────────────── */}
-      <SectionHeader title="Quick Access" className="mb-2" />
+      <SectionHeader title={t("parentDash", "quickAccess", lang)} className="mb-2" />
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-2.5 mb-5">
         {[
-          { title: "Attendance", desc: "History",        icon: ClipboardList, color: "emerald" as const, href: "/parent/attendance" },
-          { title: "Homework",   desc: "Mark complete",  icon: BookOpen,      color: "teal" as const,    href: "/parent/homework",      badge: 2 },
-          { title: "Fees",       desc: feePending ? "Due" : "OK",  icon: CreditCard, color: feePending ? "amber" as const : "emerald" as const, href: "/parent/fees" },
-          { title: "Results",    desc: "Report cards",   icon: GraduationCap, color: "blue" as const,    href: "/parent/results" },
-          { title: "Alerts",     desc: "Messages",       icon: Bell,          color: "rose" as const,    href: "/parent/notifications", badge: unreadNotifs },
-          { title: "Diary",      desc: "Teacher notes",  icon: FileText,      color: "purple" as const,  href: "/parent/notifications" },
+          { title: t("nav", "attendance", lang), desc: t("parentDash", "history", lang),        icon: ClipboardList, color: "emerald" as const, href: "/parent/attendance" },
+          { title: t("nav", "homework", lang),   desc: t("parentDash", "markComplete", lang),  icon: BookOpen,      color: "teal" as const,    href: "/parent/homework",      badge: 2 },
+          { title: t("nav", "fees", lang),       desc: feePending ? t("parentDash", "due", lang) : t("parentDash", "ok", lang),  icon: CreditCard, color: feePending ? "amber" as const : "emerald" as const, href: "/parent/fees" },
+          { title: t("nav", "results", lang),    desc: t("parentDash", "reportCards", lang),   icon: GraduationCap, color: "blue" as const,    href: "/parent/results" },
+          { title: t("nav", "alerts", lang),     desc: t("parentDash", "messages", lang),       icon: Bell,          color: "rose" as const,    href: "/parent/notifications", badge: unreadNotifs },
+          { title: t("nav", "diary", lang),      desc: t("parentDash", "teacherNotes", lang),  icon: FileText,      color: "purple" as const,  href: "/parent/notifications" },
         ].map(({ title, desc, icon, color, href, badge }) => (
           <ActionCard key={title} title={title} description={desc} icon={icon} color={color} badge={badge} onClick={() => router.push(href)} />
         ))}
@@ -88,8 +91,8 @@ export default function ParentDashboard() {
 
       {/* ── Announcement ──────────────────────────────────────── */}
       <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
-        <p className="text-sm font-semibold text-emerald-800">📢 Announcement</p>
-        <p className="text-xs text-emerald-700 mt-1 leading-relaxed">Annual exam schedule has been published. Please check the exams section.</p>
+        <p className="text-sm font-semibold text-emerald-800">{t("parentDash", "announcement", lang)}</p>
+        <p className="text-xs text-emerald-700 mt-1 leading-relaxed">{t("parentDash", "annualExam", lang)}</p>
       </div>
     </DashboardLayout>
   );

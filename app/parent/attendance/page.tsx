@@ -6,10 +6,13 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { attendanceRecords, students } from "@/mock-data";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 const myChildren = students.filter((s) => ["S001", "S006"].includes(s.id));
 
 export default function ParentAttendancePage() {
+  const { lang } = useLanguageStore();
   const [activeChild, setActiveChild] = useState(myChildren[0].id);
 
   const child = myChildren.find((c) => c.id === activeChild)!;
@@ -24,7 +27,7 @@ export default function ParentAttendancePage() {
 
   return (
     <DashboardLayout>
-      <PageHeader title="Attendance" subtitle={`${child.name}`} back />
+      <PageHeader title={t("parentPages", "attendanceTitle", lang)} subtitle={`${child.name}`} back />
 
       {/* Child selector */}
       <div className="flex gap-2 mb-5">
@@ -46,22 +49,22 @@ export default function ParentAttendancePage() {
       <div className="grid grid-cols-3 gap-3 mb-5">
         <div className="bg-white rounded-2xl p-4 text-center border border-gray-100">
           <p className="text-2xl font-bold text-emerald-600">{presentCount}</p>
-          <p className="text-xs text-gray-500 mt-1">Present Days</p>
+          <p className="text-xs text-gray-500 mt-1">{t("parentPages", "presentDays", lang)}</p>
         </div>
         <div className="bg-white rounded-2xl p-4 text-center border border-gray-100">
           <p className="text-2xl font-bold text-red-500">{records.length - presentCount}</p>
-          <p className="text-xs text-gray-500 mt-1">Absent Days</p>
+          <p className="text-xs text-gray-500 mt-1">{t("parentPages", "absentDays", lang)}</p>
         </div>
         <div className="bg-white rounded-2xl p-4 text-center border border-gray-100">
           <p className="text-2xl font-bold text-blue-600">{percentage}%</p>
-          <p className="text-xs text-gray-500 mt-1">Attendance</p>
+          <p className="text-xs text-gray-500 mt-1">{t("nav", "attendance", lang)}</p>
         </div>
       </div>
 
       {/* Progress bar */}
       <div className="bg-white rounded-2xl p-4 border border-gray-100 mb-5">
         <div className="flex justify-between text-sm mb-2">
-          <span className="font-semibold text-gray-700">Overall Attendance</span>
+          <span className="font-semibold text-gray-700">{t("parentPages", "overallAttendance", lang)}</span>
           <span className="text-emerald-600 font-bold">{percentage}%</span>
         </div>
         <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
@@ -83,7 +86,7 @@ export default function ParentAttendancePage() {
             className="bg-white rounded-2xl p-4 border border-gray-100 flex items-center justify-between"
           >
             <div>
-              <p className="font-semibold text-gray-800">{new Date(rec.date).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+              <p className="font-semibold text-gray-800">{new Date(rec.date).toLocaleDateString(lang === "ml" ? "ml-IN" : "en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
               <p className="text-xs text-gray-400">{rec.date}</p>
             </div>
             <StatusBadge status={rec.status as "present" | "absent"} size="sm" />

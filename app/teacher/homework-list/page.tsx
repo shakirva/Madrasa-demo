@@ -4,11 +4,14 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { homeworkList, students } from "@/mock-data";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 // Get teacher's classes (hardcoded for demo, based on teachers[0])
 const TEACHER_CLASSES = ["Class 4", "Class 3"];
 
 export default function TeacherHomeworkListPage() {
+  const { lang } = useLanguageStore();
   const [selectedClass, setSelectedClass] = useState(TEACHER_CLASSES[0]);
 
   // Get all homework for this class with pending statuses
@@ -30,7 +33,7 @@ export default function TeacherHomeworkListPage() {
 
   return (
     <DashboardLayout>
-      <PageHeader title="Homework Pending" subtitle="Track incomplete submissions" />
+      <PageHeader title={t("teacherPages", "hwPending", lang)} subtitle={t("teacherPages", "hwPendingSub", lang)} />
 
       {/* ── Class Selector ── */}
       <div className="flex gap-2 mb-4">
@@ -54,7 +57,7 @@ export default function TeacherHomeworkListPage() {
       <div className="space-y-4">
         {pendingHomeworks.length === 0 ? (
           <div className="bg-white rounded-2xl p-4 border border-gray-100">
-            <div className="text-sm text-gray-500">All homework submissions are complete in {selectedClass}!</div>
+            <div className="text-sm text-gray-500">{t("teacherPages", "allComplete", lang)} {selectedClass}!</div>
           </div>
         ) : (
           pendingHomeworks.map((hw) => (
@@ -78,7 +81,7 @@ export default function TeacherHomeworkListPage() {
               {/* Pending students */}
               <div className="space-y-2">
                 <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">
-                  Pending ({hw.pendingStudents.length})
+                  {t("common", "pending", lang)} ({hw.pendingStudents.length})
                 </p>
                 {hw.pendingStudents.map((ps) => (
                   <div key={ps.studentId} className="flex items-center justify-between p-2.5 rounded-lg bg-gray-50 border border-gray-100">
@@ -92,7 +95,7 @@ export default function TeacherHomeworkListPage() {
                       <div>
                         <div className="text-sm font-medium text-gray-900">{ps.studentName}</div>
                         <div className="text-xs text-gray-500">
-                          {ps.status === "red" ? "Not submitted" : "Needs review"}
+                          {ps.status === "red" ? t("teacherPages", "notCompleted", lang) : t("teacherPages", "partial", lang)}
                         </div>
                       </div>
                     </div>

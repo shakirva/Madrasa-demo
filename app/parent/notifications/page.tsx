@@ -6,6 +6,8 @@ import { notifications } from "@/mock-data";
 import { motion } from "framer-motion";
 import { Bell, BookOpen, ClipboardList, GraduationCap, CreditCard, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
   attendance: { icon: ClipboardList, color: "text-emerald-700", bg: "bg-emerald-100" },
@@ -16,15 +18,16 @@ const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: s
   general:    { icon: Bell,          color: "text-gray-700",    bg: "bg-gray-100"    },
 };
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string, lang: "en" | "ml") {
   const diff = Date.now() - new Date(dateStr).getTime();
   const h = Math.floor(diff / 3600000);
-  if (h < 1) return "Just now";
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 1) return t("parentPages", "justNow", lang);
+  if (h < 24) return `${h} ${t("parentPages", "hAgo", lang)}`;
+  return `${Math.floor(h / 24)} ${t("parentPages", "dAgo", lang)}`;
 }
 
 export default function ParentNotificationsPage() {
+  const { lang } = useLanguageStore();
   const [items, setItems] = useState(notifications);
   const unread = items.filter((n) => !n.read).length;
 
@@ -34,14 +37,14 @@ export default function ParentNotificationsPage() {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Notifications"
-        subtitle={unread > 0 ? `${unread} unread` : "All read"}
+        title={t("parentPages", "notifTitle", lang)}
+        subtitle={unread > 0 ? `${unread} ${t("notif", "unread", lang)}` : t("parentPages", "allRead", lang)}
         icon={Bell}
         back
         action={
           unread > 0 ? (
             <button onClick={markAllRead} className="text-sm text-emerald-700 font-semibold px-3 py-1.5 bg-emerald-50 rounded-xl">
-              Mark all read
+              {t("parentPages", "markAllRead", lang)}
             </button>
           ) : undefined
         }
@@ -69,7 +72,7 @@ export default function ParentNotificationsPage() {
                   <p className="font-semibold text-gray-900 text-sm leading-tight">{notif.title}</p>
                   <div className="flex items-center gap-1.5 shrink-0">
                     {!notif.read && <span className="w-2 h-2 rounded-full bg-emerald-500" />}
-                    <span className="text-xs text-gray-400 whitespace-nowrap">{timeAgo(notif.timestamp)}</span>
+                    <span className="text-xs text-gray-400 whitespace-nowrap">{timeAgo(notif.timestamp, lang)}</span>
                   </div>
                 </div>
                 <p className="text-sm text-gray-500 mt-0.5 leading-snug">{notif.message}</p>

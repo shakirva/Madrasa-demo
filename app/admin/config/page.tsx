@@ -5,8 +5,11 @@ import { madrasaConfig } from "@/mock-data";
 import { Settings, Save } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 export default function AdminConfigPage() {
+  const { lang } = useLanguageStore();
   const [config, setConfig] = useState(madrasaConfig);
   const [saved, setSaved] = useState(false);
 
@@ -17,19 +20,19 @@ export default function AdminConfigPage() {
 
   return (
     <DashboardLayout>
-      <PageHeader title="Madrasa Configuration" subtitle="System settings" icon={Settings} />
+      <PageHeader title={t("adminPages", "configTitle", lang)} subtitle={t("adminPages", "configSubtitle", lang)} icon={Settings} />
 
       <div className="space-y-5 max-w-2xl">
         {/* Basic Info */}
         <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide mb-4">Basic Information</p>
+          <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide mb-4">{t("adminPages", "basicInfo", lang)}</p>
           <div className="space-y-4">
             {[
-              { label: "Madrasa Name", key: "name" },
-              { label: "Samastha Reg. Number", key: "samasthaRegNumber" },
-              { label: "Address", key: "address" },
-              { label: "Phone", key: "phone" },
-              { label: "Email", key: "email" },
+              { label: t("adminPages", "madrasaNameCfg", lang), key: "name" },
+              { label: t("adminPages", "regNumber", lang), key: "samasthaRegNumber" },
+              { label: t("adminPages", "addressLabel", lang), key: "address" },
+              { label: t("adminPages", "phoneCfg", lang), key: "phone" },
+              { label: t("adminPages", "emailCfg", lang), key: "email" },
             ].map(({ label, key }) => (
               <div key={key}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -45,12 +48,12 @@ export default function AdminConfigPage() {
 
         {/* Academic Settings */}
         <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <p className="text-xs font-semibold text-teal-600 uppercase tracking-wide mb-4">Academic Settings</p>
+          <p className="text-xs font-semibold text-teal-600 uppercase tracking-wide mb-4">{t("adminPages", "academicSettings", lang)}</p>
           <div className="space-y-4">
             <div className="flex items-center justify-between py-2">
               <div>
-                <p className="text-sm font-medium text-gray-900">Division Enabled</p>
-                <p className="text-xs text-gray-500">Class A, B divisions</p>
+                <p className="text-sm font-medium text-gray-900">{t("adminPages", "divisionEnabled", lang)}</p>
+                <p className="text-xs text-gray-500">{t("adminPages", "classABDiv", lang)}</p>
               </div>
               <button
                 onClick={() => setConfig({ ...config, divisionEnabled: !config.divisionEnabled })}
@@ -61,11 +64,11 @@ export default function AdminConfigPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Teaching Model</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t("adminPages", "teachingModel", lang)}</label>
               <div className="space-y-2">
                 {[
-                  { value: "single_teacher", label: "Single Teacher Per Class", desc: "One teacher handles all subjects" },
-                  { value: "subject_based", label: "Subject Based Teachers", desc: "Different teachers per subject" },
+                  { value: "single_teacher", label: t("adminPages", "singleTeacher", lang), desc: t("adminPages", "singleTeacherDesc", lang) },
+                  { value: "subject_based", label: t("adminPages", "subjectBased", lang), desc: t("adminPages", "subjectBasedDesc", lang) },
                 ].map(({ value, label, desc }) => (
                   <label key={value} className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-colors ${config.teachingModel === value ? "border-emerald-500 bg-emerald-50" : "border-gray-100 hover:border-gray-200"}`}>
                     <input
@@ -89,12 +92,12 @@ export default function AdminConfigPage() {
 
         {/* Fee Settings */}
         <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-4">Fee Settings</p>
+          <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide mb-4">{t("adminPages", "feeSettingsCfg", lang)}</p>
           <div className="space-y-4">
             <div className="flex items-center justify-between py-2">
               <div>
-                <p className="text-sm font-medium text-gray-900">Fee System Enabled</p>
-                <p className="text-xs text-gray-500">Enable fee tracking and reminders</p>
+                <p className="text-sm font-medium text-gray-900">{t("adminPages", "feeEnabled", lang)}</p>
+                <p className="text-xs text-gray-500">{t("adminPages", "feeEnabledDesc", lang)}</p>
               </div>
               <button
                 onClick={() => setConfig({ ...config, feeEnabled: !config.feeEnabled })}
@@ -106,7 +109,7 @@ export default function AdminConfigPage() {
             {config.feeEnabled && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Fee Amount (₹)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("adminPages", "monthlyFeeAmtCfg", lang)}</label>
                   <input
                     type="number"
                     value={config.monthlyFeeAmount}
@@ -124,7 +127,7 @@ export default function AdminConfigPage() {
           className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm transition-colors ${saved ? "bg-emerald-100 text-emerald-700" : "bg-emerald-600 text-white hover:bg-emerald-700"}`}
         >
           <Save className="w-4 h-4" />
-          {saved ? "✅ Settings Saved!" : "Save Configuration"}
+          {saved ? t("adminPages", "settingsSaved", lang) : t("adminPages", "saveConfig", lang)}
         </button>
       </div>
     </DashboardLayout>

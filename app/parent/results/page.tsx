@@ -6,6 +6,8 @@ import { exams, students } from "@/mock-data";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Medal } from "lucide-react";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 const myChildren = students.filter((s) => ["S001", "S006"].includes(s.id));
 
@@ -19,6 +21,7 @@ function getGrade(mark: number, total: number) {
 }
 
 export default function ParentResultsPage() {
+  const { lang } = useLanguageStore();
   const [activeChild, setActiveChild] = useState(myChildren[0].id);
   const [activeExam, setActiveExam] = useState(exams[0].id);
 
@@ -35,7 +38,7 @@ export default function ParentResultsPage() {
 
   return (
     <DashboardLayout>
-      <PageHeader title="Results" subtitle="Report Cards" back />
+      <PageHeader title={t("parentPages", "resultsTitle", lang)} subtitle={t("parentPages", "reportCards", lang)} back />
 
       {/* Child selector */}
       <div className="flex gap-2 mb-5">
@@ -75,15 +78,15 @@ export default function ParentResultsPage() {
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="bg-gray-50 rounded-xl p-3">
                 <p className="text-xl font-bold text-gray-900">{totalMarks}</p>
-                <p className="text-xs text-gray-500">Total Marks</p>
+                <p className="text-xs text-gray-500">{t("parentPages", "totalMarks", lang)}</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-3">
                 <p className="text-xl font-bold text-gray-900">{maxMarks}</p>
-                <p className="text-xs text-gray-500">Out Of</p>
+                <p className="text-xs text-gray-500">{t("parentPages", "outOf", lang)}</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-3">
                 <p className="text-xl font-bold text-emerald-700">{overallPct}%</p>
-                <p className="text-xs text-gray-500">Percentage</p>
+                <p className="text-xs text-gray-500">{t("parentPages", "percentage", lang)}</p>
               </div>
             </div>
             <div className="mt-4">
@@ -101,14 +104,14 @@ export default function ParentResultsPage() {
             <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5">
               <Medal className="w-6 h-6 text-amber-600 shrink-0" />
               <div>
-                <p className="font-bold text-amber-800">Class Rank: #{studentResult.rank}</p>
-                <p className="text-xs text-amber-600">Out of {exam.results.length} students</p>
+                <p className="font-bold text-amber-800">{t("parentPages", "rank", lang)}: #{studentResult.rank}</p>
+                <p className="text-xs text-amber-600">{t("parentPages", "outOfStudents", lang)} {exam.results.length} {t("parentPages", "outOfStudentsSuffix", lang)}</p>
               </div>
             </div>
           )}
 
           {/* Subject marks */}
-          <SectionHeader title="Subject-wise Marks" className="mb-3" />
+          <SectionHeader title={t("parentPages", "subjectWise", lang)} className="mb-3" />
           <div className="space-y-3">
             {exam.subjects.map((subject, i) => {
               const mark = (studentResult.marks as Record<string, number>)[subject] ?? 0;
@@ -138,8 +141,8 @@ export default function ParentResultsPage() {
         </>
       ) : (
         <div className="text-center py-16 text-gray-400">
-          <p className="text-lg font-semibold">No results yet</p>
-          <p className="text-sm mt-1">Results will appear after the exam is evaluated</p>
+          <p className="text-lg font-semibold">{t("parentPages", "noResult", lang)}</p>
+          <p className="text-sm mt-1">{t("parentPages", "resultsAppearAfter", lang)}</p>
         </div>
       )}
     </DashboardLayout>

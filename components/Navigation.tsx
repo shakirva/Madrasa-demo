@@ -5,39 +5,46 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen, FileText,
   CreditCard, BarChart3, Bell, Settings, Star, BookMarked,
-  UserCircle, Home, GraduationCap, Moon, Image
+  UserCircle, Home, GraduationCap, Moon, Image, IndianRupee, BadgeCheck
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
-const adminLinks = [
-  { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/admin/students", icon: Users, label: "Students" },
-  { href: "/admin/fees", icon: CreditCard, label: "Fees" },
-  { href: "/admin/exams", icon: GraduationCap, label: "Exams" },
-  { href: "/admin/reports", icon: BarChart3, label: "Reports" },
-  { href: "/admin/seats", icon: BookMarked, label: "Seats" },
-  { href: "/admin/posters", icon: Image, label: "Posters" },
-  { href: "/admin/config", icon: Settings, label: "Config" },
+type NavKey = "dashboard" | "students" | "fees" | "otherPayments" | "idCards" | "exams" | "reports" | "seats" | "sksbv" | "posters" | "config" | "attendance" | "homework" | "diary" | "ibadah" | "performance" | "home" | "results" | "alerts";
+
+const adminLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[] = [
+  { href: "/admin",                icon: LayoutDashboard, key: "dashboard"      },
+  { href: "/admin/students",       icon: Users,           key: "students"       },
+  { href: "/admin/fees",           icon: CreditCard,      key: "fees"           },
+  { href: "/admin/other-payments", icon: IndianRupee,     key: "otherPayments"  },
+  { href: "/admin/id-cards",       icon: BadgeCheck,      key: "idCards"        },
+  { href: "/admin/exams",          icon: GraduationCap,   key: "exams"         },
+  { href: "/admin/reports",        icon: BarChart3,       key: "reports"        },
+  { href: "/admin/seats",          icon: BookMarked,      key: "seats"          },
+  { href: "/admin/sksbv",          icon: Star,            key: "sksbv"          },
+  { href: "/admin/posters",        icon: Image,           key: "posters"        },
+  { href: "/admin/config",         icon: Settings,        key: "config"         },
 ];
 
-const teacherLinks = [
-  { href: "/teacher", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/teacher/attendance", icon: ClipboardList, label: "Attendance" },
-  { href: "/teacher/homework", icon: BookOpen, label: "Homework" },
-  { href: "/teacher/diary", icon: FileText, label: "Diary" },
-  { href: "/teacher/ibadah", icon: Moon, label: "Ibadah" },
-  { href: "/teacher/exams", icon: GraduationCap, label: "Exams" },
-  { href: "/teacher/performance", icon: Star, label: "Performance" },
+const teacherLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[] = [
+  { href: "/teacher",             icon: LayoutDashboard, key: "dashboard"   },
+  { href: "/teacher/attendance",  icon: ClipboardList,   key: "attendance"  },
+  { href: "/teacher/homework",    icon: BookOpen,        key: "homework"    },
+  { href: "/teacher/diary",       icon: FileText,        key: "diary"       },
+  { href: "/teacher/ibadah",      icon: Moon,            key: "ibadah"      },
+  { href: "/teacher/exams",       icon: GraduationCap,   key: "exams"       },
+  { href: "/teacher/performance", icon: Star,            key: "performance" },
 ];
 
-const parentLinks = [
-  { href: "/parent", icon: Home, label: "Home" },
-  { href: "/parent/attendance", icon: ClipboardList, label: "Attendance" },
-  { href: "/parent/homework", icon: BookOpen, label: "Homework" },
-  { href: "/parent/ibadah", icon: Moon, label: "Ibadah" },
-  { href: "/parent/fees", icon: CreditCard, label: "Fees" },
-  { href: "/parent/results", icon: GraduationCap, label: "Results" },
-  { href: "/parent/notifications", icon: Bell, label: "Alerts" },
+const parentLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[] = [
+  { href: "/parent",               icon: Home,           key: "home"       },
+  { href: "/parent/attendance",     icon: ClipboardList,  key: "attendance" },
+  { href: "/parent/homework",       icon: BookOpen,       key: "homework"   },
+  { href: "/parent/ibadah",         icon: Moon,           key: "ibadah"     },
+  { href: "/parent/fees",           icon: CreditCard,     key: "fees"       },
+  { href: "/parent/results",        icon: GraduationCap,  key: "results"    },
+  { href: "/parent/notifications",  icon: Bell,           key: "alerts"     },
 ];
 
 function getLinksByRole(role: string) {
@@ -49,6 +56,7 @@ function getLinksByRole(role: string) {
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
+  const { lang } = useLanguageStore();
   if (!user) return null;
   const links = getLinksByRole(user.role);
 
@@ -61,8 +69,8 @@ export function Sidebar() {
             <BookMarked className="w-5 h-5 text-white" />
           </div>
           <div>
-            <p className="font-bold text-gray-900 text-sm leading-tight">Darul Huda</p>
-            <p className="text-xs text-gray-500">Madrasa</p>
+            <p className="font-bold text-gray-900 text-sm leading-tight">{t("common", "appName", lang)}</p>
+            <p className="text-xs text-gray-500">{t("common", "madrasa", lang)}</p>
           </div>
         </div>
       </div>
@@ -75,14 +83,14 @@ export function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-            <p className="text-xs text-emerald-700 capitalize">{user.role}</p>
+            <p className="text-xs text-emerald-700 capitalize">{t("common", user.role as "admin" | "teacher" | "parent", lang)}</p>
           </div>
         </div>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {links.map(({ href, icon: Icon, label }) => {
+        {links.map(({ href, icon: Icon, key }) => {
           const active = pathname === href || (href !== "/admin" && href !== "/teacher" && href !== "/parent" && pathname.startsWith(href));
           return (
             <Link
@@ -96,7 +104,7 @@ export function Sidebar() {
               )}
             >
               <Icon className="w-5 h-5 shrink-0" />
-              {label}
+              {t("nav", key, lang)}
             </Link>
           );
         })}
@@ -106,14 +114,14 @@ export function Sidebar() {
       <div className="p-4 border-t border-gray-100">
         <Link href={`/${user.role}/notifications`} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all">
           <Bell className="w-5 h-5" />
-          Notifications
+          {t("common", "notifications", lang)}
         </Link>
         <button
           onClick={() => { logout(); window.location.href = "/"; }}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all w-full mt-1"
         >
           <UserCircle className="w-5 h-5" />
-          Sign Out
+          {t("common", "signOut", lang)}
         </button>
       </div>
     </aside>
@@ -123,13 +131,14 @@ export function Sidebar() {
 export function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuthStore();
+  const { lang } = useLanguageStore();
   if (!user) return null;
   const links = getLinksByRole(user.role).slice(0, 5);
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 pb-safe">
       <div className="flex items-stretch justify-around px-1">
-        {links.map(({ href, icon: Icon, label }) => {
+        {links.map(({ href, icon: Icon, key }) => {
           const active = pathname === href || (href !== "/admin" && href !== "/teacher" && href !== "/parent" && pathname.startsWith(href));
           return (
             <Link
@@ -149,7 +158,7 @@ export function BottomNav() {
               )}>
                 <Icon className={cn("w-5 h-5 shrink-0", active && "stroke-[2.5]")} />
               </div>
-              <span className={cn("text-[10px] font-semibold leading-none", active ? "text-emerald-600" : "text-gray-400")}>{label}</span>
+              <span className={cn("text-[10px] font-semibold leading-none", active ? "text-emerald-600" : "text-gray-400")}>{t("nav", key, lang)}</span>
             </Link>
           );
         })}

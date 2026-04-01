@@ -9,6 +9,8 @@ import {
   ChevronDown, ChevronUp, Star, AlertTriangle, Send, Medal,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguageStore } from "@/store/language";
+import { t as tr } from "@/lib/i18n";
 
 // ── Types ─────────────────────────────────────────────────────
 type ExamStatus = "draft" | "marks_entered" | "published";
@@ -45,15 +47,15 @@ const gradeConfig: Record<string, { bg: string; text: string; border: string }> 
 };
 
 const statusConfig: Record<ExamStatus, { label: string; bg: string; text: string; icon: React.ComponentType<{ className?: string }> }> = {
-  draft:         { label: "Draft",          bg: "bg-gray-100",    text: "text-gray-500",    icon: FileEdit },
-  marks_entered: { label: "Marks Entered",  bg: "bg-amber-100",   text: "text-amber-700",   icon: Clock },
-  published:     { label: "Published",      bg: "bg-emerald-100", text: "text-emerald-700", icon: CheckCircle2 },
+  draft:         { label: "examDraft",          bg: "bg-gray-100",    text: "text-gray-500",    icon: FileEdit },
+  marks_entered: { label: "examMarksEntered",  bg: "bg-amber-100",   text: "text-amber-700",   icon: Clock },
+  published:     { label: "examPublished",      bg: "bg-emerald-100", text: "text-emerald-700", icon: CheckCircle2 },
 };
 
 const typeLabel: Record<string, { label: string; emoji: string; color: string }> = {
-  semester:   { label: "Semester",    emoji: "🎓", color: "bg-purple-100 text-purple-700 border-purple-200" },
-  class_test: { label: "Class Test",  emoji: "📝", color: "bg-blue-100 text-blue-700 border-blue-200" },
-  hifz:       { label: "Hifz",        emoji: "📖", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+  semester:   { label: "semesterType",    emoji: "🎓", color: "bg-purple-100 text-purple-700 border-purple-200" },
+  class_test: { label: "classTestType",  emoji: "📝", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  hifz:       { label: "hifzType",        emoji: "📖", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
 };
 
 const CLASSES = ["All Classes", "Class 2", "Class 3", "Class 4"];
@@ -66,6 +68,7 @@ const pct = (marks: number, total: number) => Math.round((marks / total) * 100);
 
 // ── Component ─────────────────────────────────────────────────
 export default function TeacherExamsPage() {
+  const { lang } = useLanguageStore();
   const [examList]                       = useState<Exam[]>(exams as Exam[]);
   const [selectedExam, setSelectedExam]  = useState<Exam>(exams[0] as Exam);
   const [showMarksModal, setShowMarksModal] = useState(false);
@@ -129,26 +132,26 @@ export default function TeacherExamsPage() {
   }, [selectedExam]);
 
   const handlePublish = () => {
-    toast("Results published! Parents notified 📲");
+    toast(tr("teacherPages", "resultsPublished", lang));
   };
 
   const handleSaveMarks = () => {
     setShowMarksModal(false);
-    toast("Marks saved successfully ✅");
+    toast(tr("teacherPages", "marksSaved", lang));
   };
 
   return (
     <DashboardLayout>
       <PageHeader
-        title="Exam Marks"
-        subtitle="Manage exams, enter marks & publish results"
+        title={tr("teacherPages", "examsTitle", lang)}
+        subtitle={tr("teacherPages", "examsSub", lang)}
         icon={GraduationCap}
         back backHref="/teacher"
         action={
           <button onClick={() => setShowExamModal(true)}
             className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-700 active:scale-95 transition-all shadow-sm shadow-emerald-200"
           >
-            <Plus className="w-4 h-4" /> New Exam
+            <Plus className="w-4 h-4" /> {tr("common", "add", lang)}
           </button>
         }
       />
@@ -169,7 +172,7 @@ export default function TeacherExamsPage() {
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search exams…"
+            placeholder={tr("teacherPages", "searchExams", lang)}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
@@ -199,7 +202,8 @@ export default function TeacherExamsPage() {
               </div>
               <div className="flex items-center gap-1.5">
                 <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${selectedExam.id === exam.id ? "bg-white/20 text-white" : `${sc.bg} ${sc.text}`}`}>
-                  {sc.label}
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  {tr("teacherPages", sc.label as any, lang)}
                 </span>
                 <span className={`text-[10px] ${selectedExam.id === exam.id ? "text-white/70" : "text-gray-400"}`}>{exam.class}</span>
               </div>
@@ -214,32 +218,34 @@ export default function TeacherExamsPage() {
           <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap mb-1.5">
               <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${typeLabel[selectedExam.type]?.color ?? "bg-gray-100 text-gray-600 border-gray-200"}`}>
-                {typeLabel[selectedExam.type]?.emoji} {typeLabel[selectedExam.type]?.label ?? selectedExam.type}
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {typeLabel[selectedExam.type]?.emoji} {tr("teacherPages", (typeLabel[selectedExam.type]?.label ?? selectedExam.type) as any, lang)}
               </span>
               {(() => { const sc = statusConfig[selectedExam.status]; const Icon = sc.icon;
                 return (
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 ${sc.bg} ${sc.text}`}>
-                    <Icon className="w-3 h-3" />{sc.label}
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    <Icon className="w-3 h-3" />{tr("teacherPages", sc.label as any, lang)}
                   </span>
                 );
               })()}
             </div>
             <h2 className="font-bold text-gray-900">{selectedExam.name}</h2>
             <p className="text-xs text-gray-500 mt-1">
-              📅 {selectedExam.date} · 🏫 {selectedExam.class} · 📊 {selectedExam.totalMarks} marks/subject · {selectedExam.subjects.join(", ")}
+              📅 {selectedExam.date} · 🏫 {selectedExam.class} · 📊 {selectedExam.totalMarks} {tr("teacherPages", "marksSubject", lang)} · {selectedExam.subjects.join(", ")}
             </p>
           </div>
           <div className="flex flex-col gap-2 shrink-0">
             <button onClick={() => setShowMarksModal(true)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold hover:bg-emerald-100 transition-colors"
             >
-              <FileEdit className="w-3.5 h-3.5" /> Enter Marks
+              <FileEdit className="w-3.5 h-3.5" /> {tr("teacherPages", "enterMarksBtn", lang)}
             </button>
             {selectedExam.status !== "published" && (
               <button onClick={handlePublish}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold hover:bg-blue-100 transition-colors"
               >
-                <Send className="w-3.5 h-3.5" /> Publish
+                <Send className="w-3.5 h-3.5" /> {tr("teacherPages", "publishResults", lang)}
               </button>
             )}
           </div>
@@ -250,12 +256,12 @@ export default function TeacherExamsPage() {
       {selectedExam.results.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
           <FileEdit className="w-10 h-10 mx-auto mb-3 text-gray-200" />
-          <p className="text-sm font-semibold text-gray-500">No marks entered yet</p>
-          <p className="text-xs text-gray-400 mt-1">Click &ldquo;Enter Marks&rdquo; to add results</p>
+          <p className="text-sm font-semibold text-gray-500">{tr("teacherPages", "noMarksTeacher", lang)}</p>
+          <p className="text-xs text-gray-400 mt-1">{tr("teacherPages", "clickEnterMarks", lang)}</p>
           <button onClick={() => setShowMarksModal(true)}
             className="mt-4 inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors"
           >
-            <Plus className="w-4 h-4" /> Enter Marks
+            <Plus className="w-4 h-4" /> {tr("teacherPages", "enterMarksBtn", lang)}
           </button>
         </div>
       ) : (
@@ -263,10 +269,10 @@ export default function TeacherExamsPage() {
           {/* ── Stats cards ──────────────────────────────────── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
             {[
-              { label: "Highest",    value: examStats?.highest ?? "—",  icon: TrendingUp,   color: "text-emerald-600", bg: "bg-emerald-50" },
-              { label: "Average",    value: examStats?.avg ?? "—",       icon: BarChart2,    color: "text-blue-600",    bg: "bg-blue-50"    },
-              { label: "Lowest",     value: examStats?.lowest ?? "—",    icon: TrendingDown, color: "text-red-500",     bg: "bg-red-50"     },
-              { label: "A+ Students",value: `${examStats?.aPlus ?? 0}/${examStats?.total ?? 0}`, icon: Star, color: "text-amber-500", bg: "bg-amber-50" },
+              { label: tr("teacherPages", "highestTeacher", lang),    value: examStats?.highest ?? "—",  icon: TrendingUp,   color: "text-emerald-600", bg: "bg-emerald-50" },
+              { label: tr("teacherPages", "averageTeacher", lang),    value: examStats?.avg ?? "—",       icon: BarChart2,    color: "text-blue-600",    bg: "bg-blue-50"    },
+              { label: tr("teacherPages", "lowestTeacher", lang),     value: examStats?.lowest ?? "—",    icon: TrendingDown, color: "text-red-500",     bg: "bg-red-50"     },
+              { label: tr("teacherPages", "aPlusStudents", lang),value: `${examStats?.aPlus ?? 0}/${examStats?.total ?? 0}`, icon: Star, color: "text-amber-500", bg: "bg-amber-50" },
             ].map(({ label, value, icon: Icon, color, bg }) => (
               <motion.div key={label} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                 className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3"
@@ -283,7 +289,7 @@ export default function TeacherExamsPage() {
           {/* ── Subject averages bar chart ────────────────────── */}
           <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
             <p className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-1.5">
-              <BarChart2 className="w-4 h-4 text-emerald-600" /> Subject Averages
+              <BarChart2 className="w-4 h-4 text-emerald-600" /> {tr("teacherPages", "subjectAverages", lang)}
             </p>
             <div className="space-y-2.5">
               {selectedExam.subjects.map((sub) => {
@@ -310,7 +316,7 @@ export default function TeacherExamsPage() {
           {/* ── Grade distribution ────────────────────────────── */}
           <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
             <p className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-1.5">
-              <Trophy className="w-4 h-4 text-amber-500" /> Grade Distribution
+              <Trophy className="w-4 h-4 text-amber-500" /> {tr("teacherPages", "gradeDistribution", lang)}
             </p>
             <div className="flex gap-2 flex-wrap">
               {Object.entries(
@@ -326,7 +332,7 @@ export default function TeacherExamsPage() {
               })}
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl border bg-gray-50 border-gray-200 ml-auto">
                 <Users className="w-3.5 h-3.5 text-gray-500" />
-                <span className="text-xs font-bold text-gray-600">{examStats?.passing}/{examStats?.total} Passing</span>
+                <span className="text-xs font-bold text-gray-600">{examStats?.passing}/{examStats?.total} {tr("teacherPages", "passing", lang)}</span>
               </div>
             </div>
           </div>
@@ -334,7 +340,7 @@ export default function TeacherExamsPage() {
           {/* ── Leaderboard / Results ─────────────────────────── */}
           <div className="space-y-3">
             <p className="text-sm font-bold text-gray-700 flex items-center gap-1.5">
-              <Medal className="w-4 h-4 text-amber-500" /> Student Results
+              <Medal className="w-4 h-4 text-amber-500" /> {tr("teacherPages", "studentResults", lang)}
             </p>
             {[...selectedExam.results].sort((a, b) => a.rank - b.rank).map((result, i) => {
               const cfg = getGradeCfg(result.grade);
@@ -364,7 +370,7 @@ export default function TeacherExamsPage() {
                         <div className="flex items-center gap-2 mb-0.5">
                           <p className="text-sm font-semibold text-gray-900 truncate">{getStudentName(result.studentId)}</p>
                           {!isTop && <span className="text-xs text-gray-400">#{result.rank}</span>}
-                          {isLow && <span className="text-[10px] bg-red-50 text-red-500 border border-red-200 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 font-bold"><AlertTriangle className="w-2.5 h-2.5" /> Needs help</span>}
+                          {isLow && <span className="text-[10px] bg-red-50 text-red-500 border border-red-200 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 font-bold"><AlertTriangle className="w-2.5 h-2.5" /> {tr("teacherPages", "needsHelp", lang)}</span>}
                         </div>
                         {/* Progress bar */}
                         <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mt-1">
@@ -393,7 +399,7 @@ export default function TeacherExamsPage() {
                     {isExpanded && (
                       <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                         <div className="border-t border-gray-50 bg-gray-50/60 px-4 py-3 space-y-3">
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Subject Breakdown</p>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{tr("teacherPages", "subjectBreakdown", lang)}</p>
                           <div className="grid grid-cols-2 gap-2">
                             {Object.entries(result.marks).map(([sub, mark]) => {
                               const p = pct(mark as number, selectedExam.totalMarks);
@@ -414,17 +420,17 @@ export default function TeacherExamsPage() {
                           {/* Comparison to class avg */}
                           <div className="flex gap-2">
                             <div className={`flex-1 rounded-xl p-2.5 border text-center ${result.total >= (examStats?.avg ?? 0) ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100"}`}>
-                              <p className="text-[10px] text-gray-500 mb-0.5">vs Class Avg</p>
+                              <p className="text-[10px] text-gray-500 mb-0.5">{tr("teacherPages", "vsClassAvg", lang)}</p>
                               <p className={`text-sm font-bold ${result.total >= (examStats?.avg ?? 0) ? "text-emerald-700" : "text-red-600"}`}>
                                 {result.total >= (examStats?.avg ?? 0) ? "+" : ""}{result.total - (examStats?.avg ?? 0)}
                               </p>
                             </div>
                             <div className="flex-1 bg-blue-50 border border-blue-100 rounded-xl p-2.5 text-center">
-                              <p className="text-[10px] text-gray-500 mb-0.5">Rank</p>
+                              <p className="text-[10px] text-gray-500 mb-0.5">{tr("teacherPages", "rankLabel", lang)}</p>
                               <p className="text-sm font-bold text-blue-700">{rankMedal(result.rank)}</p>
                             </div>
                             <div className="flex-1 bg-purple-50 border border-purple-100 rounded-xl p-2.5 text-center">
-                              <p className="text-[10px] text-gray-500 mb-0.5">Percentage</p>
+                              <p className="text-[10px] text-gray-500 mb-0.5">{tr("teacherPages", "percentageLabel", lang)}</p>
                               <p className="text-sm font-bold text-purple-700">{percentage}%</p>
                             </div>
                           </div>
@@ -443,13 +449,13 @@ export default function TeacherExamsPage() {
               className="mt-6 bg-emerald-50 rounded-2xl p-4 border border-emerald-100 flex items-center justify-between"
             >
               <div>
-                <p className="text-sm font-bold text-emerald-800">Ready to publish?</p>
-                <p className="text-xs text-emerald-600 mt-0.5">Parents will be notified with results.</p>
+                <p className="text-sm font-bold text-emerald-800">{tr("teacherPages", "readyPublish", lang)}</p>
+                <p className="text-xs text-emerald-600 mt-0.5">{tr("teacherPages", "parentsNotifResults", lang)}</p>
               </div>
               <button onClick={handlePublish}
                 className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-emerald-700 active:scale-95 transition-all"
               >
-                <Send className="w-4 h-4" /> Publish
+                <Send className="w-4 h-4" /> {tr("teacherPages", "publishResults", lang)}
               </button>
             </motion.div>
           )}
@@ -468,8 +474,8 @@ export default function TeacherExamsPage() {
             >
               <div className="sticky top-0 bg-white rounded-t-3xl px-6 pt-6 pb-4 border-b border-gray-100 flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-gray-900 text-lg">Enter Marks</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">{selectedExam.name} · {selectedExam.class} · Max {selectedExam.totalMarks}/subject</p>
+                  <h2 className="font-bold text-gray-900 text-lg">{tr("teacherPages", "enterMarksHeader", lang)}</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">{selectedExam.name} · {selectedExam.class} · {tr("teacherPages", "maxPerSubject", lang)} {selectedExam.totalMarks}{tr("teacherPages", "perSubject", lang)}</p>
                 </div>
                 <button onClick={() => setShowMarksModal(false)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400"><X className="w-5 h-5" /></button>
               </div>
@@ -510,11 +516,11 @@ export default function TeacherExamsPage() {
                   <button onClick={handleSaveMarks}
                     className="flex-1 bg-emerald-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2"
                   >
-                    <CheckCircle2 className="w-4 h-4" /> Save Marks
+                    <CheckCircle2 className="w-4 h-4" /> {tr("teacherPages", "saveMarksBtn", lang)}
                   </button>
                   <button onClick={() => setShowMarksModal(false)}
                     className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors"
-                  >Cancel</button>
+                  >{tr("common", "cancel", lang)}</button>
                 </div>
               </div>
             </motion.div>
@@ -534,8 +540,8 @@ export default function TeacherExamsPage() {
             >
               <div className="sticky top-0 bg-white rounded-t-3xl px-6 pt-6 pb-4 border-b border-gray-100 flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-gray-900 text-lg">Schedule New Exam</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">Fill details to create an exam record</p>
+                  <h2 className="font-bold text-gray-900 text-lg">{tr("teacherPages", "scheduleExam", lang)}</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">{tr("teacherPages", "fillExamDetails", lang)}</p>
                 </div>
                 <button onClick={() => setShowExamModal(false)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400"><X className="w-5 h-5" /></button>
               </div>
@@ -543,13 +549,13 @@ export default function TeacherExamsPage() {
               <div className="px-6 pb-6 pt-4 space-y-4">
                 {/* Exam type */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Exam Type</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "examType", lang)}</label>
                   <div className="flex gap-2">
                     {Object.entries(typeLabel).map(([key, { label, emoji, color }]) => (
                       <button key={key} onClick={() => setNewType(key)}
                         className={`flex-1 py-2.5 rounded-xl border text-xs font-bold transition-all ${newType === key ? color : "bg-white text-gray-400 border-gray-200"}`}
                       >
-                        {emoji}<br/>{label}
+                        {emoji}<br/>{tr("teacherPages", label as any, lang)}
                       </button>
                     ))}
                   </div>
@@ -557,9 +563,9 @@ export default function TeacherExamsPage() {
 
                 {/* Name */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Exam Name <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "examName", lang)} <span className="text-red-500">*</span></label>
                   <input value={newName} onChange={(e) => setNewName(e.target.value)}
-                    placeholder="e.g. Monthly Test – April"
+                    placeholder={tr("teacherPages", "examNamePlc", lang)}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
                   />
                 </div>
@@ -567,7 +573,7 @@ export default function TeacherExamsPage() {
                 {/* Class + Date row */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Class</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "examClassLabel", lang)}</label>
                     <select value={newClass} onChange={(e) => setNewClass(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none text-sm"
                     >
@@ -575,7 +581,7 @@ export default function TeacherExamsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Date <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "dateLabel", lang)} <span className="text-red-500">*</span></label>
                     <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none text-sm"
                     />
@@ -584,7 +590,7 @@ export default function TeacherExamsPage() {
 
                 {/* Subjects */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Subjects</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "subjectsLabel", lang)}</label>
                   <div className="flex flex-wrap gap-2">
                     {SUBJECTS_ALL.map((sub) => (
                       <button key={sub} onClick={() => setNewSubjects((prev) =>
@@ -600,7 +606,7 @@ export default function TeacherExamsPage() {
 
                 {/* Total marks */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Total Marks / Subject</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "totalMarksPerSub", lang)}</label>
                   <div className="flex gap-2">
                     {["50", "100", "200"].map((v) => (
                       <button key={v} onClick={() => setNewTotal(v)}
@@ -610,7 +616,7 @@ export default function TeacherExamsPage() {
                       </button>
                     ))}
                     <input value={newTotal} onChange={(e) => setNewTotal(e.target.value)}
-                      type="number" placeholder="Custom"
+                      type="number" placeholder={tr("teacherPages", "customPlc", lang)}
                       className="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm font-semibold text-center focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                   </div>
@@ -619,18 +625,18 @@ export default function TeacherExamsPage() {
                 {/* Notify note */}
                 <div className="bg-blue-50 rounded-xl p-3 border border-blue-100 flex items-start gap-2">
                   <Eye className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
-                  <p className="text-xs text-blue-700">This exam will be created as a <strong>draft</strong>. Enter marks and publish to notify parents.</p>
+                  <p className="text-xs text-blue-700" dangerouslySetInnerHTML={{ __html: tr("teacherPages", "draftExamNote", lang) }} />
                 </div>
 
                 <div className="flex gap-3 pt-1">
                   <button
                     disabled={!newName || !newDate || newSubjects.length === 0}
-                    onClick={() => { setShowExamModal(false); toast("Exam scheduled! Now enter marks 📝"); }}
+                    onClick={() => { setShowExamModal(false); toast(tr("teacherPages", "examScheduled", lang)); }}
                     className="flex-1 bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white py-3 rounded-xl text-sm font-bold hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2"
                   >
-                    <GraduationCap className="w-4 h-4" /> Schedule Exam
+                    <GraduationCap className="w-4 h-4" /> {tr("teacherPages", "scheduleExamBtn", lang)}
                   </button>
-                  <button onClick={() => setShowExamModal(false)} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-semibold">Cancel</button>
+                  <button onClick={() => setShowExamModal(false)} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-semibold">{tr("common", "cancel", lang)}</button>
                 </div>
               </div>
             </motion.div>

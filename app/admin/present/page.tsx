@@ -2,6 +2,8 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { students, attendanceRecords } from "@/mock-data";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 function getLatestDate(records: { date: string }[]) {
   if (!records.length) return null;
@@ -9,6 +11,7 @@ function getLatestDate(records: { date: string }[]) {
 }
 
 export default function AdminPresentPage() {
+  const { lang } = useLanguageStore();
   const latest = getLatestDate(attendanceRecords) || "";
   // flatten records for the latest date
   const latestGroups = attendanceRecords.filter(r => r.date === latest);
@@ -22,7 +25,7 @@ export default function AdminPresentPage() {
 
   return (
     <DashboardLayout>
-      <PageHeader title="Present Today" subtitle={latest ? `Date: ${latest}` : ""} />
+      <PageHeader title={t("adminPages", "presentTitle", lang)} subtitle={latest ? `${t("common", "date", lang)}: ${latest}` : ""} />
       <div className="bg-white rounded-2xl p-4 border border-gray-100 mt-4">
         <div className="grid gap-2">
           {list.map(s => (
@@ -31,10 +34,10 @@ export default function AdminPresentPage() {
                 <div className="font-medium text-gray-900">{s.name}</div>
                 <div className="text-xs text-gray-500">{s.class}</div>
               </div>
-              <div className="text-sm text-emerald-600 font-semibold">Present</div>
+              <div className="text-sm text-emerald-600 font-semibold">{t("common", "present", lang)}</div>
             </div>
           ))}
-          {list.length === 0 && <div className="text-sm text-gray-500">No records for today.</div>}
+          {list.length === 0 && <div className="text-sm text-gray-500">{t("common", "noResults", lang)}</div>}
         </div>
       </div>
     </DashboardLayout>

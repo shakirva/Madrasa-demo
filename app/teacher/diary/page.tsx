@@ -10,6 +10,8 @@ import {
   Bookmark, TrendingUp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguageStore } from "@/store/language";
+import { t as tr } from "@/lib/i18n";
 
 type DiaryType = "class" | "student";
 type MoodType = "positive" | "neutral" | "concern";
@@ -95,6 +97,7 @@ const CLASSES  = ["Class 3", "Class 4", "Class 5"];
 const classStudents = (cls: string) => students.filter((s) => s.class === cls);
 
 export default function TeacherDiaryPage() {
+  const { lang } = useLanguageStore();
   const [entries, setEntries]           = useState<DiaryEntry[]>(enriched);
   const [showCreate, setShowCreate]     = useState(false);
   const [activeTab, setActiveTab]       = useState<TabType>("all");
@@ -134,7 +137,7 @@ export default function TeacherDiaryPage() {
 
   const deleteEntry = (id: string) => {
     setEntries((prev) => prev.filter((e) => e.id !== id));
-    toast("Entry deleted");
+    toast(tr("teacherPages", "entryDeleted", lang));
   };
 
   const handleSave = () => {
@@ -155,7 +158,7 @@ export default function TeacherDiaryPage() {
     setEntries((prev) => [newEntry, ...prev]);
     setShowCreate(false);
     setFormTitle(""); setFormContent(""); setFormTags([]);
-    toast(formNotify ? "Entry saved & parents notified 📲" : "Entry saved as draft 📝");
+    toast(formNotify ? tr("teacherPages", "entrySavedNotif", lang) : tr("teacherPages", "entrySavedDraft", lang));
   };
 
   // Stats
@@ -194,16 +197,16 @@ export default function TeacherDiaryPage() {
     const date = new Date(d);
     const today = new Date(); today.setHours(0,0,0,0);
     const yesterday = new Date(today); yesterday.setDate(today.getDate()-1);
-    if (date.toDateString() === today.toDateString()) return "Today";
-    if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
-    return date.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+    if (date.toDateString() === today.toDateString()) return tr("teacherPages", "today", lang);
+    if (date.toDateString() === yesterday.toDateString()) return tr("teacherPages", "yesterday", lang);
+    return date.toLocaleDateString(lang === "ml" ? "ml-IN" : "en-GB", { weekday: "long", day: "numeric", month: "long" });
   };
 
   return (
     <DashboardLayout>
       <PageHeader
-        title="Daily Diary"
-        subtitle="Class notes & personal student remarks"
+        title={tr("teacherPages", "diaryTitle", lang)}
+        subtitle={tr("teacherPages", "diarySub", lang)}
         icon={FileText}
         back
         backHref="/teacher"
@@ -212,7 +215,7 @@ export default function TeacherDiaryPage() {
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-700 active:scale-95 transition-all shadow-sm shadow-emerald-200"
           >
-            <Plus className="w-4 h-4" /> Write
+            <Plus className="w-4 h-4" /> {tr("common", "add", lang)}
           </button>
         }
       />
@@ -232,12 +235,12 @@ export default function TeacherDiaryPage() {
       {/* ── Stats ──────────────────────────────────────────── */}
       <div className="grid grid-cols-3 lg:grid-cols-6 gap-2 mb-5">
         {[
-          { label: "Total",    value: stats.total,    icon: FileText,     color: "text-gray-600",    bg: "bg-gray-50" },
-          { label: "Class",    value: stats.class,    icon: BookOpen,     color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Student",  value: stats.student,  icon: User,         color: "text-blue-600",    bg: "bg-blue-50" },
-          { label: "Starred",  value: stats.starred,  icon: Star,         color: "text-amber-500",   bg: "bg-amber-50" },
-          { label: "Positive", value: stats.positive, icon: TrendingUp,   color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Concerns", value: stats.concern,  icon: MessageSquare,color: "text-red-500",     bg: "bg-red-50" },
+          { label: tr("teacherPages", "totalEntries", lang),    value: stats.total,    icon: FileText,     color: "text-gray-600",    bg: "bg-gray-50" },
+          { label: tr("teacherPages", "classNotes", lang),    value: stats.class,    icon: BookOpen,     color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: tr("teacherPages", "studentNotes", lang),  value: stats.student,  icon: User,         color: "text-blue-600",    bg: "bg-blue-50" },
+          { label: tr("teacherPages", "starred", lang),  value: stats.starred,  icon: Star,         color: "text-amber-500",   bg: "bg-amber-50" },
+          { label: tr("teacherPages", "positive", lang), value: stats.positive, icon: TrendingUp,   color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: tr("teacherPages", "concerns", lang), value: stats.concern,  icon: MessageSquare,color: "text-red-500",     bg: "bg-red-50" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <motion.div key={label} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl border border-gray-100 p-3 flex flex-col items-center gap-1 text-center"
@@ -255,7 +258,7 @@ export default function TeacherDiaryPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search diary entries..."
+            placeholder={tr("teacherPages", "searchDiary", lang)}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
@@ -273,13 +276,13 @@ export default function TeacherDiaryPage() {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden mb-4"
           >
-            <p className="text-xs text-gray-400 font-medium mb-2 uppercase tracking-wide">Filter by Mood</p>
+            <p className="text-xs text-gray-400 font-medium mb-2 uppercase tracking-wide">{tr("teacherPages", "filterByMood", lang)}</p>
             <div className="flex gap-2 flex-wrap">
               {(Object.entries(MOODS) as [MoodType, typeof MOODS[MoodType]][]).map(([key, cfg]) => (
                 <button key={key}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${cfg.bg} ${cfg.color}`}
                 >
-                  {cfg.emoji} {cfg.label}
+                  {cfg.emoji} {key === "positive" ? tr("teacherPages", "positiveFilter", lang) : key === "neutral" ? tr("teacherPages", "neutralFilter", lang) : tr("teacherPages", "concernFilter", lang)}
                 </button>
               ))}
             </div>
@@ -290,10 +293,10 @@ export default function TeacherDiaryPage() {
       {/* ── Tabs ───────────────────────────────────────────── */}
       <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-5">
         {([
-          { key: "all",     label: "All",         count: entries.length },
-          { key: "class",   label: "Class Notes", count: stats.class },
-          { key: "student", label: "Student",     count: stats.student },
-          { key: "starred", label: "⭐ Starred",  count: stats.starred },
+          { key: "all",     label: tr("teacherPages", "allDiary", lang),         count: entries.length },
+          { key: "class",   label: tr("teacherPages", "classNotesTab", lang), count: stats.class },
+          { key: "student", label: tr("teacherPages", "studentTab", lang),     count: stats.student },
+          { key: "starred", label: tr("teacherPages", "starredTab", lang),  count: stats.starred },
         ] as { key: TabType; label: string; count: number }[]).map(({ key, label, count }) => (
           <button key={key} onClick={() => setActiveTab(key)}
             className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold transition-all ${activeTab === key ? "bg-white text-emerald-700 shadow-sm" : "text-gray-500"}`}
@@ -308,7 +311,7 @@ export default function TeacherDiaryPage() {
       {grouped.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <FileText className="w-10 h-10 mx-auto mb-2 opacity-30" />
-          <p className="text-sm">No diary entries found</p>
+          <p className="text-sm">{tr("teacherPages", "noDiary", lang)}</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -321,7 +324,7 @@ export default function TeacherDiaryPage() {
                   <span className="text-xs font-semibold text-gray-600">{formatDate(date)}</span>
                 </div>
                 <div className="flex-1 h-px bg-gray-100" />
-                <span className="text-xs text-gray-400">{dayEntries.length} {dayEntries.length === 1 ? "entry" : "entries"}</span>
+                <span className="text-xs text-gray-400">{dayEntries.length} {dayEntries.length === 1 ? tr("teacherPages", "entry", lang) : tr("teacherPages", "entries", lang)}</span>
               </div>
 
               <div className="space-y-3">
@@ -350,18 +353,18 @@ export default function TeacherDiaryPage() {
                             <div className="flex items-center gap-2 flex-wrap">
                               {/* Type badge */}
                               <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${entry.type === "class" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
-                                {entry.type === "class" ? "📚 Class Note" : "👤 Student Note"}
+                                {entry.type === "class" ? tr("teacherPages", "classNote", lang) : tr("teacherPages", "studentNote", lang)}
                               </span>
                               {/* Mood badge */}
                               {mood && (
                                 <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${mood.bg} ${mood.color}`}>
-                                  {mood.emoji} {mood.label}
+                                  {mood.emoji} {entry.mood === "positive" ? tr("teacherPages", "positiveFilter", lang) : entry.mood === "neutral" ? tr("teacherPages", "neutralFilter", lang) : tr("teacherPages", "concernFilter", lang)}
                                 </span>
                               )}
                               {/* Notified */}
                               {entry.notified && (
                                 <span className="text-[11px] text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                                  📨 Notified
+                                  {tr("teacherPages", "notified", lang)}
                                 </span>
                               )}
                             </div>
@@ -428,7 +431,7 @@ export default function TeacherDiaryPage() {
                             onClick={() => setExpandedId(isExpanded ? null : entry.id)}
                             className="mt-2.5 flex items-center gap-1 text-xs text-emerald-600 font-medium hover:underline"
                           >
-                            {isExpanded ? <><ChevronUp className="w-3 h-3" /> Show less</> : <><ChevronDown className="w-3 h-3" /> Read more</>}
+                            {isExpanded ? <><ChevronUp className="w-3 h-3" /> {tr("teacherPages", "showLess", lang)}</> : <><ChevronDown className="w-3 h-3" /> {tr("teacherPages", "readMore", lang)}</>}
                           </button>
 
                           {/* Expanded actions */}
@@ -439,22 +442,22 @@ export default function TeacherDiaryPage() {
                               >
                                 <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-2 flex-wrap">
                                   <button
-                                    onClick={() => { toast("Reminder sent to parents 📲"); }}
+                                    onClick={() => { toast(tr("teacherPages", "reminderSent", lang)); }}
                                     className="flex items-center gap-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg hover:bg-emerald-100 transition-colors"
                                   >
-                                    <Bell className="w-3.5 h-3.5" /> Re-notify Parents
+                                    <Bell className="w-3.5 h-3.5" /> {tr("teacherPages", "renotifyParents", lang)}
                                   </button>
                                   <button
-                                    onClick={() => { toast("Entry copied to clipboard 📋"); }}
+                                    onClick={() => { toast(tr("teacherPages", "copiedClipboard", lang)); }}
                                     className="flex items-center gap-1.5 text-xs font-semibold bg-gray-50 text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
                                   >
-                                    <Send className="w-3.5 h-3.5" /> Share Entry
+                                    <Send className="w-3.5 h-3.5" /> {tr("teacherPages", "shareEntry", lang)}
                                   </button>
                                   <button
                                     onClick={() => toggleStar(entry.id)}
                                     className={`flex items-center gap-1.5 text-xs font-semibold border px-3 py-1.5 rounded-lg transition-colors ${entry.starred ? "bg-amber-50 text-amber-600 border-amber-200" : "bg-gray-50 text-gray-500 border-gray-200"}`}
                                   >
-                                    <Bookmark className="w-3.5 h-3.5" /> {entry.starred ? "Unstar" : "Star Entry"}
+                                    <Bookmark className="w-3.5 h-3.5" /> {entry.starred ? tr("teacherPages", "unstar", lang) : tr("teacherPages", "starEntryBtn", lang)}
                                   </button>
                                 </div>
                               </motion.div>
@@ -484,11 +487,11 @@ export default function TeacherDiaryPage() {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${previewEntry.type === "class" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
-                    {previewEntry.type === "class" ? "📚 Class Note" : "👤 Student Note"}
+                    {previewEntry.type === "class" ? tr("teacherPages", "classNote", lang) : tr("teacherPages", "studentNote", lang)}
                   </span>
                   {previewEntry.mood && (
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${MOODS[previewEntry.mood].bg} ${MOODS[previewEntry.mood].color}`}>
-                      {MOODS[previewEntry.mood].emoji} {MOODS[previewEntry.mood].label}
+                      {MOODS[previewEntry.mood].emoji} {previewEntry.mood === "positive" ? tr("teacherPages", "positiveFilter", lang) : previewEntry.mood === "neutral" ? tr("teacherPages", "neutralFilter", lang) : tr("teacherPages", "concernFilter", lang)}
                     </span>
                   )}
                 </div>
@@ -526,7 +529,7 @@ export default function TeacherDiaryPage() {
                 </div>
                 {previewEntry.notified && (
                   <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Parents notified
+                    <CheckCircle2 className="w-3.5 h-3.5" /> {tr("teacherPages", "parentsNotified", lang)}
                   </span>
                 )}
               </div>
@@ -548,8 +551,8 @@ export default function TeacherDiaryPage() {
               {/* Header */}
               <div className="sticky top-0 bg-white rounded-t-3xl px-6 pt-6 pb-4 border-b border-gray-100 flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-gray-900 text-lg">Write Diary Entry</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">Notes are sent to parents automatically</p>
+                  <h2 className="font-bold text-gray-900 text-lg">{tr("teacherPages", "writeDiaryEntry", lang)}</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">{tr("teacherPages", "notesAutoSent", lang)}</p>
                 </div>
                 <button onClick={() => setShowCreate(false)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400"><X className="w-5 h-5" /></button>
               </div>
@@ -560,19 +563,19 @@ export default function TeacherDiaryPage() {
                   <button onClick={() => setFormType("class")}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-semibold transition-all ${formType === "class" ? "bg-white text-emerald-700 shadow-sm" : "text-gray-500"}`}
                   >
-                    <BookOpen className="w-3.5 h-3.5" /> Class Note
+                    <BookOpen className="w-3.5 h-3.5" /> {tr("teacherPages", "classNoteType", lang)}
                   </button>
                   <button onClick={() => setFormType("student")}
                     className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-semibold transition-all ${formType === "student" ? "bg-white text-blue-700 shadow-sm" : "text-gray-500"}`}
                   >
-                    <User className="w-3.5 h-3.5" /> Student Note
+                    <User className="w-3.5 h-3.5" /> {tr("teacherPages", "studentNoteType", lang)}
                   </button>
                 </div>
 
                 {/* Class + Student */}
                 <div className={`grid gap-3 ${formType === "student" ? "grid-cols-2" : "grid-cols-1"}`}>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Class</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "diaryClassLabel", lang)}</label>
                     <select value={formClass} onChange={(e) => { setFormClass(e.target.value); setFormStudent(""); }}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none text-sm"
                     >
@@ -581,11 +584,11 @@ export default function TeacherDiaryPage() {
                   </div>
                   {formType === "student" && (
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">Student <span className="text-red-500">*</span></label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "diaryStudentLabel", lang)} <span className="text-red-500">*</span></label>
                       <select value={formStudent} onChange={(e) => setFormStudent(e.target.value)}
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none text-sm"
                       >
-                        <option value="">Select…</option>
+                        <option value="">{tr("teacherPages", "selectOpt", lang)}</option>
                         {classStudents(formClass).map((s) => (
                           <option key={s.id} value={s.id}>{s.name.split(" ")[0]}</option>
                         ))}
@@ -596,33 +599,33 @@ export default function TeacherDiaryPage() {
 
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Title <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "diaryTitleLabel", lang)} <span className="text-red-500">*</span></label>
                   <input value={formTitle} onChange={(e) => setFormTitle(e.target.value)}
-                    placeholder="e.g. Today's lesson summary"
+                    placeholder={tr("teacherPages", "diaryTitlePlc", lang)}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm transition-colors"
                   />
                 </div>
 
                 {/* Content */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Message</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "messageField", lang)}</label>
                   <textarea value={formContent} onChange={(e) => setFormContent(e.target.value)}
-                    placeholder="Write your note here... Parents will receive this."
+                    placeholder={tr("teacherPages", "diaryMsgPlc", lang)}
                     rows={4}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm resize-none transition-colors"
                   />
-                  <p className="text-right text-xs text-gray-400 mt-1">{formContent.length} chars</p>
+                  <p className="text-right text-xs text-gray-400 mt-1">{formContent.length} {tr("teacherPages", "chars", lang)}</p>
                 </div>
 
                 {/* Mood */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mood / Tone</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "moodTone", lang)}</label>
                   <div className="flex gap-2">
                     {(Object.entries(MOODS) as [MoodType, typeof MOODS[MoodType]][]).map(([key, cfg]) => (
                       <button key={key} onClick={() => setFormMood(key)}
                         className={`flex-1 py-2.5 rounded-xl border text-xs font-bold transition-all ${formMood === key ? `${cfg.bg} ${cfg.color} border-current` : "bg-white text-gray-400 border-gray-200"}`}
                       >
-                        {cfg.emoji}<br />{cfg.label}
+                        {cfg.emoji}<br />{key === "positive" ? tr("teacherPages", "positiveFilter", lang) : key === "neutral" ? tr("teacherPages", "neutralFilter", lang) : tr("teacherPages", "concernFilter", lang)}
                       </button>
                     ))}
                   </div>
@@ -630,7 +633,7 @@ export default function TeacherDiaryPage() {
 
                 {/* Tags */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Tags</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "tagsField", lang)}</label>
                   <div className="flex flex-wrap gap-2">
                     {QUICK_TAGS.map((tag) => (
                       <button key={tag} onClick={() => setFormTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag])}
@@ -646,7 +649,7 @@ export default function TeacherDiaryPage() {
                 <div className="flex items-center justify-between bg-emerald-50 rounded-xl px-4 py-3 border border-emerald-100">
                   <div className="flex items-center gap-2">
                     <Bell className="w-4 h-4 text-emerald-600" />
-                    <p className="text-sm font-semibold text-emerald-800">Notify Parents</p>
+                    <p className="text-sm font-semibold text-emerald-800">{tr("teacherPages", "notifyParents", lang)}</p>
                   </div>
                   <button onClick={() => setFormNotify((v) => !v)}
                     className={`w-11 h-6 rounded-full transition-colors relative ${formNotify ? "bg-emerald-500" : "bg-gray-200"}`}
@@ -662,10 +665,10 @@ export default function TeacherDiaryPage() {
                     disabled={!formTitle || (formType === "student" && !formStudent)}
                     className="flex-1 bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white py-3 rounded-xl text-sm font-bold hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2"
                   >
-                    <Send className="w-4 h-4" /> {formNotify ? "Save & Notify" : "Save Draft"}
+                    <Send className="w-4 h-4" /> {formNotify ? tr("teacherPages", "saveNotify", lang) : tr("teacherPages", "saveDraft", lang)}
                   </button>
                   <button onClick={() => setShowCreate(false)} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors">
-                    Cancel
+                    {tr("teacherPages", "cancelBtn", lang)}
                   </button>
                 </div>
               </div>

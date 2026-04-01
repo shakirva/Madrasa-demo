@@ -4,6 +4,8 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { attendanceRecords, students } from "@/mock-data";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 // Get teacher's classes (hardcoded for demo, based on teachers[0])
 const TEACHER_CLASSES = ["Class 4", "Class 3"];
@@ -13,6 +15,7 @@ function getStudentsInClass(classId: string) {
 }
 
 export default function TeacherAbsentPage() {
+  const { lang } = useLanguageStore();
   const [selectedClass, setSelectedClass] = useState(TEACHER_CLASSES[0]);
 
   // Get the latest attendance record (today's)
@@ -28,7 +31,7 @@ export default function TeacherAbsentPage() {
 
   return (
     <DashboardLayout>
-      <PageHeader title="Absent Today" subtitle={latestRecord?.date || "Latest"} />
+      <PageHeader title={t("teacherPages", "absentToday", lang)} subtitle={latestRecord?.date || "Latest"} />
 
       {/* ── Class Selector ── */}
       <div className="flex gap-2 mb-4">
@@ -50,9 +53,9 @@ export default function TeacherAbsentPage() {
 
       {/* ── Absent List ── */}
       <div className="bg-white rounded-2xl p-4 border border-gray-100 mt-4">
-        <p className="text-xs text-gray-500 mb-3">Total Absent: {absentStudents.length}</p>
+        <p className="text-xs text-gray-500 mb-3">{t("teacherPages", "totalAbsent", lang)}: {absentStudents.length}</p>
         {absentStudents.length === 0 ? (
-          <div className="text-sm text-gray-500">No students absent in {selectedClass}.</div>
+          <div className="text-sm text-gray-500">{t("teacherPages", "noAbsent", lang)} {selectedClass}.</div>
         ) : (
           <div className="space-y-2">
             {absentStudents.map((s) => (
@@ -69,7 +72,7 @@ export default function TeacherAbsentPage() {
                     <div className="text-xs text-gray-500">{s.admissionNumber}</div>
                   </div>
                 </div>
-                <div className="text-xs text-red-600 font-semibold">✗ Absent</div>
+                <div className="text-xs text-red-600 font-semibold">✗ {t("common", "absent", lang)}</div>
               </div>
             ))}
           </div>

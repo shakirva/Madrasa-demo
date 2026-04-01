@@ -12,6 +12,8 @@ import {
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
@@ -36,6 +38,7 @@ const monthlyChartData = ALL_MONTHS.slice().reverse().map((month) => {
 // ── Component ───────────────────────────────────────────────────────────────
 export default function AdminFeesPage() {
   const router = useRouter();
+  const { lang } = useLanguageStore();
   const [activeMonth, setActiveMonth]     = useState("March 2026");
   const [activeClass, setActiveClass]     = useState("All Classes");
   const [selectedStudent, setSelectedStudent] = useState<string | null>(null);
@@ -90,7 +93,7 @@ export default function AdminFeesPage() {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Fees"
+        title={t("adminPages", "feesTitle", lang)}
         subtitle={activeMonth}
         icon={CreditCard}
         action={
@@ -98,7 +101,7 @@ export default function AdminFeesPage() {
             <button onClick={() => setShowReport(true)}
               className="flex items-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-700 rounded-xl text-sm font-semibold"
             >
-              <BarChart2 className="w-4 h-4" />Report
+              <BarChart2 className="w-4 h-4" />{t("adminPages", "report", lang)}
             </button>
             <button onClick={() => setShowSettings(true)}
               className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-semibold"
@@ -142,21 +145,21 @@ export default function AdminFeesPage() {
         <button onClick={() => { router.push(`/admin/fees/paid?month=${encodeURIComponent(activeMonth)}&class=${encodeURIComponent(activeClass)}`); }} className="text-left">
           <div className="bg-emerald-50 rounded-2xl p-3.5 text-center border border-emerald-100 hover:shadow-sm">
             <p className="text-xl font-bold text-emerald-700">{paidRecs.length}</p>
-            <p className="text-xs text-emerald-600 mt-0.5">Paid</p>
+            <p className="text-xs text-emerald-600 mt-0.5">{t("adminPages", "paidLabel", lang)}</p>
           </div>
         </button>
 
         <button onClick={() => { router.push(`/admin/fees/pending?month=${encodeURIComponent(activeMonth)}&class=${encodeURIComponent(activeClass)}`); }} className="text-left">
           <div className="bg-amber-50 rounded-2xl p-3.5 text-center border border-amber-100 hover:shadow-sm">
             <p className="text-xl font-bold text-amber-700">{pendingRecs.length}</p>
-            <p className="text-xs text-amber-600 mt-0.5">Proof Sent</p>
+            <p className="text-xs text-amber-600 mt-0.5">{t("adminPages", "proofSent", lang)}</p>
           </div>
         </button>
 
         <button onClick={() => { router.push(`/admin/fees/unpaid?month=${encodeURIComponent(activeMonth)}&class=${encodeURIComponent(activeClass)}`); }} className="text-left">
           <div className="bg-red-50 rounded-2xl p-3.5 text-center border border-red-100 hover:shadow-sm">
             <p className="text-xl font-bold text-red-600">{unpaidRecs.length}</p>
-            <p className="text-xs text-red-500 mt-0.5">Unpaid</p>
+            <p className="text-xs text-red-500 mt-0.5">{t("adminPages", "unpaid", lang)}</p>
           </div>
         </button>
       </div>
@@ -165,11 +168,11 @@ export default function AdminFeesPage() {
       <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-xs text-gray-400">Collected</p>
+            <p className="text-xs text-gray-400">{t("adminPages", "collected", lang)}</p>
             <p className="text-xl font-bold text-emerald-700">₹{collected.toLocaleString()}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-400">Still Due</p>
+            <p className="text-xs text-gray-400">{t("adminPages", "stillDue", lang)}</p>
             <p className="text-xl font-bold text-red-500">₹{stillDue.toLocaleString()}</p>
           </div>
         </div>
@@ -184,7 +187,7 @@ export default function AdminFeesPage() {
           </div>
         )}
         <p className="text-xs text-gray-400 mt-1.5 text-right">
-          {collected + stillDue > 0 ? Math.round((collected / (collected + stillDue)) * 100) : 0}% collected
+          {collected + stillDue > 0 ? Math.round((collected / (collected + stillDue)) * 100) : 0}% {t("adminPages", "pctCollected", lang)}
         </p>
       </div>
 
@@ -263,7 +266,7 @@ export default function AdminFeesPage() {
                                 : "bg-emerald-50 text-emerald-700 border border-emerald-200"
                             )}
                           >
-                            {approving === fee.id ? "✓ Done" : "Approve"}
+                            {approving === fee.id ? t("adminPages", "doneApprove", lang) : t("adminPages", "approve", lang)}
                           </button>
                         )}
                         <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
@@ -308,7 +311,7 @@ export default function AdminFeesPage() {
                         approving === fee.id ? "bg-emerald-600 text-white" : "bg-emerald-50 text-emerald-700 border border-emerald-200"
                       )}
                     >
-                      {approving === fee.id ? "✓" : "Approve"}
+                      {approving === fee.id ? "✓" : t("adminPages", "approve", lang)}
                     </button>
                   )}
                   <ChevronRight className="w-4 h-4 text-gray-300" />
@@ -365,37 +368,37 @@ export default function AdminFeesPage() {
                     <p className="text-lg font-bold text-emerald-700">
                       {studentHistory.filter((f) => f.status === "paid").length}
                     </p>
-                    <p className="text-xs text-emerald-600">Paid</p>
+                    <p className="text-xs text-emerald-600">{t("adminPages", "paidLabel", lang)}</p>
                   </div>
                   <div className="bg-red-50 rounded-2xl p-3 text-center border border-red-100">
                     <p className="text-lg font-bold text-red-600">
                       {studentHistory.filter((f) => f.status !== "paid").length}
                     </p>
-                    <p className="text-xs text-red-500">Pending</p>
+                    <p className="text-xs text-red-500">{t("adminPages", "pendingLabel", lang)}</p>
                   </div>
                   <div className="bg-gray-50 rounded-2xl p-3 text-center border border-gray-200">
                     <p className="text-lg font-bold text-gray-800">
                       {studentHistory.length}
                     </p>
-                    <p className="text-xs text-gray-500">Months</p>
+                    <p className="text-xs text-gray-500">{t("adminPages", "months", lang)}</p>
                   </div>
                 </div>
 
                 {/* Amount summary */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5 flex justify-between items-center">
                   <div>
-                    <p className="text-xs text-gray-400">Total Paid</p>
+                    <p className="text-xs text-gray-400">{t("adminPages", "totalPaidLabel", lang)}</p>
                     <p className="text-xl font-bold text-emerald-700">₹{totalPaidByStudent.toLocaleString()}</p>
                   </div>
                   <div className="h-10 w-px bg-gray-100" />
                   <div className="text-right">
-                    <p className="text-xs text-gray-400">Still Due</p>
+                    <p className="text-xs text-gray-400">{t("adminPages", "stillDue", lang)}</p>
                     <p className="text-xl font-bold text-red-500">₹{totalDueByStudent.toLocaleString()}</p>
                   </div>
                 </div>
 
                 {/* Payment history */}
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Payment History</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t("adminPages", "paymentHistory", lang)}</p>
                 <div className="space-y-3">
                   {studentHistory.map((fee, i) => (
                     <motion.div key={fee.id}
@@ -417,7 +420,7 @@ export default function AdminFeesPage() {
                         </span>
                         {fee.paidDate && (
                           <span className="text-emerald-600 font-medium">
-                            Paid on {new Date(fee.paidDate).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" })}
+                            {t("adminPages", "paidOn", lang)} {new Date(fee.paidDate).toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" })}
                           </span>
                         )}
                       </div>
@@ -436,10 +439,10 @@ export default function AdminFeesPage() {
                               approving === fee.id ? "bg-emerald-600 text-white" : "bg-emerald-600 text-white"
                             )}
                           >
-                            {approving === fee.id ? "✓ Approved!" : "Approve Payment"}
+                            {approving === fee.id ? t("adminPages", "approved", lang) : t("adminPages", "approvePayment", lang)}
                           </button>
                           <button className="px-3 py-2 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold flex items-center gap-1">
-                            <Upload className="w-3 h-3" />Proof
+                            <Upload className="w-3 h-3" />{t("adminPages", "proof", lang)}
                           </button>
                         </div>
                       )}
@@ -472,8 +475,8 @@ export default function AdminFeesPage() {
               </div>
               <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
                 <div>
-                  <h2 className="font-bold text-gray-900 text-lg">Monthly Report</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">3-month fee collection overview</p>
+                  <h2 className="font-bold text-gray-900 text-lg">{t("adminPages", "monthlyReport", lang)}</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">{t("adminPages", "threeMonthOverview", lang)}</p>
                 </div>
                 <button onClick={() => setShowReport(false)}
                   className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"
@@ -485,7 +488,7 @@ export default function AdminFeesPage() {
                 {/* Chart */}
                 <div className="bg-gray-50 rounded-2xl p-4">
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-1.5">
-                    <TrendingUp className="w-3.5 h-3.5" />Collection vs Pending
+                    <TrendingUp className="w-3.5 h-3.5" />{t("adminPages", "collVsPending", lang)}
                   </p>
                   <ResponsiveContainer width="100%" height={160}>
                     <BarChart data={monthlyChartData} barSize={22}>
@@ -493,8 +496,8 @@ export default function AdminFeesPage() {
                       <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                       <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v/1000}k`} />
                       <Tooltip formatter={(val) => [`₹${Number(val).toLocaleString()}`, ""]} />
-                      <Bar dataKey="collected" fill="#10b981" radius={[6,6,0,0]} name="Collected" />
-                      <Bar dataKey="pending"   fill="#fca5a5" radius={[6,6,0,0]} name="Pending"   />
+                      <Bar dataKey="collected" fill="#10b981" radius={[6,6,0,0]} name={t("adminPages", "collected", lang)} />
+                      <Bar dataKey="pending"   fill="#fca5a5" radius={[6,6,0,0]} name={t("adminPages", "pendingLabel", lang)}   />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -522,15 +525,15 @@ export default function AdminFeesPage() {
                       <div className="grid grid-cols-3 gap-2 text-center text-xs">
                         <div className="bg-emerald-50 rounded-xl p-2">
                           <p className="font-bold text-emerald-700">{paid.length}</p>
-                          <p className="text-emerald-600">Paid</p>
+                          <p className="text-emerald-600">{t("adminPages", "paidLabel", lang)}</p>
                         </div>
                         <div className="bg-red-50 rounded-xl p-2">
                           <p className="font-bold text-red-600">{due.length}</p>
-                          <p className="text-red-500">Due</p>
+                          <p className="text-red-500">{t("adminPages", "due", lang)}</p>
                         </div>
                         <div className="bg-gray-50 rounded-xl p-2">
                           <p className="font-bold text-gray-700">₹{collAmt.toLocaleString()}</p>
-                          <p className="text-gray-500">Collected</p>
+                          <p className="text-gray-500">{t("adminPages", "collected", lang)}</p>
                         </div>
                       </div>
                     </div>
@@ -562,8 +565,8 @@ export default function AdminFeesPage() {
               </div>
               <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
                 <div>
-                  <h2 className="font-bold text-gray-900 text-lg">Fee Settings</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">Configure fee amounts per class</p>
+                  <h2 className="font-bold text-gray-900 text-lg">{t("adminPages", "feeSettings", lang)}</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">{t("adminPages", "configureFees", lang)}</p>
                 </div>
                 <button onClick={() => setShowSettings(false)}
                   className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"
@@ -575,7 +578,7 @@ export default function AdminFeesPage() {
 
                 {/* Fee per class */}
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Monthly Fee Amount</p>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t("adminPages", "monthlyFeeAmt", lang)}</p>
                   <div className="space-y-3">
                     {Object.entries(feeAmount).map(([cls, amt]) => (
                       <div key={cls} className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between gap-4">
@@ -596,29 +599,32 @@ export default function AdminFeesPage() {
 
                 {/* QR Code section */}
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Payment QR Code</p>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t("adminPages", "paymentQR", lang)}</p>
                   <div className="bg-gray-50 rounded-2xl p-4 text-center">
                     <div className="w-28 h-28 bg-white rounded-xl mx-auto flex items-center justify-center border border-gray-200 mb-3">
                       <QrCode className="w-14 h-14 text-gray-400" />
                     </div>
                     <p className="text-sm text-gray-600 font-medium mb-1">UPI: darulhuda@okaxis</p>
-                    <p className="text-xs text-gray-400 mb-3">Parents scan to pay monthly fees</p>
+                    <p className="text-xs text-gray-400 mb-3">{t("adminPages", "parentsScan", lang)}</p>
                     <button className="w-full py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2">
-                      <Upload className="w-4 h-4" />Upload New QR Code
+                      <Upload className="w-4 h-4" />{t("adminPages", "uploadNewQR", lang)}
                     </button>
                   </div>
                 </div>
 
                 {/* Send reminder */}
                 <div>
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Reminders</p>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t("adminPages", "reminders", lang)}</p>
                   <div className="space-y-2">
-                    {["Send reminder to all unpaid parents", "Send reminder for pending approvals"].map((action) => (
-                      <button key={action}
+                    {[
+                      { key: "sendUnpaidReminder" as const, label: t("adminPages", "sendUnpaidReminder", lang) },
+                      { key: "sendPendingReminder" as const, label: t("adminPages", "sendPendingReminder", lang) },
+                    ].map((action) => (
+                      <button key={action.key}
                         onClick={() => alert("✅ Reminder sent! (Demo)")}
                         className="w-full py-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2"
                       >
-                        {action}
+                        {action.label}
                       </button>
                     ))}
                   </div>
@@ -629,7 +635,7 @@ export default function AdminFeesPage() {
                   onClick={() => { setShowSettings(false); alert("✅ Settings saved! (Demo)"); }}
                   className="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl text-base"
                 >
-                  Save Settings ✓
+                  {t("adminPages", "saveSettingsFee", lang)}
                 </button>
               </div>
             </motion.div>

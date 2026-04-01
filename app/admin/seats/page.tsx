@@ -5,8 +5,11 @@ import { seatArrangements } from "@/mock-data";
 import { BookMarked } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 export default function AdminSeatsPage() {
+  const { lang } = useLanguageStore();
   const [arrangement] = useState(seatArrangements[0]);
   const [showGenerator, setShowGenerator] = useState(false);
 
@@ -16,7 +19,7 @@ export default function AdminSeatsPage() {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Exam Seat Arrangement"
+        title={t("adminPages", "seatsTitle", lang)}
         subtitle={arrangement.examName}
         icon={BookMarked}
         action={
@@ -24,7 +27,7 @@ export default function AdminSeatsPage() {
             onClick={() => setShowGenerator(true)}
             className="bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors"
           >
-            Generate New
+            {t("adminPages", "generateNew", lang)}
           </button>
         }
       />
@@ -33,23 +36,23 @@ export default function AdminSeatsPage() {
       <div className="bg-white rounded-2xl p-4 border border-gray-100 mb-5 flex items-center justify-between">
         <div>
           <p className="font-semibold text-gray-900">{arrangement.hall}</p>
-          <p className="text-sm text-gray-500">{arrangement.totalBenches} benches</p>
+          <p className="text-sm text-gray-500">{arrangement.totalBenches} {t("adminPages", "benches", lang)}</p>
         </div>
         <div className="flex gap-3">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-blue-200" />
-            <span className="text-xs text-gray-600">Boys</span>
+            <span className="text-xs text-gray-600">{t("adminPages", "boys", lang)}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-pink-200" />
-            <span className="text-xs text-gray-600">Girls</span>
+            <span className="text-xs text-gray-600">{t("adminPages", "girls", lang)}</span>
           </div>
         </div>
       </div>
 
       {/* Teacher / Invigilator */}
       <div className="bg-emerald-600 text-white rounded-2xl p-3 mb-6 text-center text-sm font-semibold">
-        📋 Invigilator Desk
+        {t("adminPages", "invigilatorDesk", lang)}
       </div>
 
       {/* Seat Grid */}
@@ -90,13 +93,13 @@ export default function AdminSeatsPage() {
             initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-3xl p-6 w-full max-w-md"
           >
-            <h2 className="font-bold text-gray-900 text-lg mb-4">Generate Seat Arrangement</h2>
+            <h2 className="font-bold text-gray-900 text-lg mb-4">{t("adminPages", "generateSeat", lang)}</h2>
             <div className="space-y-4">
               {[
-                { label: "Exam Name", placeholder: "e.g. Second Semester Exam" },
-                { label: "Hall Name", placeholder: "e.g. Main Hall" },
-                { label: "Number of Benches", placeholder: "e.g. 30", type: "number" },
-                { label: "Number of Columns", placeholder: "e.g. 4", type: "number" },
+                { label: t("adminPages", "examNameLabel", lang), placeholder: "e.g. Second Semester Exam" },
+                { label: t("adminPages", "hallName", lang), placeholder: "e.g. Main Hall" },
+                { label: t("adminPages", "numBenches", lang), placeholder: "e.g. 30", type: "number" },
+                { label: t("adminPages", "numColumns", lang), placeholder: "e.g. 4", type: "number" },
               ].map(({ label, placeholder, type }) => (
                 <div key={label}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -104,7 +107,7 @@ export default function AdminSeatsPage() {
                 </div>
               ))}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Participating Classes</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t("adminPages", "participatingClasses", lang)}</label>
                 <div className="flex gap-2 flex-wrap">
                   {["Class 2","Class 3","Class 4","Class 5"].map((c) => (
                     <label key={c} className="flex items-center gap-1.5 bg-gray-50 rounded-lg px-3 py-1.5 cursor-pointer">
@@ -119,10 +122,10 @@ export default function AdminSeatsPage() {
                   onClick={() => { setShowGenerator(false); alert("✅ Seat arrangement generated! (Demo)"); }}
                   className="flex-1 bg-emerald-600 text-white font-semibold py-3 rounded-xl hover:bg-emerald-700 transition-colors text-sm"
                 >
-                  Generate
+                  {t("adminPages", "generate", lang)}
                 </button>
                 <button onClick={() => setShowGenerator(false)} className="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-200 transition-colors text-sm">
-                  Cancel
+                  {t("adminPages", "cancel", lang)}
                 </button>
               </div>
             </div>

@@ -6,6 +6,8 @@ import { notifications, teachers, parents } from "@/mock-data";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, Send, Users, BookOpen, ClipboardList, GraduationCap, CreditCard, FileText, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
   attendance: { icon: ClipboardList, color: "text-emerald-700", bg: "bg-emerald-100" },
@@ -16,15 +18,16 @@ const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: s
   general:    { icon: Bell,          color: "text-gray-700",    bg: "bg-gray-100"    },
 };
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string, lang: "en" | "ml") {
   const diff = Date.now() - new Date(dateStr).getTime();
   const h = Math.floor(diff / 3600000);
-  if (h < 1) return "Just now";
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 1) return t("notif", "justNow", lang);
+  if (h < 24) return `${h} ${t("notif", "hAgo", lang)}`;
+  return `${Math.floor(h / 24)} ${t("notif", "dAgo", lang)}`;
 }
 
 export default function AdminNotificationsPage() {
+  const { lang } = useLanguageStore();
   const [items, setItems] = useState(notifications);
   const [showCompose, setShowCompose] = useState(false);
   const [sent, setSent] = useState(false);
@@ -42,14 +45,14 @@ export default function AdminNotificationsPage() {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Notifications"
-        subtitle={unread > 0 ? `${unread} unread` : "All read"}
+        title={t("adminPages", "notifTitle", lang)}
+        subtitle={unread > 0 ? `${unread} ${t("notif", "unread", lang)}` : t("notif", "allRead", lang)}
         icon={Bell}
         action={
           <button onClick={() => setShowCompose(true)}
             className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold"
           >
-            <Send className="w-4 h-4" />Send
+            <Send className="w-4 h-4" />{t("notif", "send", lang)}
           </button>
         }
       />
@@ -58,25 +61,25 @@ export default function AdminNotificationsPage() {
       <div className="grid grid-cols-3 gap-3 mb-5">
         <div className="bg-white rounded-2xl p-3 text-center border border-gray-100">
           <p className="text-xl font-bold text-gray-900">{items.length}</p>
-          <p className="text-xs text-gray-500">Total</p>
+          <p className="text-xs text-gray-500">{t("notif", "total", lang)}</p>
         </div>
         <div className="bg-white rounded-2xl p-3 text-center border border-gray-100">
           <p className="text-xl font-bold text-emerald-600">{unread}</p>
-          <p className="text-xs text-gray-500">Unread</p>
+          <p className="text-xs text-gray-500">{t("notif", "unread", lang)}</p>
         </div>
         <div className="bg-white rounded-2xl p-3 text-center border border-gray-100">
           <p className="text-xl font-bold text-blue-600">{teachers.length + parents.length}</p>
-          <p className="text-xs text-gray-500">Recipients</p>
+          <p className="text-xs text-gray-500">{t("notif", "recipients", lang)}</p>
         </div>
       </div>
 
       {unread > 0 && (
         <button onClick={markAllRead} className="mb-4 text-sm text-emerald-700 font-semibold underline underline-offset-2">
-          Mark all as read
+          {t("notif", "markAllRead", lang)}
         </button>
       )}
 
-      <SectionHeader title="All Notifications" className="mb-3" />
+      <SectionHeader title={t("notif", "allNotifications", lang)} className="mb-3" />
       <div className="space-y-3">
         {items.map((notif, i) => {
           const cfg = typeConfig[notif.type] ?? typeConfig.general;
@@ -99,7 +102,7 @@ export default function AdminNotificationsPage() {
                   <p className="font-semibold text-gray-900 text-sm">{notif.title}</p>
                   <div className="flex items-center gap-1.5 shrink-0">
                     {!notif.read && <span className="w-2 h-2 rounded-full bg-emerald-500" />}
-                    <span className="text-xs text-gray-400">{timeAgo(notif.timestamp)}</span>
+                    <span className="text-xs text-gray-400">{timeAgo(notif.timestamp, lang)}</span>
                   </div>
                 </div>
                 <p className="text-sm text-gray-500 mt-0.5">{notif.message}</p>
@@ -119,7 +122,7 @@ export default function AdminNotificationsPage() {
               className="bg-white rounded-3xl p-6 w-full max-w-md"
             >
               <div className="flex justify-between items-center mb-5">
-                <h3 className="font-bold text-gray-900 text-lg">Send Notification</h3>
+                <h3 className="font-bold text-gray-900 text-lg">{t("adminPages", "sendNotification", lang)}</h3>
                 <button onClick={() => setShowCompose(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                   <X className="w-4 h-4" />
                 </button>
@@ -127,12 +130,12 @@ export default function AdminNotificationsPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">Send To</label>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t("adminPages", "sendTo", lang)}</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { value: "all", label: "Everyone", icon: Users },
-                      { value: "parents", label: "Parents", icon: Users },
-                      { value: "teachers", label: "Teachers", icon: BookOpen },
+                      { value: "all", label: t("notif", "everyone", lang), icon: Users },
+                      { value: "parents", label: t("notif", "parentsOnly", lang), icon: Users },
+                      { value: "teachers", label: t("notif", "teachersOnly", lang), icon: BookOpen },
                     ].map((opt) => (
                       <button key={opt.value} onClick={() => setForm((f) => ({ ...f, audience: opt.value }))}
                         className={cn("py-2.5 rounded-xl text-xs font-semibold flex flex-col items-center gap-1",
@@ -145,18 +148,18 @@ export default function AdminNotificationsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">Title</label>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t("adminPages", "titleLabel", lang)}</label>
                   <input
                     type="text" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                    placeholder="Notification title..."
+                    placeholder={t("adminPages", "notifTitlePlc", lang)}
                     className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">Message</label>
+                  <label className="text-sm font-semibold text-gray-700 block mb-1.5">{t("adminPages", "messageLabel", lang)}</label>
                   <textarea
                     value={form.message} onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                    placeholder="Write your message..."
+                    placeholder={t("adminPages", "writeMessage", lang)}
                     rows={3}
                     className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-400 resize-none"
                   />
@@ -164,7 +167,7 @@ export default function AdminNotificationsPage() {
                 <button onClick={handleSend}
                   className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2"
                 >
-                  {sent ? "✓ Notification Sent!" : <><Send className="w-4 h-4" />Send to {form.audience === "all" ? "Everyone" : form.audience === "parents" ? "All Parents" : "All Teachers"}</>}
+                  {sent ? t("adminPages", "notifSent", lang) : <><Send className="w-4 h-4" />{form.audience === "all" ? t("adminPages", "sendToEveryone", lang) : form.audience === "parents" ? t("adminPages", "sendToParents", lang) : t("adminPages", "sendToTeachers", lang)}</>}
                 </button>
               </div>
             </motion.div>

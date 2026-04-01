@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
   ResponsiveContainer, Tooltip,
@@ -22,7 +24,6 @@ type ExamRecord = typeof exams[number];
 // ── Helpers ───────────────────────────────────────────────────────────────
 const ALL_CLASSES = ["All", "Class 4", "Class 3", "Class 2"];
 const EXAM_TYPES  = ["All", "semester", "class_test", "hifz"];
-const TYPE_LABELS: Record<string, string> = { semester: "Semester", class_test: "Class Test", hifz: "Hifz", All: "All" };
 
 const GRADE_CONFIG: Record<string, { min: number; color: string; bg: string; label: string }> = {
   "A+": { min: 90, color: "text-emerald-700", bg: "bg-emerald-100",  label: "A+ Excellent"  },
@@ -58,6 +59,7 @@ function rankIcon(rank: number) {
 
 // ── Component ─────────────────────────────────────────────────────────────
 export default function AdminExamsPage() {
+  const { lang } = useLanguageStore();
   // ── filter state ──
   const [activeClass, setActiveClass] = useState("All");
   const [activeType,  setActiveType]  = useState("All");
@@ -172,15 +174,15 @@ export default function AdminExamsPage() {
     return (
       <DashboardLayout>
         <PageHeader
-          title="Exams & Results"
-          subtitle="Manage, mark & publish"
+          title={t("adminPages", "examsTitle", lang)}
+          subtitle={t("adminPages", "examsSubtitle", lang)}
           icon={GraduationCap}
           action={
             <div className="flex gap-2">
               <button onClick={() => setShowCreate(true)}
                 className="flex items-center gap-1.5 px-3 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold"
               >
-                <Plus className="w-4 h-4" />New
+                <Plus className="w-4 h-4" />{t("adminPages", "newExam", lang)}
               </button>
               <button onClick={() => setShowSettings(true)}
                 className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center"
@@ -207,14 +209,14 @@ export default function AdminExamsPage() {
 
         {/* ── Type tabs ── */}
         <div className="flex gap-2 overflow-x-auto pb-1 mb-5 scrollbar-hide">
-          {EXAM_TYPES.map((t) => (
-            <button key={t} onClick={() => setActiveType(t)}
+          {EXAM_TYPES.map((tp) => (
+            <button key={tp} onClick={() => setActiveType(tp)}
               className={cn(
                 "px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all",
-                activeType === t ? "bg-emerald-600 text-white" : "bg-white border border-gray-200 text-gray-500"
+                activeType === tp ? "bg-emerald-600 text-white" : "bg-white border border-gray-200 text-gray-500"
               )}
             >
-              {TYPE_LABELS[t]}
+              {tp === "All" ? t("common", "all", lang) : tp === "semester" ? t("adminPages", "semester", lang) : tp === "class_test" ? t("adminPages", "classTest", lang) : t("adminPages", "hifz", lang)}
             </button>
           ))}
         </div>
@@ -222,9 +224,9 @@ export default function AdminExamsPage() {
         {/* ── Summary row ── */}
         <div className="grid grid-cols-3 gap-3 mb-5">
           {[
-            { label: "Total Exams",  val: examList.length,                                   color: "text-gray-800" },
-            { label: "Published",    val: examList.filter((e) => e.status === "published").length,  color: "text-emerald-700" },
-            { label: "Pending",      val: examList.filter((e) => e.status !== "published").length,  color: "text-amber-700" },
+            { label: t("adminPages", "totalExams", lang),  val: examList.length,                                   color: "text-gray-800" },
+            { label: t("adminPages", "published", lang),    val: examList.filter((e) => e.status === "published").length,  color: "text-emerald-700" },
+            { label: t("adminPages", "pendingExams", lang),      val: examList.filter((e) => e.status !== "published").length,  color: "text-amber-700" },
           ].map(({ label, val, color }) => (
             <div key={label} className="bg-white rounded-2xl p-3 border border-gray-100 text-center">
               <p className={cn("text-2xl font-bold", color)}>{val}</p>
@@ -261,15 +263,15 @@ export default function AdminExamsPage() {
                       <div className="flex-1 min-w-0 pr-3">
                         <p className="font-bold text-gray-900 text-sm leading-tight">{exam.name}</p>
                         <p className="text-xs text-gray-400 mt-0.5">
-                          {exam.class} · {new Date(exam.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} · {exam.totalMarks} marks
+                          {exam.class} · {new Date(exam.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} · {exam.totalMarks} {t("adminPages", "marks", lang)}
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-1.5 shrink-0">
                         <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", TYPE_COLORS[exam.type] ?? "bg-gray-100 text-gray-600")}>
-                          {TYPE_LABELS[exam.type]}
+                          {exam.type === "semester" ? t("adminPages", "semester", lang) : exam.type === "class_test" ? t("adminPages", "classTest", lang) : t("adminPages", "hifz", lang)}
                         </span>
                         <span className={cn("flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full", sm.bg, sm.color)}>
-                          <SmIcon className="w-3 h-3" />{sm.label}
+                          <SmIcon className="w-3 h-3" />{exam.status === "draft" ? t("adminPages", "draft", lang) : exam.status === "marks_entered" ? t("adminPages", "marksEntered", lang) : t("adminPages", "published", lang)}
                         </span>
                       </div>
                     </div>
@@ -285,7 +287,7 @@ export default function AdminExamsPage() {
                     <div className="border-t border-gray-50 px-4 py-3 flex items-center justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                          <p className="text-xs text-gray-400">Marks entered</p>
+                          <p className="text-xs text-gray-400">{t("adminPages", "marksEntered", lang)}</p>
                           <p className="text-xs font-semibold text-gray-600">{enteredCount}/{examStudents.length}</p>
                         </div>
                         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -298,14 +300,14 @@ export default function AdminExamsPage() {
                           <button onClick={(e) => { e.stopPropagation(); setMarkEntry(exam); }}
                             className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold border border-amber-200"
                           >
-                            <Edit3 className="w-3 h-3" />Marks
+                            <Edit3 className="w-3 h-3" />{t("adminPages", "marks", lang)}
                           </button>
                         )}
                         {exam.status === "marks_entered" && (
                           <button onClick={(e) => { e.stopPropagation(); publishExam(exam.id); }}
                             className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold"
                           >
-                            <Send className="w-3 h-3" />Publish
+                            <Send className="w-3 h-3" />{t("adminPages", "publish", lang)}
                           </button>
                         )}
                         <ChevronRight className="w-5 h-5 text-gray-300 my-auto" />
@@ -321,7 +323,7 @@ export default function AdminExamsPage() {
         {filtered.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <GraduationCap className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p className="text-sm font-medium">No exams found</p>
+            <p className="text-sm font-medium">{t("adminPages", "noExamsFound", lang)}</p>
           </div>
         )}
 
@@ -342,7 +344,7 @@ export default function AdminExamsPage() {
                 </div>
                 <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
                   <div>
-                    <h2 className="font-bold text-gray-900">Mark Entry</h2>
+                    <h2 className="font-bold text-gray-900">{t("adminPages", "markEntry", lang)}</h2>
                     <p className="text-xs text-gray-400 mt-0.5">{markEntry.name} · {markEntry.class} · Max {markEntry.totalMarks}</p>
                   </div>
                   <button onClick={() => setMarkEntry(null)}
@@ -391,7 +393,7 @@ export default function AdminExamsPage() {
                   <button onClick={() => saveMarks(markEntry)}
                     className="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl text-base flex items-center justify-center gap-2"
                   >
-                    <CheckCircle className="w-5 h-5" />Save All Marks
+                    <CheckCircle className="w-5 h-5" />{t("adminPages", "saveAllMarks", lang)}
                   </button>
                 </div>
               </motion.div>
@@ -415,7 +417,7 @@ export default function AdminExamsPage() {
                   <div className="w-10 h-1 bg-gray-300 rounded-full" />
                 </div>
                 <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
-                  <h2 className="font-bold text-gray-900 text-lg">Create New Exam</h2>
+                  <h2 className="font-bold text-gray-900 text-lg">{t("adminPages", "createNewExam", lang)}</h2>
                   <button onClick={() => setShowCreate(false)}
                     className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"
                   ><X className="w-4 h-4" /></button>
@@ -423,7 +425,7 @@ export default function AdminExamsPage() {
                 <div className="overflow-y-auto flex-1 px-5 py-5 pb-4 space-y-4">
                   {/* Name */}
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Exam Name</label>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">{t("adminPages", "examName", lang)}</label>
                     <input type="text" placeholder="e.g. Second Semester Exam"
                       value={newExam.name}
                       onChange={(e) => setNewExam((p) => ({ ...p, name: e.target.value }))}
@@ -432,24 +434,24 @@ export default function AdminExamsPage() {
                   </div>
                   {/* Type */}
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Exam Type</label>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">{t("adminPages", "examType", lang)}</label>
                     <div className="grid grid-cols-3 gap-2">
-                      {["semester", "class_test", "hifz"].map((t) => (
-                        <label key={t} className={cn(
+                      {["semester", "class_test", "hifz"].map((tp) => (
+                        <label key={tp} className={cn(
                           "flex flex-col items-center justify-center py-3 rounded-xl border-2 text-xs font-semibold cursor-pointer transition-all text-center",
-                          newExam.type === t ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-gray-200 text-gray-500"
+                          newExam.type === tp ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-gray-200 text-gray-500"
                         )}>
-                          <input type="radio" name="type" value={t} checked={newExam.type === t}
-                            onChange={() => setNewExam((p) => ({ ...p, type: t }))} className="hidden" />
-                          {t === "semester" ? "📖" : t === "class_test" ? "✏️" : "🌙"}
-                          <span className="mt-1">{TYPE_LABELS[t]}</span>
+                          <input type="radio" name="type" value={tp} checked={newExam.type === tp}
+                            onChange={() => setNewExam((p) => ({ ...p, type: tp }))} className="hidden" />
+                          {tp === "semester" ? "📖" : tp === "class_test" ? "✏️" : "🌙"}
+                          <span className="mt-1">{tp === "semester" ? t("adminPages", "semester", lang) : tp === "class_test" ? t("adminPages", "classTest", lang) : t("adminPages", "hifz", lang)}</span>
                         </label>
                       ))}
                     </div>
                   </div>
                   {/* Class */}
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Class</label>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">{t("common", "class", lang)}</label>
                     <div className="flex gap-2">
                       {["Class 2", "Class 3", "Class 4"].map((c) => (
                         <label key={c} className={cn(
@@ -466,14 +468,14 @@ export default function AdminExamsPage() {
                   {/* Date & Marks */}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Date</label>
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">{t("adminPages", "dateLabel", lang)}</label>
                       <input type="date" value={newExam.date}
                         onChange={(e) => setNewExam((p) => ({ ...p, date: e.target.value }))}
                         className="w-full px-3 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-emerald-400"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Max Marks</label>
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">{t("adminPages", "maxMarks", lang)}</label>
                       <input type="number" value={newExam.totalMarks}
                         onChange={(e) => setNewExam((p) => ({ ...p, totalMarks: e.target.value }))}
                         className="w-full px-3 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-emerald-400"
@@ -482,7 +484,7 @@ export default function AdminExamsPage() {
                   </div>
                   {/* Subjects */}
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Subjects <span className="normal-case font-normal text-gray-400">(comma separated)</span></label>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">{t("adminPages", "subjects", lang)} <span className="normal-case font-normal text-gray-400">({t("adminPages", "commaSeparated", lang)})</span></label>
                     <input type="text" placeholder="Quran, Arabic, Fiqh, Islamic Studies"
                       value={newExam.subjects}
                       onChange={(e) => setNewExam((p) => ({ ...p, subjects: e.target.value }))}
@@ -504,7 +506,7 @@ export default function AdminExamsPage() {
                 <div className="px-5 py-4 border-t border-gray-100 shrink-0">
                   <button onClick={createExam}
                     className="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl text-base"
-                  >Create Exam ✓</button>
+                  >{t("adminPages", "createExam", lang)}</button>
                 </div>
               </motion.div>
             </>
@@ -528,8 +530,8 @@ export default function AdminExamsPage() {
                 </div>
                 <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
                   <div>
-                    <h2 className="font-bold text-gray-900 text-lg">Exam Settings</h2>
-                    <p className="text-xs text-gray-400 mt-0.5">Grade config & result preferences</p>
+                    <h2 className="font-bold text-gray-900 text-lg">{t("adminPages", "examSettings", lang)}</h2>
+                    <p className="text-xs text-gray-400 mt-0.5">{t("adminPages", "gradeConfig", lang)}</p>
                   </div>
                   <button onClick={() => setShowSettings(false)}
                     className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"
@@ -538,12 +540,12 @@ export default function AdminExamsPage() {
                 <div className="overflow-y-auto flex-1 px-5 py-5 pb-8 space-y-6">
                   {/* Grade table */}
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Grade Boundaries</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t("adminPages", "gradeBoundaries", lang)}</p>
                     <div className="bg-gray-50 rounded-2xl overflow-hidden">
                       <div className="grid grid-cols-3 px-4 py-2 border-b border-gray-200">
-                        <p className="text-xs font-bold text-gray-500">Grade</p>
-                        <p className="text-xs font-bold text-gray-500 text-center">Min %</p>
-                        <p className="text-xs font-bold text-gray-500 text-right">Label</p>
+                        <p className="text-xs font-bold text-gray-500">{t("adminPages", "grade", lang)}</p>
+                        <p className="text-xs font-bold text-gray-500 text-center">{t("adminPages", "minPct", lang)}</p>
+                        <p className="text-xs font-bold text-gray-500 text-right">{t("adminPages", "label", lang)}</p>
                       </div>
                       {Object.entries(GRADE_CONFIG).map(([grade, cfg]) => (
                         <div key={grade} className="grid grid-cols-3 px-4 py-3 border-b border-gray-100 last:border-0 items-center">
@@ -556,9 +558,9 @@ export default function AdminExamsPage() {
                   </div>
                   {/* Pass mark */}
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Pass Mark</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t("adminPages", "passMark", lang)}</p>
                     <div className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between">
-                      <p className="text-sm font-semibold text-gray-700">Minimum to Pass</p>
+                      <p className="text-sm font-semibold text-gray-700">{t("adminPages", "minToPass", lang)}</p>
                       <div className="flex items-center gap-2">
                         <input type="number" defaultValue={50} className="w-16 px-2 py-1.5 rounded-xl border border-gray-200 text-sm font-bold text-center focus:outline-none focus:border-emerald-400" />
                         <span className="text-sm text-gray-500">%</span>
@@ -567,12 +569,12 @@ export default function AdminExamsPage() {
                   </div>
                   {/* Result visibility */}
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Result Visibility</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t("adminPages", "resultVisibility", lang)}</p>
                     <div className="space-y-2">
                       {[
-                        { label: "Show rank to parents", desc: "Parents see student ranking" },
-                        { label: "Show other scores", desc: "Parents see class average" },
-                        { label: "Send notification on publish", desc: "Auto notify parents on publish" },
+                        { label: t("adminPages", "showRankParents", lang), desc: t("adminPages", "parentsSeeRank", lang) },
+                        { label: t("adminPages", "showOtherScores", lang), desc: t("adminPages", "parentsSeeAvg", lang) },
+                        { label: t("adminPages", "notifyOnPublish", lang), desc: t("adminPages", "autoNotify", lang) },
                       ].map((item) => (
                         <div key={item.label} className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between">
                           <div>
@@ -588,7 +590,7 @@ export default function AdminExamsPage() {
                   </div>
                   <button onClick={() => { setShowSettings(false); }}
                     className="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl text-base"
-                  >Save Settings ✓</button>
+                  >{t("adminPages", "saveSettingsBtn", lang)}</button>
                 </div>
               </motion.div>
             </>
@@ -617,10 +619,10 @@ export default function AdminExamsPage() {
         </button>
         <div className="flex-1 min-w-0">
           <h1 className="font-bold text-gray-900 text-base leading-tight truncate">{selectedExam.name}</h1>
-          <p className="text-xs text-gray-400 mt-0.5">{selectedExam.class} · {selectedExam.date} · {selectedExam.totalMarks} marks each</p>
+          <p className="text-xs text-gray-400 mt-0.5">{selectedExam.class} · {selectedExam.date} · {selectedExam.totalMarks} {t("adminPages", "marksEach", lang)}</p>
         </div>
         <span className={cn("flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full shrink-0", sm.bg, sm.color)}>
-          <SmIcon className="w-3.5 h-3.5" />{sm.label}
+          <SmIcon className="w-3.5 h-3.5" />{selectedExam.status === "draft" ? t("adminPages", "draft", lang) : selectedExam.status === "marks_entered" ? t("adminPages", "marksEntered", lang) : t("adminPages", "published", lang)}
         </span>
       </div>
 
@@ -637,24 +639,24 @@ export default function AdminExamsPage() {
           <button onClick={() => setMarkEntry(selectedExam)}
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl text-sm font-bold"
           >
-            <Edit3 className="w-4 h-4" />Enter Marks
+            <Edit3 className="w-4 h-4" />{t("adminPages", "enterMarks", lang)}
           </button>
         )}
         {selectedExam.status === "marks_entered" && (
           <button onClick={() => publishExam(selectedExam.id)}
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-600 text-white rounded-2xl text-sm font-bold"
           >
-            <Send className="w-4 h-4" />Publish Results
+            <Send className="w-4 h-4" />{t("adminPages", "publishResults", lang)}
           </button>
         )}
         {selectedExam.status === "published" && (
           <div className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl text-sm font-bold">
-            <CheckCircle className="w-4 h-4" />Results Published
+            <CheckCircle className="w-4 h-4" />{t("adminPages", "resultsPublished", lang)}
           </div>
         )}
         {selectedExam.status === "draft" && (
           <div className="flex-1 flex items-center justify-center gap-2 py-3 bg-gray-50 border border-gray-200 text-gray-500 rounded-2xl text-sm font-semibold">
-            <AlertCircle className="w-4 h-4" />Enter marks first
+            <AlertCircle className="w-4 h-4" />{t("adminPages", "enterMarksFirst", lang)}
           </div>
         )}
       </div>
@@ -663,10 +665,10 @@ export default function AdminExamsPage() {
       {examStats && (
         <div className="grid grid-cols-4 gap-2 mb-5">
           {[
-            { label: "Students",   val: examStats.total,   color: "text-gray-800" },
-            { label: "Avg Score",  val: examStats.avg,     color: "text-blue-700" },
-            { label: "Highest",    val: examStats.highest, color: "text-emerald-700" },
-            { label: "Passed",     val: examStats.pass,    color: "text-violet-700" },
+            { label: t("adminPages", "studentsCount", lang),   val: examStats.total,   color: "text-gray-800" },
+            { label: t("adminPages", "avgScore", lang),  val: examStats.avg,     color: "text-blue-700" },
+            { label: t("adminPages", "highest", lang),    val: examStats.highest, color: "text-emerald-700" },
+            { label: t("adminPages", "passed", lang),     val: examStats.pass,    color: "text-violet-700" },
           ].map(({ label, val, color }) => (
             <div key={label} className="bg-white rounded-2xl p-3 border border-gray-100 text-center">
               <p className={cn("text-xl font-bold leading-tight", color)}>{val}</p>
@@ -680,8 +682,8 @@ export default function AdminExamsPage() {
       {sortedResults.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
           <FileEdit className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm font-semibold text-gray-500">No marks entered yet</p>
-          <p className="text-xs text-gray-400 mt-1">Use the &quot;Enter Marks&quot; button above</p>
+          <p className="text-sm font-semibold text-gray-500">{t("adminPages", "noMarksYet", lang)}</p>
+          <p className="text-xs text-gray-400 mt-1">{t("adminPages", "useEnterMarks", lang)}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -722,7 +724,7 @@ export default function AdminExamsPage() {
                 {/* Progress bar */}
                 <div className="px-4 pb-3">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-400">Score</span>
+                    <span className="text-xs text-gray-400">{t("adminPages", "scoreLabel", lang)}</span>
                     <span className="text-xs font-semibold text-gray-600">{pct}%</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -758,7 +760,7 @@ export default function AdminExamsPage() {
                   <div className="px-4 pb-4">
                     <div className="bg-amber-50/50 rounded-xl p-2">
                       <p className="text-xs text-amber-700 font-semibold text-center mb-1 flex items-center justify-center gap-1">
-                        <Star className="w-3 h-3" />Performance Radar
+                        <Star className="w-3 h-3" />{t("adminPages", "performanceRadar", lang)}
                       </p>
                       <ResponsiveContainer width="100%" height={140}>
                         <RadarChart data={radarData} outerRadius={50}>
@@ -794,7 +796,7 @@ export default function AdminExamsPage() {
               </div>
               <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
                 <div>
-                  <h2 className="font-bold text-gray-900">Mark Entry</h2>
+                  <h2 className="font-bold text-gray-900">{t("adminPages", "markEntry", lang)}</h2>
                   <p className="text-xs text-gray-400 mt-0.5">{markEntry.name} · Max {markEntry.totalMarks} per subject</p>
                 </div>
                 <button onClick={() => setMarkEntry(null)}
@@ -841,7 +843,7 @@ export default function AdminExamsPage() {
                 <button onClick={() => saveMarks(markEntry)}
                   className="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl text-base flex items-center justify-center gap-2"
                 >
-                  <CheckCircle className="w-5 h-5" />Save All Marks
+                  <CheckCircle className="w-5 h-5" />{t("adminPages", "saveAllMarks", lang)}
                 </button>
               </div>
             </motion.div>

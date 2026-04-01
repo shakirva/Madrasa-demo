@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { feesRecords, students } from "@/mock-data";
@@ -8,7 +9,7 @@ function getStudent(id: string) {
   return students.find((s) => s.id === id);
 }
 
-export default function AdminFeesPaidPage() {
+function PaidContent() {
   const sp = useSearchParams();
   const month = sp?.get("month") || "";
   const cls = sp?.get("class") || "All Classes";
@@ -45,5 +46,13 @@ export default function AdminFeesPaidPage() {
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function AdminFeesPaidPage() {
+  return (
+    <Suspense fallback={<DashboardLayout><div className="p-8 text-center text-gray-400">Loading…</div></DashboardLayout>}>
+      <PaidContent />
+    </Suspense>
   );
 }

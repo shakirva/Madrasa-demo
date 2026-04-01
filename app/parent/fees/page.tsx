@@ -7,10 +7,13 @@ import { feesRecords, students } from "@/mock-data";
 import { motion, AnimatePresence } from "framer-motion";
 import { QrCode, Upload, Receipt, X, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 const myChildren = students.filter((s) => ["S001", "S006"].includes(s.id));
 
 export default function ParentFeesPage() {
+  const { lang } = useLanguageStore();
   const [activeChild, setActiveChild] = useState(myChildren[0].id);
   const [showQR, setShowQR] = useState(false);
   const [showReceipt, setShowReceipt] = useState<string | null>(null);
@@ -27,9 +30,9 @@ export default function ParentFeesPage() {
 
   return (
     <DashboardLayout>
-      <PageHeader title="Fees" subtitle={child.name} back action={
+      <PageHeader title={t("parentPages", "feesTitle", lang)} subtitle={child.name} back action={
         <button onClick={() => setShowQR(true)} className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold">
-          <QrCode className="w-4 h-4" />Pay Now
+          <QrCode className="w-4 h-4" />{t("parentPages", "payNow", lang)}
         </button>
       } />
 
@@ -46,16 +49,16 @@ export default function ParentFeesPage() {
       {/* Summary */}
       <div className="grid grid-cols-2 gap-3 mb-5">
         <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
-          <p className="text-xs text-emerald-600 mb-1">Total Paid</p>
+          <p className="text-xs text-emerald-600 mb-1">{t("parentPages", "totalPaid", lang)}</p>
           <p className="text-2xl font-bold text-emerald-700">₹{totalPaid.toLocaleString()}</p>
         </div>
         <div className="bg-red-50 rounded-2xl p-4 border border-red-100">
-          <p className="text-xs text-red-500 mb-1">Pending</p>
+          <p className="text-xs text-red-500 mb-1">{t("common", "pending", lang)}</p>
           <p className="text-2xl font-bold text-red-600">₹{totalPending.toLocaleString()}</p>
         </div>
       </div>
 
-      <SectionHeader title="Monthly Fees" className="mb-3" />
+      <SectionHeader title={t("parentPages", "monthlyFees", lang)} className="mb-3" />
       <div className="space-y-3">
         {childFees.map((fee, i) => (
           <motion.div key={fee.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
@@ -64,7 +67,7 @@ export default function ParentFeesPage() {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="font-semibold text-gray-900">{fee.month}</p>
-                <p className="text-xs text-gray-400">Fee for {fee.month}</p>
+                <p className="text-xs text-gray-400">{t("parentPages", "feeFor", lang)} {fee.month}</p>
               </div>
               <div className="text-right">
                 <p className="font-bold text-gray-800">₹{fee.amount.toLocaleString()}</p>
@@ -76,7 +79,7 @@ export default function ParentFeesPage() {
               <button onClick={() => setShowReceipt(fee.id)}
                 className="w-full py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold flex items-center justify-center gap-2"
               >
-                <Receipt className="w-4 h-4" />View Receipt
+                <Receipt className="w-4 h-4" />{t("parentPages", "viewReceipt", lang)}
               </button>
             )}
 
@@ -85,14 +88,14 @@ export default function ParentFeesPage() {
                 <button onClick={() => setShowQR(true)}
                   className="w-full py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold flex items-center justify-center gap-2"
                 >
-                  <QrCode className="w-4 h-4" />Pay via UPI / QR
+                  <QrCode className="w-4 h-4" />{t("parentPages", "payViaUPI", lang)}
                 </button>
                 <button onClick={() => { setUploadedFor(fee.id); setTimeout(() => setUploadedFor(null), 2500); }}
                   className="w-full py-2 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold flex items-center justify-center gap-2"
                 >
                   {uploadedFor === fee.id
-                    ? <><CheckCircle className="w-4 h-4 text-emerald-600" /> Proof sent to admin!</>
-                    : <><Upload className="w-4 h-4" />Upload Payment Proof</>
+                    ? <><CheckCircle className="w-4 h-4 text-emerald-600" /> {t("parentPages", "proofSent", lang)}</>
+                    : <><Upload className="w-4 h-4" />{t("parentPages", "uploadProof", lang)}</>
                   }
                 </button>
               </div>
@@ -111,7 +114,7 @@ export default function ParentFeesPage() {
               className="bg-white rounded-3xl p-6 w-full max-w-sm"
             >
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-gray-900 text-lg">Pay via QR / UPI</h3>
+                <h3 className="font-bold text-gray-900 text-lg">{t("parentPages", "qrPayment", lang)}</h3>
                 <button onClick={() => setShowQR(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                   <X className="w-4 h-4" />
                 </button>
@@ -124,7 +127,7 @@ export default function ParentFeesPage() {
                 </div>
               </div>
               <p className="text-center text-sm text-gray-600 mb-1">UPI ID: <strong>madrasa@upi</strong></p>
-              <p className="text-center text-xs text-gray-400">Scan with any UPI app (GPay, PhonePe, Paytm)</p>
+              <p className="text-center text-xs text-gray-400">{t("parentPages", "scanWithUPI", lang)}</p>
             </motion.div>
           </motion.div>
         )}
@@ -142,22 +145,22 @@ export default function ParentFeesPage() {
                 className="bg-white rounded-3xl p-6 w-full max-w-sm"
               >
                 <div className="flex justify-between items-center mb-5">
-                  <h3 className="font-bold text-gray-900 text-lg">Receipt</h3>
+                  <h3 className="font-bold text-gray-900 text-lg">{t("parentPages", "receipt", lang)}</h3>
                   <button onClick={() => setShowReceipt(null)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
                 <div className="bg-emerald-50 rounded-2xl p-5 text-center mb-4">
                   <CheckCircle className="w-10 h-10 text-emerald-600 mx-auto mb-2" />
-                  <p className="text-emerald-700 font-bold text-lg">Payment Confirmed</p>
+                  <p className="text-emerald-700 font-bold text-lg">{t("parentPages", "paymentConfirmed", lang)}</p>
                   <p className="text-3xl font-bold text-gray-900 mt-2">₹{fee.amount.toLocaleString()}</p>
                 </div>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-500">Student</span><span className="font-semibold">{child.name}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Month</span><span className="font-semibold">{fee.month}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Class</span><span className="font-semibold">{child.class}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Receipt No.</span><span className="font-semibold">REC-{fee.id}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Status</span><StatusBadge status="paid" size="sm" /></div>
+                  <div className="flex justify-between"><span className="text-gray-500">{t("parentPages", "studentLabel", lang)}</span><span className="font-semibold">{child.name}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">{t("parentPages", "monthLabel", lang)}</span><span className="font-semibold">{fee.month}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">{t("parentPages", "classLabel", lang)}</span><span className="font-semibold">{child.class}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">{t("parentPages", "receiptNo", lang)}</span><span className="font-semibold">REC-{fee.id}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">{t("parentPages", "statusLabel", lang)}</span><StatusBadge status="paid" size="sm" /></div>
                 </div>
               </motion.div>
             </motion.div>

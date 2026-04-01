@@ -2,6 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 const EVENTS = [
   "Samastha Dhinam",
@@ -72,6 +74,7 @@ function escapeXml(unsafe = "") {
 }
 
 export default function AdminPostersPage() {
+  const { lang } = useLanguageStore();
   const [eventType, setEventType] = useState(EVENTS[0]);
   const [title, setTitle] = useState("Special Program");
   const [date, setDate] = useState("");
@@ -182,15 +185,15 @@ export default function AdminPostersPage() {
 
   return (
     <DashboardLayout>
-      <PageHeader title="Posters" subtitle="Create and manage event posters" />
+      <PageHeader title={t("adminPages", "postersTitle", lang)} subtitle={t("adminPages", "postersSubtitle", lang)} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
         <div className="col-span-2 bg-white rounded-2xl p-4 border border-gray-100">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Create Poster</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">{t("adminPages", "createPoster", lang)}</h3>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-500">Event</label>
+              <label className="block text-xs text-gray-500">{t("adminPages", "event", lang)}</label>
               <select value={eventType} onChange={(e) => setEventType(e.target.value)} className="w-full p-2 rounded border mt-1">
                 {EVENTS.map((ev) => (
                   <option key={ev} value={ev}>{ev}</option>
@@ -199,70 +202,70 @@ export default function AdminPostersPage() {
             </div>
 
             <div>
-              <label className="block text-xs text-gray-500">Template</label>
+              <label className="block text-xs text-gray-500">{t("adminPages", "template", lang)}</label>
               <select value={template} onChange={(e) => setTemplate(e.target.value)} className="w-full p-2 rounded border mt-1">
-                <option value="top">Top Image</option>
-                <option value="center">Centered Text</option>
-                <option value="minimal">Minimal</option>
+                <option value="top">{t("adminPages", "topImage", lang)}</option>
+                <option value="center">{t("adminPages", "centeredText", lang)}</option>
+                <option value="minimal">{t("adminPages", "minimal", lang)}</option>
               </select>
             </div>
 
             <div className="col-span-1 lg:col-span-2">
-              <label className="block text-xs text-gray-500">Title</label>
+              <label className="block text-xs text-gray-500">{t("adminPages", "titleField", lang)}</label>
               <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full p-2 rounded border mt-1" />
             </div>
 
             <div>
-              <label className="block text-xs text-gray-500">Date</label>
+              <label className="block text-xs text-gray-500">{t("adminPages", "dateField", lang)}</label>
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full p-2 rounded border mt-1" />
             </div>
 
             <div>
-              <label className="block text-xs text-gray-500">Background Color</label>
+              <label className="block text-xs text-gray-500">{t("adminPages", "bgColor", lang)}</label>
               <input type="color" value={bgColor} onChange={(e) => setBgColor(e.target.value)} className="w-full h-10 p-1 rounded border mt-1" />
             </div>
 
             <div className="col-span-1 lg:col-span-2">
-              <label className="block text-xs text-gray-500">Short Description</label>
+              <label className="block text-xs text-gray-500">{t("adminPages", "shortDesc", lang)}</label>
               <textarea value={desc} onChange={(e) => setDesc(e.target.value)} className="w-full p-2 rounded border mt-1" rows={3} />
             </div>
 
             <div>
-              <label className="block text-xs text-gray-500">Upload Image (optional)</label>
+              <label className="block text-xs text-gray-500">{t("adminPages", "uploadImage", lang)}</label>
               <input type="file" accept="image/*" onChange={(e) => handleUpload(e.target.files?.[0])} className="w-full mt-1" />
-              {imageData && <div className="mt-2 text-xs text-gray-500">Image selected</div>}
+              {imageData && <div className="mt-2 text-xs text-gray-500">{t("adminPages", "imageSelected", lang)}</div>}
             </div>
 
             <div className="flex items-end gap-2">
-              <button onClick={handleSave} className="px-4 py-2 bg-emerald-600 text-white rounded">{editingId ? "Update" : "Save Poster"}</button>
+              <button onClick={handleSave} className="px-4 py-2 bg-emerald-600 text-white rounded">{editingId ? t("adminPages", "updatePoster", lang) : t("adminPages", "savePoster", lang)}</button>
               <button onClick={() => {
                 setEventType(EVENTS[0]); setTitle(""); setDate(""); setDesc(""); setBgColor("#ef4444"); setTemplate("top"); setImageData(null); setEditingId(null);
-              }} className="px-4 py-2 bg-gray-100 rounded">Clear</button>
-              <div className="ml-2 text-sm text-emerald-600">{saved ? "Saved" : ""}</div>
+              }} className="px-4 py-2 bg-gray-100 rounded">{t("adminPages", "clearPoster", lang)}</button>
+              <div className="ml-2 text-sm text-emerald-600">{saved ? t("adminPages", "saved", lang) : ""}</div>
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-2xl p-4 border border-gray-100">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Preview</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">{t("adminPages", "preview", lang)}</h3>
           <div ref={previewRef} className="w-full h-auto">
             <div className="w-full overflow-hidden rounded-lg shadow" style={{ width: "100%" }}>
               <div dangerouslySetInnerHTML={{ __html: createSVG(previewPoster, 900, 470) }} />
             </div>
 
             <div className="flex gap-2 mt-3">
-              <button onClick={() => exportPNG(previewPoster)} className="px-4 py-2 bg-blue-600 text-white rounded">Export PNG</button>
+              <button onClick={() => exportPNG(previewPoster)} className="px-4 py-2 bg-blue-600 text-white rounded">{t("adminPages", "exportPNG", lang)}</button>
               {list.length > 0 && (
-                <button onClick={() => exportPNG(list[0])} className="px-4 py-2 bg-gray-100 rounded">Export Latest</button>
+                <button onClick={() => exportPNG(list[0])} className="px-4 py-2 bg-gray-100 rounded">{t("adminPages", "exportLatest", lang)}</button>
               )}
             </div>
           </div>
         </div>
 
         <div className="col-span-3 bg-white rounded-2xl p-4 border border-gray-100">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Saved Posters</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">{t("adminPages", "savedPosters", lang)}</h3>
           <div className="grid gap-3">
-            {list.length === 0 && <div className="text-sm text-gray-500">No posters saved yet.</div>}
+            {list.length === 0 && <div className="text-sm text-gray-500">{t("adminPages", "noPosters", lang)}</div>}
             {list.map((p) => (
               <div key={p.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-100">
                 <div className="flex items-center gap-3">
@@ -275,9 +278,9 @@ export default function AdminPostersPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => handleEdit(p.id)} className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded text-sm">Edit</button>
-                  <button onClick={() => exportPNG(p)} className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-sm">Export</button>
-                  <button onClick={() => handleDelete(p.id)} className="px-3 py-1.5 bg-red-50 text-red-600 rounded text-sm">Delete</button>
+                  <button onClick={() => handleEdit(p.id)} className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded text-sm">{t("adminPages", "editPoster", lang)}</button>
+                  <button onClick={() => exportPNG(p)} className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-sm">{t("adminPages", "exportBtn", lang)}</button>
+                  <button onClick={() => handleDelete(p.id)} className="px-3 py-1.5 bg-red-50 text-red-600 rounded text-sm">{t("adminPages", "deletePoster", lang)}</button>
                 </div>
               </div>
             ))}

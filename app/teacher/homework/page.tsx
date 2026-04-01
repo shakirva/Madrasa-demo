@@ -10,6 +10,8 @@ import {
   BookMarked, Star, Send, BarChart2, Bell, Trash2, Edit2, X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguageStore } from "@/store/language";
+import { t as tr } from "@/lib/i18n";
 
 type HWStatus = "green" | "yellow" | "red" | "returned";
 type TabType = "all" | "daily" | "long" | "overdue";
@@ -32,6 +34,7 @@ const subjectIcon: Record<string, string> = {
 };
 
 export default function TeacherHomeworkPage() {
+  const { lang } = useLanguageStore();
   const [showCreate, setShowCreate]   = useState(false);
   const [hwType, setHwType]           = useState<"daily" | "long">("daily");
   const [activeTab, setActiveTab]     = useState<TabType>("all");
@@ -107,8 +110,8 @@ export default function TeacherHomeworkPage() {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Homework"
-        subtitle="Assign, track & verify student submissions"
+        title={tr("teacherPages", "homeworkTitle", lang)}
+        subtitle={tr("teacherPages", "homeworkSub", lang)}
         icon={BookOpen}
         back
         backHref="/teacher"
@@ -117,7 +120,7 @@ export default function TeacherHomeworkPage() {
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-700 active:scale-95 transition-all shadow-sm shadow-emerald-200"
           >
-            <Plus className="w-4 h-4" /> Assign
+            <Plus className="w-4 h-4" /> {tr("common", "add", lang)}
           </button>
         }
       />
@@ -130,7 +133,7 @@ export default function TeacherHomeworkPage() {
             className="fixed top-4 left-1/2 -translate-x-1/2 z-100 bg-emerald-700 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-sm font-medium"
           >
             <CheckCircle2 className="w-4 h-4" />
-            {showNotifyId === "new-hw" ? "Homework assigned! Parents notified 📲" : "Homework verified & parent notified ✅"}
+            {showNotifyId === "new-hw" ? `${tr("teacherPages", "hwAssignedNotif", lang)} 📲` : `${tr("teacherPages", "hwVerifiedNotif", lang)} ✅`}
           </motion.div>
         )}
       </AnimatePresence>
@@ -138,10 +141,10 @@ export default function TeacherHomeworkPage() {
       {/* ── Stats row ────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Completed",  value: stats.completed, icon: CheckCircle2,   color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Pending",    value: stats.pending,   icon: Clock,          color: "text-amber-600",   bg: "bg-amber-50" },
-          { label: "Missing",    value: stats.missing,   icon: AlertTriangle,  color: "text-red-500",     bg: "bg-red-50" },
-          { label: "Completion", value: `${stats.pct}%`, icon: TrendingUp,     color: "text-blue-600",    bg: "bg-blue-50" },
+          { label: tr("teacherPages", "completedStat", lang),  value: stats.completed, icon: CheckCircle2,   color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: tr("teacherPages", "pendingStat", lang),    value: stats.pending,   icon: Clock,          color: "text-amber-600",   bg: "bg-amber-50" },
+          { label: tr("teacherPages", "missingStat", lang),    value: stats.missing,   icon: AlertTriangle,  color: "text-red-500",     bg: "bg-red-50" },
+          { label: tr("teacherPages", "completionStat", lang), value: `${stats.pct}%`, icon: TrendingUp,     color: "text-blue-600",    bg: "bg-blue-50" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <motion.div key={label} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
             className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3"
@@ -161,7 +164,7 @@ export default function TeacherHomeworkPage() {
       <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-5">
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
-            <BarChart2 className="w-4 h-4 text-emerald-600" /> Overall Submission Rate
+            <BarChart2 className="w-4 h-4 text-emerald-600" /> {tr("teacherPages", "overallSubmission", lang)}
           </p>
           <span className="text-sm font-bold text-emerald-700">{stats.pct}%</span>
         </div>
@@ -172,10 +175,10 @@ export default function TeacherHomeworkPage() {
           />
         </div>
         <div className="flex justify-between mt-2">
-          <span className="text-xs text-gray-400">{stats.completed} submitted out of {stats.total}</span>
+          <span className="text-xs text-gray-400">{stats.completed} {tr("teacherPages", "submittedOutOf", lang)} {stats.total}</span>
           {overdueCount > 0 && (
             <span className="text-xs text-red-500 font-medium flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" /> {overdueCount} overdue
+              <AlertTriangle className="w-3 h-3" /> {overdueCount} {tr("teacherPages", "overdue", lang)}
             </span>
           )}
         </div>
@@ -187,7 +190,7 @@ export default function TeacherHomeworkPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search homework..."
+            placeholder={tr("teacherPages", "searchHomework", lang)}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
         </div>
@@ -195,7 +198,7 @@ export default function TeacherHomeworkPage() {
           onClick={() => setShowFilters((v) => !v)}
           className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-colors ${showFilters ? "bg-emerald-600 text-white border-emerald-600" : "bg-white border-gray-200 text-gray-600"}`}
         >
-          <Filter className="w-4 h-4" /> Filter
+          <Filter className="w-4 h-4" /> {tr("teacherPages", "filterBtn", lang)}
         </button>
       </div>
 
@@ -210,7 +213,7 @@ export default function TeacherHomeworkPage() {
                 <button key={sub} onClick={() => setSubjectFilter(sub)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${subjectFilter === sub ? "bg-emerald-600 text-white border-emerald-600" : "bg-white text-gray-600 border-gray-200 hover:border-emerald-400"}`}
                 >
-                  {sub === "all" ? "All Subjects" : `${subjectIcon[sub]} ${sub}`}
+                  {sub === "all" ? tr("teacherPages", "allSubjects", lang) : `${subjectIcon[sub]} ${sub}`}
                 </button>
               ))}
             </div>
@@ -221,10 +224,10 @@ export default function TeacherHomeworkPage() {
       {/* ── Tabs ─────────────────────────────────────────────── */}
       <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-5">
         {([
-          { key: "all",    label: "All",       count: homeworkList.length },
-          { key: "daily",  label: "Daily",     count: homeworkList.filter((h) => h.type === "daily").length },
-          { key: "long",   label: "Long-term", count: homeworkList.filter((h) => h.type === "long").length },
-          { key: "overdue",label: "Overdue",   count: overdueCount },
+          { key: "all",    label: tr("teacherPages", "allTab", lang),       count: homeworkList.length },
+          { key: "daily",  label: tr("teacherPages", "dailyTab", lang),     count: homeworkList.filter((h) => h.type === "daily").length },
+          { key: "long",   label: tr("teacherPages", "longTermTab", lang), count: homeworkList.filter((h) => h.type === "long").length },
+          { key: "overdue",label: tr("teacherPages", "overdueTab", lang),   count: overdueCount },
         ] as { key: TabType; label: string; count: number }[]).map(({ key, label, count }) => (
           <button key={key} onClick={() => setActiveTab(key)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all ${activeTab === key ? "bg-white text-emerald-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
@@ -243,7 +246,7 @@ export default function TeacherHomeworkPage() {
       {filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <BookMarked className="w-10 h-10 mx-auto mb-2 opacity-40" />
-          <p className="text-sm">No homework found</p>
+          <p className="text-sm">{tr("teacherPages", "noHwFound", lang)}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -274,15 +277,15 @@ export default function TeacherHomeworkPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${hw.type === "daily" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-purple-50 text-purple-700 border-purple-200"}`}>
-                          {hw.type === "daily" ? "Daily" : "Long Term"}
+                          {hw.type === "daily" ? tr("teacherPages", "daily", lang) : tr("teacherPages", "longTerm", lang)}
                         </span>
                         <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${priorityConfig[priority].bg} ${priorityConfig[priority].color}`}>
                           {priority === "high" && <Star className="w-2.5 h-2.5 inline mr-0.5" />}
-                          {priorityConfig[priority].label}
+                          {priority === "high" ? tr("teacherPages", "highPriority", lang) : priority === "medium" ? tr("teacherPages", "mediumPriority", lang) : tr("teacherPages", "lowPriority", lang)}
                         </span>
                         {overdue && (
                           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200 flex items-center gap-1">
-                            <AlertTriangle className="w-2.5 h-2.5" /> Overdue
+                            <AlertTriangle className="w-2.5 h-2.5" /> {tr("teacherPages", "overdueLabel", lang)}
                           </span>
                         )}
                       </div>
@@ -291,8 +294,8 @@ export default function TeacherHomeworkPage() {
                       <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{hw.description}</p>
 
                       <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                        <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Due {hw.dueDate}</span>
-                        <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {total} students</span>
+                        <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {tr("teacherPages", "dueLabel", lang)} {hw.dueDate}</span>
+                        <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {total} {tr("teacherPages", "studentsSmall", lang)}</span>
                         <span className="flex items-center gap-1 font-medium text-gray-700">{hw.subject}</span>
                       </div>
                     </div>
@@ -320,9 +323,9 @@ export default function TeacherHomeworkPage() {
                   <div className="mt-3">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-3 text-xs">
-                        <span className="flex items-center gap-1 text-emerald-600 font-medium"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />{done} done</span>
-                        <span className="flex items-center gap-1 text-amber-600"><span className="w-1.5 h-1.5 rounded-full bg-amber-400" />{pend} pending</span>
-                        <span className="flex items-center gap-1 text-red-500"><span className="w-1.5 h-1.5 rounded-full bg-red-500" />{miss} missing</span>
+                        <span className="flex items-center gap-1 text-emerald-600 font-medium"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />{done} {tr("teacherPages", "doneCount", lang)}</span>
+                        <span className="flex items-center gap-1 text-amber-600"><span className="w-1.5 h-1.5 rounded-full bg-amber-400" />{pend} {tr("teacherPages", "pendingCount", lang)}</span>
+                        <span className="flex items-center gap-1 text-red-500"><span className="w-1.5 h-1.5 rounded-full bg-red-500" />{miss} {tr("teacherPages", "missingCount", lang)}</span>
                       </div>
                       <span className="text-xs font-bold text-gray-700">{pct}%</span>
                     </div>
@@ -343,9 +346,9 @@ export default function TeacherHomeworkPage() {
                     >
                       <div className="border-t border-gray-50 bg-gray-50/50 px-4 pt-3 pb-4">
                         <div className="flex items-center justify-between mb-3">
-                          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Student Submissions</p>
+                          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{tr("teacherPages", "studentSubmissions", lang)}</p>
                           <button className="flex items-center gap-1 text-xs text-emerald-600 font-medium hover:underline">
-                            <Bell className="w-3 h-3" /> Remind All Missing
+                            <Bell className="w-3 h-3" /> {tr("teacherPages", "remindAllMissing", lang)}
                           </button>
                         </div>
 
@@ -418,7 +421,7 @@ export default function TeacherHomeworkPage() {
 
                         {/* Description block */}
                         <div className="mt-3 bg-white rounded-xl p-3 border border-gray-100">
-                          <p className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">Instructions</p>
+                          <p className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">{tr("teacherPages", "hwInstructionsLabel", lang)}</p>
                           <p className="text-sm text-gray-700">{hw.description}</p>
                         </div>
                       </div>
@@ -446,8 +449,8 @@ export default function TeacherHomeworkPage() {
               {/* Modal header */}
               <div className="sticky top-0 bg-white rounded-t-3xl px-6 pt-6 pb-4 border-b border-gray-100 flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-gray-900 text-lg">Assign Homework</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">Fill in details and notify parents automatically</p>
+                  <h2 className="font-bold text-gray-900 text-lg">{tr("teacherPages", "assignHomework", lang)}</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">{tr("teacherPages", "hwFillDetails", lang)}</p>
                 </div>
                 <button onClick={() => setShowCreate(false)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 transition-colors">
                   <X className="w-5 h-5" />
@@ -458,16 +461,16 @@ export default function TeacherHomeworkPage() {
                 {/* Type selector */}
                 <div className="flex gap-2 bg-gray-100 rounded-xl p-1">
                   <button onClick={() => setHwType("daily")} className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${hwType === "daily" ? "bg-white text-emerald-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-                    📅 Daily
+                    📅 {tr("teacherPages", "daily", lang)}
                   </button>
                   <button onClick={() => setHwType("long")} className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${hwType === "long" ? "bg-white text-purple-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-                    📌 Long Term
+                    📌 {tr("teacherPages", "longTerm", lang)}
                   </button>
                 </div>
 
                 {/* Title */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Title <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "hwTitleLabel", lang)} <span className="text-red-500">*</span></label>
                   <input
                     value={formTitle} onChange={(e) => setFormTitle(e.target.value)}
                     placeholder="e.g. Memorize Surah Al-Fatiha"
@@ -477,7 +480,7 @@ export default function TeacherHomeworkPage() {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Instructions</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "hwInstructionsLabel", lang)}</label>
                   <textarea
                     value={formDesc} onChange={(e) => setFormDesc(e.target.value)}
                     placeholder="Add detailed instructions for students..."
@@ -489,7 +492,7 @@ export default function TeacherHomeworkPage() {
                 {/* Subject + Class row */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Subject</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "subjectField", lang)}</label>
                     <select value={formSubject} onChange={(e) => setFormSubject(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none text-sm"
                     >
@@ -497,7 +500,7 @@ export default function TeacherHomeworkPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Class</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "hwClassLabel", lang)}</label>
                     <select value={formClass} onChange={(e) => setFormClass(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none text-sm"
                     >
@@ -508,14 +511,14 @@ export default function TeacherHomeworkPage() {
 
                 {/* Priority */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Priority</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">{tr("teacherPages", "priorityField", lang)}</label>
                   <div className="flex gap-2">
                     {(["high", "medium", "low"] as PriorityType[]).map((p) => (
                       <button key={p} onClick={() => setFormPriority(p)}
                         className={`flex-1 py-2 rounded-xl border text-xs font-bold capitalize transition-all ${formPriority === p ? `${priorityConfig[p].bg} ${priorityConfig[p].color} border-current` : "bg-white text-gray-400 border-gray-200"}`}
                       >
                         {p === "high" && "🔴 "}{p === "medium" && "🟡 "}{p === "low" && "🟢 "}
-                        {priorityConfig[p].label}
+                        {p === "high" ? tr("teacherPages", "highPriority", lang) : p === "medium" ? tr("teacherPages", "mediumPriority", lang) : tr("teacherPages", "lowPriority", lang)}
                       </button>
                     ))}
                   </div>
@@ -525,7 +528,7 @@ export default function TeacherHomeworkPage() {
                 {hwType === "long" && (
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                      Due Date <span className="text-red-500">*</span>
+                      {tr("teacherPages", "dueDateField", lang)} <span className="text-red-500">*</span>
                     </label>
                     <input type="date" value={formDue} onChange={(e) => setFormDue(e.target.value)}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
@@ -536,7 +539,7 @@ export default function TeacherHomeworkPage() {
                 {/* Notify toggle info */}
                 <div className="flex items-center gap-3 bg-emerald-50 rounded-xl p-3 border border-emerald-100">
                   <Bell className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <p className="text-xs text-emerald-700">Parents will be notified automatically when homework is assigned.</p>
+                  <p className="text-xs text-emerald-700">{tr("teacherPages", "hwParentAutoNotif", lang)}</p>
                 </div>
 
                 {/* Actions */}
@@ -546,10 +549,10 @@ export default function TeacherHomeworkPage() {
                     disabled={!formTitle}
                     className="flex-1 bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 rounded-xl text-sm font-bold hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2"
                   >
-                    <Send className="w-4 h-4" /> Assign & Notify
+                    <Send className="w-4 h-4" /> {tr("teacherPages", "hwAssignNotify", lang)}
                   </button>
                   <button onClick={() => setShowCreate(false)} className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors">
-                    Cancel
+                    {tr("teacherPages", "hwCancelBtn", lang)}
                   </button>
                 </div>
               </div>

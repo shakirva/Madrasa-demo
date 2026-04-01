@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 // ── Types ────────────────────────────────────────────────────
 type PrayerStatus = "jama" | "individual" | "missed";
@@ -106,6 +108,7 @@ const MY_CHILDREN_IDS = ["S001", "S006"];
 const TODAY = new Date().toISOString().split("T")[0]; // "2026-03-17"
 
 export default function ParentIbadahPage() {
+  const { lang } = useLanguageStore();
   const myChildren = students.filter((s) => MY_CHILDREN_IDS.includes(s.id));
   const [activeChild, setActiveChild] = useState(myChildren[0].id);
   const [activeSection, setActiveSection] = useState<Section>("prayers");
@@ -205,8 +208,8 @@ export default function ParentIbadahPage() {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Ibadah Checklist"
-        subtitle={`Today · ${new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`}
+        title={t("parentPages", "ibadahChecklist", lang)}
+        subtitle={`${t("common", "today", lang)} · ${new Date().toLocaleDateString(lang === "ml" ? "ml-IN" : "en-GB", { day: "numeric", month: "long", year: "numeric" })}`}
         icon={Moon}
         back
         backHref="/parent"
@@ -219,7 +222,7 @@ export default function ParentIbadahPage() {
             initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
             className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-emerald-700 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-sm font-medium"
           >
-            <CheckCircle2 className="w-4 h-4" /> Ibadah record submitted to teacher!
+            <CheckCircle2 className="w-4 h-4" /> {t("parentPages", "ibadahSubmitted", lang)}
           </motion.div>
         )}
       </AnimatePresence>
@@ -256,11 +259,11 @@ export default function ParentIbadahPage() {
           </div>
           {fardMissedToday > 0 && (
             <span className="text-[10px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full font-bold flex items-center gap-0.5">
-              <AlertTriangle className="w-2.5 h-2.5" />{fardMissedToday} missed
+              <AlertTriangle className="w-2.5 h-2.5" />{fardMissedToday} {t("parentPages", "missed", lang)}
             </span>
           )}
           {fardMissedToday === 0 && scoreToday > 0 && (
-            <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold">All Fard ✓</span>
+            <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold">{t("parentPages", "allFard", lang)}</span>
           )}
         </div>
       </div>
@@ -271,13 +274,13 @@ export default function ParentIbadahPage() {
           onClick={() => setShowHistory(false)}
           className={cn("flex-1 py-2 rounded-lg text-sm font-semibold transition-colors", !showHistory ? "bg-emerald-600 text-white" : "text-gray-500")}
         >
-          Today&apos;s Checklist
+          {t("parentPages", "todayChecklist", lang)}
         </button>
         <button
           onClick={() => setShowHistory(true)}
           className={cn("flex-1 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1.5", showHistory ? "bg-emerald-600 text-white" : "text-gray-500")}
         >
-          <Calendar className="w-3.5 h-3.5" /> History
+          <Calendar className="w-3.5 h-3.5" /> {t("parentPages", "historyLabel", lang)}
         </button>
       </div>
 
@@ -303,30 +306,30 @@ export default function ParentIbadahPage() {
           {/* Legend */}
           {activeSection === "prayers" && (
             <div className="flex gap-3 mb-4 flex-wrap">
-              {[["bg-emerald-500", "Jama'a"], ["bg-amber-400", "Individual"], ["bg-red-400", "Missed"]].map(([bg, lbl]) => (
-                <div key={lbl} className="flex items-center gap-1.5 bg-white rounded-full px-3 py-1.5 border border-gray-100">
+              {[[`bg-emerald-500`, "jama"], [`bg-amber-400`, "individual"], [`bg-red-400`, "missedLabel"]].map(([bg, key]) => (
+                <div key={key} className="flex items-center gap-1.5 bg-white rounded-full px-3 py-1.5 border border-gray-100">
                   <span className={`w-2 h-2 rounded-full ${bg}`} />
-                  <span className="text-xs text-gray-600">{lbl}</span>
+                  <span className="text-xs text-gray-600">{t("parentPages", key as "jama" | "individual" | "missedLabel", lang)}</span>
                 </div>
               ))}
-              <span className="text-xs text-gray-400 self-center ml-auto hidden sm:block">Tap to cycle</span>
+              <span className="text-xs text-gray-400 self-center ml-auto hidden sm:block">{t("parentPages", "tapToCycle", lang)}</span>
             </div>
           )}
           {(activeSection === "sunnah" || activeSection === "quran" || activeSection === "akhlaq") && (
             <div className="flex gap-3 mb-4 flex-wrap">
-              {[["bg-emerald-500", "Done"], ["bg-amber-400", "Partial"], ["bg-gray-200", "Not Done"]].map(([bg, lbl]) => (
-                <div key={lbl} className="flex items-center gap-1.5 bg-white rounded-full px-3 py-1.5 border border-gray-100">
+              {[[`bg-emerald-500`, "done"], [`bg-amber-400`, "partial"], [`bg-gray-200`, "notDone"]].map(([bg, key]) => (
+                <div key={key} className="flex items-center gap-1.5 bg-white rounded-full px-3 py-1.5 border border-gray-100">
                   <span className={`w-2 h-2 rounded-full ${bg}`} />
-                  <span className="text-xs text-gray-600">{lbl}</span>
+                  <span className="text-xs text-gray-600">{t("parentPages", key as "done" | "partial" | "notDone", lang)}</span>
                 </div>
               ))}
             </div>
           )}
           {activeSection === "zikr" && (
             <div className="flex gap-2 mb-4 flex-wrap">
-              {[["bg-gray-100 text-gray-700", "None"], ["bg-purple-100 text-purple-700", "~⅓"], ["bg-purple-400 text-white", "~⅔"], ["bg-purple-600 text-white", "Full"]].map(([cls, lbl]) => (
+              {[["bg-gray-100 text-gray-700", "none"], ["bg-purple-100 text-purple-700", "~⅓"], ["bg-purple-400 text-white", "~⅔"], ["bg-purple-600 text-white", "full"]].map(([cls, lbl]) => (
                 <div key={lbl} className={`flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-100 ${cls}`}>
-                  <span className="text-xs font-medium">{lbl}</span>
+                  <span className="text-xs font-medium">{lbl === "none" ? t("parentPages", "none", lang) : lbl === "full" ? t("parentPages", "full", lang) : lbl}</span>
                 </div>
               ))}
             </div>
@@ -335,7 +338,7 @@ export default function ParentIbadahPage() {
           {/* ── FARD PRAYERS ──────────────────────────────── */}
           {activeSection === "prayers" && (
             <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">5 Daily Prayers</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">{t("parentPages", "fiveDailyPrayers", lang)}</p>
               <div className="flex gap-2">
                 {FARD_PRAYERS.map((p) => (
                   <button
@@ -354,7 +357,7 @@ export default function ParentIbadahPage() {
           {/* ── SUNNAH PRAYERS ────────────────────────────── */}
           {activeSection === "sunnah" && (
             <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Voluntary Prayers</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">{t("parentPages", "sunnahPrayers", lang)}</p>
               <div className="grid grid-cols-2 gap-2">
                 {SUNNAH_PRAYERS.map(({ key, label, arabic, time }) => {
                   const val = rec[key as keyof TodayRecord] as TriStatus;
@@ -383,7 +386,7 @@ export default function ParentIbadahPage() {
           {/* ── QURAN ─────────────────────────────────────── */}
           {activeSection === "quran" && (
             <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4 space-y-3">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Quran Activities</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t("parentPages", "quranActivities", lang)}</p>
               <div className="grid grid-cols-2 gap-2">
                 {QURAN_ACTIVITIES.map(({ key, label, arabic, desc }) => {
                   const val = rec[key as keyof TodayRecord] as TriStatus;
@@ -408,7 +411,7 @@ export default function ParentIbadahPage() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
-                  <p className="text-[10px] text-blue-500 font-semibold mb-1">Tilawah Pages</p>
+                  <p className="text-[10px] text-blue-500 font-semibold mb-1">Tilawah {t("parentPages", "pages", lang)}</p>
                   <div className="flex items-center gap-2">
                     <button onClick={() => update("tilawahPages", Math.max(0, rec.tilawahPages - 1))}
                       className="w-6 h-6 rounded-lg bg-blue-200 text-blue-700 font-bold text-sm flex items-center justify-center">−</button>
@@ -418,7 +421,7 @@ export default function ParentIbadahPage() {
                   </div>
                 </div>
                 <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
-                  <p className="text-[10px] text-emerald-600 font-semibold mb-1">Hifz Lines</p>
+                  <p className="text-[10px] text-emerald-600 font-semibold mb-1">Hifz {t("parentPages", "lines", lang)}</p>
                   <div className="flex items-center gap-2">
                     <button onClick={() => update("hifzLines", Math.max(0, rec.hifzLines - 1))}
                       className="w-6 h-6 rounded-lg bg-emerald-200 text-emerald-700 font-bold text-sm flex items-center justify-center">−</button>
@@ -434,7 +437,7 @@ export default function ParentIbadahPage() {
           {/* ── ZIKR ──────────────────────────────────────── */}
           {activeSection === "zikr" && (
             <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4 space-y-2">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Dhikr & Adhkar</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">{t("parentPages", "zikrDhikr", lang)}</p>
               {ZIKR_TYPES.map(({ key, label, arabic, target }) => {
                 const level = rec[key as keyof TodayRecord] as ZikrLevel;
                 return (
@@ -464,7 +467,7 @@ export default function ParentIbadahPage() {
           {/* ── AKHLAQ ────────────────────────────────────── */}
           {activeSection === "akhlaq" && (
             <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4 space-y-3">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Character & Conduct</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">{t("parentPages", "akhlaq", lang)}</p>
               <div className="grid grid-cols-2 gap-2">
                 {AKHLAQ_ITEMS.map(({ key, label, icon }) => {
                   const val = rec[key as keyof TodayRecord] as TriStatus;
@@ -491,13 +494,13 @@ export default function ParentIbadahPage() {
           {/* ── Remarks ───────────────────────────────────── */}
           <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-              <MessageSquare className="w-3.5 h-3.5" /> Parent Remarks
+              <MessageSquare className="w-3.5 h-3.5" /> {t("parentPages", "remarks", lang)}
             </p>
             <textarea
               value={rec.remarks}
               onChange={(e) => update("remarks", e.target.value)}
               rows={2}
-              placeholder="Add any notes about your child's ibadah today…"
+              placeholder={t("parentPages", "remarkPlaceholder", lang)}
               className="w-full text-sm px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-gray-700 placeholder:text-gray-300"
             />
           </div>
@@ -513,9 +516,9 @@ export default function ParentIbadahPage() {
               }`}
             >
               {saved[activeChild] ? (
-                <><CheckCircle2 className="w-5 h-5" /> Submitted to Teacher!</>
+                <><CheckCircle2 className="w-5 h-5" /> {t("parentPages", "submittedCheck", lang)}</>
               ) : (
-                <><Save className="w-5 h-5" /> Submit Ibadah to Teacher</>
+                <><Save className="w-5 h-5" /> {t("parentPages", "submitToday", lang)}</>
               )}
             </button>
           </div>
@@ -528,14 +531,14 @@ export default function ParentIbadahPage() {
           {pastRecords.length === 0 && (
             <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
               <Moon className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-              <p className="text-sm text-gray-400">No past records found.</p>
+              <p className="text-sm text-gray-400">{t("parentPages", "noHistory", lang)}</p>
             </div>
           )}
           {pastRecords.map((r, i) => {
             const fardMissed = FARD_PRAYERS.filter((p) => (r as Record<string, unknown>)[p] === "missed").length;
             const allFard = fardMissed === 0;
             const isExpanded = expandedHistoryId === r.id;
-            const dateLabel = new Date(r.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+            const dateLabel = new Date(r.date).toLocaleDateString(lang === "ml" ? "ml-IN" : "en-GB", { weekday: "short", day: "numeric", month: "short" });
 
             return (
               <motion.div
@@ -556,8 +559,8 @@ export default function ParentIbadahPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-gray-900">{dateLabel}</p>
                     <p className="text-xs text-gray-400">
-                      {allFard ? "All Fard ✓" : `${fardMissed} prayers missed`}
-                      {r.remarks ? " · Has remarks" : ""}
+                      {allFard ? t("parentPages", "allFard", lang) : `${fardMissed} ${lang === "ml" ? "നമസ്‌കാരം നഷ്‌ടപ്പെട്ടു" : "prayers missed"}`}
+                      {r.remarks ? ` · ${lang === "ml" ? "കുറിപ്പ് ഉണ്ട്" : "Has remarks"}` : ""}
                     </p>
                   </div>
                   {/* Prayer pills */}

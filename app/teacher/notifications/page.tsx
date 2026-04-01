@@ -5,6 +5,8 @@ import { notifications } from "@/mock-data";
 import { Bell, BookOpen, ClipboardList, GraduationCap, CreditCard, FileText } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 const typeConfig = {
   attendance: { icon: ClipboardList, color: "bg-emerald-50 text-emerald-600" },
@@ -16,13 +18,14 @@ const typeConfig = {
 };
 
 export default function NotificationsPage() {
+  const { lang } = useLanguageStore();
   const unread = notifications.filter((n) => !n.read).length;
 
   return (
     <DashboardLayout>
       <PageHeader
-        title="Notifications"
-        subtitle={unread > 0 ? `${unread} unread` : "All caught up"}
+        title={t("notif", "title", lang)}
+        subtitle={unread > 0 ? `${unread} ${t("notif", "unread", lang)}` : t("notif", "allCaughtUp", lang)}
         icon={Bell}
       />
 
@@ -45,7 +48,7 @@ export default function NotificationsPage() {
                   {!notif.read && <span className="w-2 h-2 bg-emerald-500 rounded-full shrink-0 mt-1.5" />}
                 </div>
                 <p className="text-sm text-gray-500 mt-0.5 leading-relaxed">{notif.message}</p>
-                <p className="text-xs text-gray-400 mt-1.5">{new Date(notif.timestamp).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
+                <p className="text-xs text-gray-400 mt-1.5">{new Date(notif.timestamp).toLocaleString(lang === "ml" ? "ml-IN" : "en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
               </div>
             </motion.div>
           );

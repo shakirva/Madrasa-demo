@@ -7,6 +7,8 @@ import { Users, Plus, Search, Eye, GraduationCap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
 
 // Derive unique classes in order
 const ALL_CLASSES = ["All", ...Array.from(new Set(students.map((s) => s.class))).sort()];
@@ -21,6 +23,7 @@ const fallback = { bg: "bg-gray-100", text: "text-gray-700", badge: "bg-gray-100
 
 export default function AdminStudentsPage() {
   const router = useRouter();
+  const { lang } = useLanguageStore();
   const [search, setSearch]       = useState("");
   const [activeClass, setActiveClass] = useState("All");
   const [gender, setGender]       = useState<"all" | "male" | "female">("all");
@@ -41,15 +44,15 @@ export default function AdminStudentsPage() {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Students"
-        subtitle={`${students.length} enrolled students`}
+        title={t("adminPages", "studentsTitle", lang)}
+        subtitle={`${students.length} ${t("common", "students", lang).toLowerCase()}`}
         icon={Users}
         action={
           <button
             onClick={() => setShowForm(true)}
             className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold"
           >
-            <Plus className="w-4 h-4" /> Add Student
+            <Plus className="w-4 h-4" /> {t("adminPages", "addStudent", lang)}
           </button>
         }
       />
@@ -60,7 +63,7 @@ export default function AdminStudentsPage() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name or admission number..."
+          placeholder={t("adminPages", "searchNameOrAdm", lang)}
           className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
         />
       </div>
@@ -105,16 +108,16 @@ export default function AdminStudentsPage() {
                 : "bg-white border border-gray-200 text-gray-500"
             )}
           >
-            {g === "all" ? "👥 All" : g === "male" ? "♂ Boys" : "♀ Girls"}
+            {g === "all" ? t("adminPages", "genderAll", lang) : g === "male" ? t("adminPages", "genderBoys", lang) : t("adminPages", "genderGirls", lang)}
           </button>
         ))}
       </div>
 
       {/* ── Result count ── */}
       <p className="text-xs text-gray-400 mb-3 font-medium">
-        Showing <span className="text-gray-700 font-bold">{filtered.length}</span> student{filtered.length !== 1 ? "s" : ""}
+        {t("adminPages", "showingStudents", lang)} <span className="text-gray-700 font-bold">{filtered.length}</span> {t("adminPages", "studentsLabel", lang)}
         {activeClass !== "All" ? ` in ${activeClass}` : ""}
-        {gender !== "all" ? ` · ${gender === "male" ? "Boys" : "Girls"}` : ""}
+        {gender !== "all" ? ` · ${gender === "male" ? t("adminPages", "boys", lang) : t("adminPages", "girls", lang)}` : ""}
       </p>
 
       {/* ── Student List ── */}
@@ -125,8 +128,8 @@ export default function AdminStudentsPage() {
               className="text-center py-16 text-gray-400"
             >
               <Users className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p className="font-semibold">No students found</p>
-              <p className="text-sm mt-1">Try adjusting the filter or search</p>
+              <p className="font-semibold">{t("adminPages", "noStudentsFound", lang)}</p>
+              <p className="text-sm mt-1">{t("adminPages", "tryAdjustFilter", lang)}</p>
             </motion.div>
           ) : (
             filtered.map((student, i) => {
@@ -167,7 +170,7 @@ export default function AdminStudentsPage() {
                     </span>
                     {/* Division badge */}
                     <span className="text-xs font-semibold px-2 py-1 rounded-lg bg-gray-100 text-gray-600 hidden sm:inline-flex">
-                      Div {student.division}
+                      {t("adminPages", "divLabel", lang)} {student.division}
                     </span>
                     {/* View button */}
                     <button
@@ -175,7 +178,7 @@ export default function AdminStudentsPage() {
                       className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors text-xs font-semibold"
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">View</span>
+                      <span className="hidden sm:inline">{t("adminPages", "viewBtn", lang)}</span>
                     </button>
                   </div>
                 </motion.div>
@@ -216,8 +219,8 @@ export default function AdminStudentsPage() {
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 shrink-0">
                 <div>
-                  <h2 className="font-bold text-gray-900 text-lg">New Admission</h2>
-                  <p className="text-xs text-gray-400 mt-0.5">Fill in student details below</p>
+                  <h2 className="font-bold text-gray-900 text-lg">{t("adminPages", "newAdmission", lang)}</h2>
+                  <p className="text-xs text-gray-400 mt-0.5">{t("adminPages", "fillStudentDetails", lang)}</p>
                 </div>
                 <button
                   onClick={() => setShowForm(false)}
@@ -234,14 +237,14 @@ export default function AdminStudentsPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold">1</div>
-                    <p className="text-sm font-bold text-emerald-700 uppercase tracking-wide">Student Information</p>
+                    <p className="text-sm font-bold text-emerald-700 uppercase tracking-wide">{t("adminPages", "studentInfo", lang)}</p>
                   </div>
                   <div className="space-y-3">
                     {[
-                      { label: "Student Name", placeholder: "Full name", type: "text" },
-                      { label: "Admission Number", placeholder: "MDA-2026-XXX", type: "text" },
-                      { label: "Date of Birth", placeholder: "", type: "date" },
-                      { label: "Address", placeholder: "Full address", type: "text" },
+                      { label: t("adminPages", "studentName", lang), placeholder: t("adminPages", "fullName", lang), type: "text" },
+                      { label: t("adminPages", "admissionNumber", lang), placeholder: t("adminPages", "admNoPlaceholder", lang), type: "text" },
+                      { label: t("adminPages", "dateOfBirth2", lang), placeholder: "", type: "date" },
+                      { label: t("adminPages", "addressField", lang), placeholder: t("adminPages", "fullAddress", lang), type: "text" },
                     ].map(({ label, placeholder, type }) => (
                       <div key={label}>
                         <label className="block text-xs font-semibold text-gray-600 mb-1.5">{label}</label>
@@ -253,12 +256,12 @@ export default function AdminStudentsPage() {
                       </div>
                     ))}
                     <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">Gender</label>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t("adminPages", "gender", lang)}</label>
                       <div className="grid grid-cols-2 gap-2">
                         {["Male", "Female"].map((g) => (
                           <label key={g} className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-semibold text-gray-700 cursor-pointer has-checked:border-emerald-500 has-checked:bg-emerald-50 has-checked:text-emerald-700 transition-all">
                             <input type="radio" name="gender" value={g} className="accent-emerald-600" />
-                            {g === "Male" ? "♂" : "♀"} {g}
+                            {g === "Male" ? "♂" : "♀"} {g === "Male" ? t("adminPages", "male", lang) : t("adminPages", "female", lang)}
                           </label>
                         ))}
                       </div>
@@ -273,14 +276,14 @@ export default function AdminStudentsPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold">2</div>
-                    <p className="text-sm font-bold text-teal-700 uppercase tracking-wide">Parent Information</p>
+                    <p className="text-sm font-bold text-teal-700 uppercase tracking-wide">{t("adminPages", "parentInfo", lang)}</p>
                   </div>
                   <div className="space-y-3">
                     {[
-                      { label: "Father Name", placeholder: "Father's full name", type: "text" },
-                      { label: "Mother Name", placeholder: "Mother's full name", type: "text" },
-                      { label: "Phone Number", placeholder: "10-digit mobile", type: "tel" },
-                      { label: "Parent Login Password", placeholder: "Min 6 characters", type: "password" },
+                      { label: t("adminPages", "fatherNameForm", lang), placeholder: t("adminPages", "fatherFullName", lang), type: "text" },
+                      { label: t("adminPages", "motherNameForm", lang), placeholder: t("adminPages", "motherFullName", lang), type: "text" },
+                      { label: t("adminPages", "phoneNumber", lang), placeholder: t("adminPages", "tenDigitMobile", lang), type: "tel" },
+                      { label: t("adminPages", "parentLoginPwd", lang), placeholder: t("adminPages", "minSixChars", lang), type: "password" },
                     ].map(({ label, placeholder, type }) => (
                       <div key={label}>
                         <label className="block text-xs font-semibold text-gray-600 mb-1.5">{label}</label>
@@ -301,11 +304,11 @@ export default function AdminStudentsPage() {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">3</div>
-                    <p className="text-sm font-bold text-blue-700 uppercase tracking-wide">Madrasa Details</p>
+                    <p className="text-sm font-bold text-blue-700 uppercase tracking-wide">{t("adminPages", "madrasaDetails", lang)}</p>
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">Class</label>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t("adminPages", "classField", lang)}</label>
                       <select className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 focus:outline-none focus:border-blue-400 text-sm">
                         {["Class 1","Class 2","Class 3","Class 4","Class 5","Class 6"].map((c) => (
                           <option key={c}>{c}</option>
@@ -313,18 +316,18 @@ export default function AdminStudentsPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">Division</label>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t("adminPages", "divisionAB", lang)}</label>
                       <div className="grid grid-cols-2 gap-2">
                         {["A", "B"].map((d) => (
                           <label key={d} className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-gray-200 bg-gray-50 text-sm font-semibold text-gray-700 cursor-pointer has-checked:border-blue-500 has-checked:bg-blue-50 has-checked:text-blue-700 transition-all">
                             <input type="radio" name="division" value={d} className="accent-blue-600" />
-                            Division {d}
+                            {t("adminPages", "divisionAB", lang)} {d}
                           </label>
                         ))}
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">Joining Date</label>
+                      <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t("adminPages", "joiningDateForm", lang)}</label>
                       <input
                         type="date"
                         className="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 focus:outline-none focus:border-blue-400 text-sm"
@@ -341,7 +344,7 @@ export default function AdminStudentsPage() {
                   }}
                   className="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl text-base active:scale-[0.98] transition-transform shadow-lg shadow-emerald-200"
                 >
-                  Admit Student ✓
+                  {t("adminPages", "admitStudent", lang)}
                 </button>
               </div>
             </motion.div>

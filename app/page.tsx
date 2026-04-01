@@ -4,10 +4,14 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { BookMarked, Eye, EyeOff, Shield, GraduationCap, Users } from "lucide-react";
 import { useAuthStore, demoCredentials } from "@/store/auth";
+import { useLanguageStore } from "@/store/language";
+import { t } from "@/lib/i18n";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
+  const { lang } = useLanguageStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +28,7 @@ export default function LoginPage() {
       login({ id: cred.id, name: cred.name, role: cred.role, email: cred.email });
       router.push(`/${cred.role}`);
     } else {
-      setError("Invalid email or password. Use demo credentials below.");
+      setError(t("login", "invalidCredentials", lang));
     }
     setLoading(false);
   };
@@ -35,13 +39,18 @@ export default function LoginPage() {
   };
 
   const roleCards = [
-    { label: "Admin", icon: Shield, color: "bg-emerald-50 border-emerald-200 text-emerald-700", cred: demoCredentials[0] },
-    { label: "Teacher", icon: GraduationCap, color: "bg-teal-50 border-teal-200 text-teal-700", cred: demoCredentials[1] },
-    { label: "Parent", icon: Users, color: "bg-amber-50 border-amber-200 text-amber-700", cred: demoCredentials[2] },
+    { label: t("common", "admin", lang), icon: Shield, color: "bg-emerald-50 border-emerald-200 text-emerald-700", cred: demoCredentials[0] },
+    { label: t("common", "teacher", lang), icon: GraduationCap, color: "bg-teal-50 border-teal-200 text-teal-700", cred: demoCredentials[1] },
+    { label: t("common", "parent", lang), icon: Users, color: "bg-amber-50 border-amber-200 text-amber-700", cred: demoCredentials[2] },
   ];
 
   return (
     <div className="min-h-screen bg-[#faf9f6] flex flex-col items-center justify-center p-4">
+      {/* Language Switcher at top-right */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -52,34 +61,34 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-600 rounded-2xl mb-4 shadow-lg shadow-emerald-100">
             <BookMarked className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Darul Huda</h1>
-          <p className="text-gray-500 text-sm mt-1">Madrasa Management System</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("common", "appName", lang)}</h1>
+          <p className="text-gray-500 text-sm mt-1">{t("common", "madrasaSystem", lang)}</p>
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Welcome back</h2>
-          <p className="text-sm text-gray-500 mb-6">Sign in to your account</p>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">{t("login", "welcomeBack", lang)}</h2>
+          <p className="text-sm text-gray-500 mb-6">{t("login", "signInAccount", lang)}</p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t("login", "email", lang)}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder={t("login", "enterEmail", lang)}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 text-sm"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t("login", "password", lang)}</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
+                  placeholder={t("login", "enterPassword", lang)}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-gray-900 text-sm pr-12"
                   required
                 />
@@ -107,15 +116,15 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Signing in...
+                  {t("login", "signingIn", lang)}
                 </>
-              ) : "Sign In"}
+              ) : t("login", "signIn", lang)}
             </button>
           </form>
         </div>
 
         <div className="mt-6">
-          <p className="text-center text-xs text-gray-500 mb-3">Quick demo access – tap to fill credentials</p>
+          <p className="text-center text-xs text-gray-500 mb-3">{t("login", "quickDemo", lang)}</p>
           <div className="grid grid-cols-3 gap-3">
             {roleCards.map(({ label, icon: Icon, color, cred }) => (
               <button

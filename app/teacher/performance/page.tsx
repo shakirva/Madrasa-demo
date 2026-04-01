@@ -9,8 +9,11 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { useLanguageStore } from "@/store/language";
+import { t as tr } from "@/lib/i18n";
 
 export default function TeacherPerformancePage() {
+  const { lang } = useLanguageStore();
   const [filter, setFilter] = useState<"weekly" | "monthly">("monthly");
 
   const bestBoy = performanceRankingData.find((s) => s.gender === "male");
@@ -18,12 +21,12 @@ export default function TeacherPerformancePage() {
 
   return (
     <DashboardLayout>
-      <PageHeader title="Student Performance" subtitle="Rankings & analytics" icon={Star} back backHref="/teacher" />
+      <PageHeader title={tr("teacherPages", "performanceTitle", lang)} subtitle={tr("teacherPages", "performanceSub", lang)} icon={Star} back backHref="/teacher" />
 
       {/* Filter */}
       <div className="flex gap-2 mb-5 bg-white border border-gray-100 rounded-xl p-1 w-fit">
         {(["weekly", "monthly"] as const).map((f) => (
-          <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${filter === f ? "bg-emerald-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}>{f}</button>
+          <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === f ? "bg-emerald-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}>{f === "weekly" ? tr("teacherPages", "weekly", lang) : tr("teacherPages", "monthly", lang)}</button>
         ))}
       </div>
 
@@ -37,17 +40,17 @@ export default function TeacherPerformancePage() {
           >
             <div className="flex items-center justify-between mb-2">
               <Crown className="w-6 h-6" />
-              <span className="text-xs font-medium opacity-80">{s!.gender === "male" ? "Best Boy" : "Best Girl"}</span>
+              <span className="text-xs font-medium opacity-80">{s!.gender === "male" ? tr("teacherPages", "bestBoy", lang) : tr("teacherPages", "bestGirl", lang)}</span>
             </div>
             <p className="font-bold">{s!.name.split(" ")[0]}</p>
-            <p className="text-sm opacity-80 mt-0.5">Score: {s!.total}</p>
+            <p className="text-sm opacity-80 mt-0.5">{tr("teacherPages", "score", lang)}: {s!.total}</p>
           </motion.div>
         ))}
       </div>
 
       {/* Rankings */}
       <div className="bg-white rounded-2xl p-5 border border-gray-100 mb-6">
-        <SectionHeader title="Class Rankings" />
+        <SectionHeader title={tr("teacherPages", "classRankings", lang)} />
         <div className="space-y-3">
           {performanceRankingData.map((s, i) => (
             <div key={s.studentId} className="flex items-center gap-3">
@@ -60,9 +63,9 @@ export default function TeacherPerformancePage() {
                   {s.crown && <Crown className="w-3.5 h-3.5 text-amber-500" />}
                 </div>
                 <div className="flex gap-3 mt-0.5">
-                  <span className="text-xs text-gray-500">Exam: {s.examScore}</span>
-                  <span className="text-xs text-gray-500">Ibadah: {s.ibadah}</span>
-                  <span className="text-xs text-gray-500">HW: {s.homework}</span>
+                  <span className="text-xs text-gray-500">{tr("teacherPages", "exam", lang)}: {s.examScore}</span>
+                  <span className="text-xs text-gray-500">{tr("teacherPages", "ibadahLabel", lang)}: {s.ibadah}</span>
+                  <span className="text-xs text-gray-500">{tr("teacherPages", "hw", lang)}: {s.homework}</span>
                 </div>
                 <div className="mt-1.5 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                   <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(s.total / 400) * 100}%` }} />
@@ -77,21 +80,21 @@ export default function TeacherPerformancePage() {
       {/* Charts */}
       <div className="space-y-5">
         <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <SectionHeader title="Homework Completion (%)" />
+          <SectionHeader title={tr("teacherPages", "hwCompletion", lang)} />
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={homeworkCompletionData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="week" tick={{ fontSize: 12, fill: "#9ca3af" }} />
               <YAxis tick={{ fontSize: 12, fill: "#9ca3af" }} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "none" }} />
-              <Bar dataKey="completed" name="Completed" fill="#059669" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="missing" name="Missing" fill="#ef4444" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="completed" name={tr("common", "completed", lang)} fill="#059669" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="missing" name={tr("common", "absent", lang)} fill="#ef4444" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         <div className="bg-white rounded-2xl p-5 border border-gray-100">
-          <SectionHeader title="Parent Cooperation" />
+          <SectionHeader title={tr("teacherPages", "parentCoop", lang)} />
           <div className="flex items-center gap-6">
             <ResponsiveContainer width={140} height={140}>
               <PieChart>

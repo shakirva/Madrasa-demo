@@ -944,3 +944,146 @@ export const adminStats = {
   feesPending: 26000,
   homeworkCompletionRate: 84,
 };
+
+// ── Other Payments (Exam Fees, Book Orders, Fund Campaigns) ─────────────────
+export type OtherPaymentCategory =
+  | "exam-fees"
+  | "book-fees"
+  | "samstha-fund"
+  | "keithang-charity"
+  | "muallim-charity"
+  | "other-campaign";
+
+export const otherPaymentCategories = [
+  { id: "exam-fees",        label: "Exam Fees",          icon: "GraduationCap", color: "blue"   },
+  { id: "book-fees",        label: "Book Order Fees",    icon: "BookOpen",      color: "purple" },
+  { id: "samstha-fund",     label: "Samstha Fund",       icon: "Building2",     color: "teal"   },
+  { id: "keithang-charity", label: "Keithang Charity",   icon: "Heart",         color: "rose"   },
+  { id: "muallim-charity",  label: "Muallim Charity",    icon: "HandHeart",     color: "orange" },
+  { id: "other-campaign",   label: "Other Campaigns",    icon: "Megaphone",     color: "amber"  },
+];
+
+export const otherPaymentRecords = [
+  // Exam Fees
+  { id:"OP001", studentId:"S001", category:"exam-fees",        amount:250, status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-10", note:"Term 2 Exam Fee" },
+  { id:"OP002", studentId:"S002", category:"exam-fees",        amount:250, status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-12", note:"Term 2 Exam Fee" },
+  { id:"OP003", studentId:"S003", category:"exam-fees",        amount:250, status:"pending", dueDate:"2026-03-31", paidDate:null,          note:"Term 2 Exam Fee" },
+  { id:"OP004", studentId:"S004", category:"exam-fees",        amount:250, status:"pending", dueDate:"2026-03-31", paidDate:null,          note:"Term 2 Exam Fee" },
+  { id:"OP005", studentId:"S005", category:"exam-fees",        amount:250, status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-15", note:"Term 2 Exam Fee" },
+  { id:"OP006", studentId:"S006", category:"exam-fees",        amount:200, status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-11", note:"Term 2 Exam Fee" },
+  { id:"OP007", studentId:"S007", category:"exam-fees",        amount:200, status:"pending", dueDate:"2026-03-31", paidDate:null,          note:"Term 2 Exam Fee" },
+  { id:"OP008", studentId:"S008", category:"exam-fees",        amount:150, status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-09", note:"Term 2 Exam Fee" },
+  // Book Order Fees
+  { id:"OP009", studentId:"S001", category:"book-fees",        amount:500, status:"paid",    dueDate:"2026-02-28", paidDate:"2026-02-10", note:"Annual book set" },
+  { id:"OP010", studentId:"S002", category:"book-fees",        amount:500, status:"paid",    dueDate:"2026-02-28", paidDate:"2026-02-12", note:"Annual book set" },
+  { id:"OP011", studentId:"S003", category:"book-fees",        amount:500, status:"pending", dueDate:"2026-02-28", paidDate:null,          note:"Annual book set" },
+  { id:"OP012", studentId:"S004", category:"book-fees",        amount:500, status:"paid",    dueDate:"2026-02-28", paidDate:"2026-02-14", note:"Annual book set" },
+  { id:"OP013", studentId:"S005", category:"book-fees",        amount:500, status:"pending", dueDate:"2026-02-28", paidDate:null,          note:"Annual book set" },
+  { id:"OP014", studentId:"S006", category:"book-fees",        amount:400, status:"paid",    dueDate:"2026-02-28", paidDate:"2026-02-11", note:"Annual book set" },
+  { id:"OP015", studentId:"S007", category:"book-fees",        amount:400, status:"paid",    dueDate:"2026-02-28", paidDate:"2026-02-13", note:"Annual book set" },
+  { id:"OP016", studentId:"S008", category:"book-fees",        amount:350, status:"pending", dueDate:"2026-02-28", paidDate:null,          note:"Annual book set" },
+  // Samstha Fund
+  { id:"OP017", studentId:"S001", category:"samstha-fund",     amount:100, status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-05", note:"Annual Samstha contribution" },
+  { id:"OP018", studentId:"S002", category:"samstha-fund",     amount:100, status:"pending", dueDate:"2026-03-31", paidDate:null,          note:"Annual Samstha contribution" },
+  { id:"OP019", studentId:"S003", category:"samstha-fund",     amount:100, status:"pending", dueDate:"2026-03-31", paidDate:null,          note:"Annual Samstha contribution" },
+  { id:"OP020", studentId:"S004", category:"samstha-fund",     amount:100, status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-06", note:"Annual Samstha contribution" },
+  { id:"OP021", studentId:"S005", category:"samstha-fund",     amount:100, status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-07", note:"Annual Samstha contribution" },
+  // Keithang Charity
+  { id:"OP022", studentId:"S001", category:"keithang-charity", amount:50,  status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-08", note:"Keithang charity drive 2026" },
+  { id:"OP023", studentId:"S002", category:"keithang-charity", amount:50,  status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-09", note:"Keithang charity drive 2026" },
+  { id:"OP024", studentId:"S003", category:"keithang-charity", amount:50,  status:"pending", dueDate:"2026-03-31", paidDate:null,          note:"Keithang charity drive 2026" },
+  { id:"OP025", studentId:"S004", category:"keithang-charity", amount:50,  status:"pending", dueDate:"2026-03-31", paidDate:null,          note:"Keithang charity drive 2026" },
+  { id:"OP026", studentId:"S005", category:"keithang-charity", amount:50,  status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-10", note:"Keithang charity drive 2026" },
+  { id:"OP027", studentId:"S006", category:"keithang-charity", amount:50,  status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-10", note:"Keithang charity drive 2026" },
+  // Muallim Charity
+  { id:"OP028", studentId:"S001", category:"muallim-charity",  amount:75,  status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-11", note:"Muallim welfare fund" },
+  { id:"OP029", studentId:"S002", category:"muallim-charity",  amount:75,  status:"pending", dueDate:"2026-03-31", paidDate:null,          note:"Muallim welfare fund" },
+  { id:"OP030", studentId:"S003", category:"muallim-charity",  amount:75,  status:"pending", dueDate:"2026-03-31", paidDate:null,          note:"Muallim welfare fund" },
+  { id:"OP031", studentId:"S004", category:"muallim-charity",  amount:75,  status:"paid",    dueDate:"2026-03-31", paidDate:"2026-03-12", note:"Muallim welfare fund" },
+  // Other Campaign
+  { id:"OP032", studentId:"S001", category:"other-campaign",   amount:200, status:"paid",    dueDate:"2026-04-15", paidDate:"2026-03-20", note:"Madrasa Building Fund" },
+  { id:"OP033", studentId:"S002", category:"other-campaign",   amount:200, status:"pending", dueDate:"2026-04-15", paidDate:null,          note:"Madrasa Building Fund" },
+  { id:"OP034", studentId:"S005", category:"other-campaign",   amount:200, status:"pending", dueDate:"2026-04-15", paidDate:null,          note:"Madrasa Building Fund" },
+];
+
+// ── Student ID Cards ──────────────────────────────────────────────────────────
+export const idCardSettings = {
+  madrasaName: "Darul Huda Madrasa",
+  madrasaAddress: "Mosque Road, Calicut, Kerala – 673001",
+  madrasaPhone: "0495-2765432",
+  academicYear: "2025–2026",
+  primaryColor: "#059669",
+  logoText: "DH",
+};
+
+// ── SKSBV Student Union ───────────────────────────────────────────────────────
+export const sksbvData = {
+  name: "SKSBV",
+  fullName: "Sunni Kuttikalude Sanghatana Balan Vedi",
+  established: "2019",
+  motto: "Knowledge, Faith & Service",
+  executive: [
+    { id:"EX01", studentId:"S001", name:"Ahmed Bin Abdullah", role:"President",          class:"Class 4", photo:null },
+    { id:"EX02", studentId:"S004", name:"Fatima Zahra",       role:"Vice President",     class:"Class 4", photo:null },
+    { id:"EX03", studentId:"S002", name:"Ibrahim Khaleel",    role:"General Secretary",  class:"Class 4", photo:null },
+    { id:"EX04", studentId:"S005", name:"Aisha Siddiqui",     role:"Treasurer",          class:"Class 4", photo:null },
+    { id:"EX05", studentId:"S006", name:"Umar Farooq",        role:"Class Rep – Class 3",class:"Class 3", photo:null },
+    { id:"EX06", studentId:"S007", name:"Maryam Noor",        role:"Class Rep – Class 3",class:"Class 3", photo:null },
+    { id:"EX07", studentId:"S008", name:"Hamza Rashid",       role:"Class Rep – Class 2",class:"Class 2", photo:null },
+  ],
+  programs: [
+    {
+      id:"SK001", title:"Quran Recitation Competition", category:"Academic",
+      date:"2026-04-10", status:"upcoming", venue:"Main Hall",
+      description:"Inter-class Quran recitation with tajweed evaluation.",
+      participants:40, coordinator:"Usthad Abdul Kareem", budget:2000,
+    },
+    {
+      id:"SK002", title:"Islamic Quiz Bowl", category:"Academic",
+      date:"2026-03-20", status:"completed", venue:"Classroom Block",
+      description:"20-team quiz on Fiqh, Hadith, and Seerah. Winners get certificates.",
+      participants:80, coordinator:"Usthad Rasheed", budget:1500, winner:"Class 4A",
+    },
+    {
+      id:"SK003", title:"Charity Collection – Ramadan", category:"Charity",
+      date:"2026-03-15", status:"completed", venue:"School Premises",
+      description:"Students collected donations for needy families during Ramadan.",
+      participants:142, coordinator:"Usthada Zubeda", budget:0, collected:8500,
+    },
+    {
+      id:"SK004", title:"Nasheeds & Madh Night", category:"Cultural",
+      date:"2026-05-02", status:"upcoming", venue:"School Auditorium",
+      description:"Evening of Islamic nasheeds, poetry, and qasidas by students.",
+      participants:60, coordinator:"Usthad Abdul Kareem", budget:3000,
+    },
+    {
+      id:"SK005", title:"Sports & Games Day", category:"Sports",
+      date:"2026-05-15", status:"upcoming", venue:"School Ground",
+      description:"Cricket, football, and track events for all classes.",
+      participants:142, coordinator:"Usthad Rasheed", budget:2500,
+    },
+    {
+      id:"SK006", title:"Annual Picnic & Outing", category:"Outing",
+      date:"2026-02-28", status:"completed", venue:"Calicut Beach Park",
+      description:"Annual recreational outing for all students and staff.",
+      participants:120, coordinator:"Usthada Zubeda", budget:5000,
+    },
+    {
+      id:"SK007", title:"Parents Interaction Day", category:"Community",
+      date:"2026-04-25", status:"upcoming", venue:"Main Hall",
+      description:"SKSBV-organised event for parents to interact with union leaders.",
+      participants:50, coordinator:"Usthad Abdul Kareem", budget:1000,
+    },
+    {
+      id:"SK008", title:"Blood Donation Drive", category:"Charity",
+      date:"2026-01-10", status:"completed", venue:"School Premises",
+      description:"Community blood donation drive organised by SKSBV in collaboration with local hospital.",
+      participants:25, coordinator:"Usthad Rasheed", budget:500, collected:0,
+    },
+  ],
+  stats: {
+    totalMembers: 142, executiveCount: 7,
+    programsThisYear: 8, completedPrograms: 4,
+    totalBudget: 15500, fundsRaised: 8500,
+  },
+};

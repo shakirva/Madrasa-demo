@@ -14,16 +14,18 @@ import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer,
   Tooltip, CartesianGrid,
 } from "recharts";
+import { useLanguageStore } from "@/store/language";
+import { t as tr } from "@/lib/i18n";
 
 // ── Types ─────────────────────────────────────────────────────────────────
 type AttStatus = "present" | "absent" | "late" | "excused";
 type ViewTab = "mark" | "history" | "stats";
 
 const STATUS_META: Record<AttStatus, { label: string; color: string; bg: string; border: string; icon: React.ReactNode }> = {
-  present: { label: "Present", color: "text-emerald-700", bg: "bg-emerald-600", border: "border-emerald-200", icon: <Check className="w-4 h-4" /> },
-  absent:  { label: "Absent",  color: "text-red-600",     bg: "bg-red-500",     border: "border-red-200",     icon: <X className="w-4 h-4" /> },
-  late:    { label: "Late",    color: "text-amber-700",   bg: "bg-amber-500",   border: "border-amber-200",   icon: <Clock className="w-4 h-4" /> },
-  excused: { label: "Excused", color: "text-blue-700",    bg: "bg-blue-500",    border: "border-blue-200",    icon: <FileText className="w-4 h-4" /> },
+  present: { label: "present", color: "text-emerald-700", bg: "bg-emerald-600", border: "border-emerald-200", icon: <Check className="w-4 h-4" /> },
+  absent:  { label: "absent",  color: "text-red-600",     bg: "bg-red-500",     border: "border-red-200",     icon: <X className="w-4 h-4" /> },
+  late:    { label: "late",    color: "text-amber-700",   bg: "bg-amber-500",   border: "border-amber-200",   icon: <Clock className="w-4 h-4" /> },
+  excused: { label: "excused", color: "text-blue-700",    bg: "bg-blue-500",    border: "border-blue-200",    icon: <FileText className="w-4 h-4" /> },
 };
 
 const STATUS_ROW_BG: Record<AttStatus, string> = {
@@ -39,8 +41,8 @@ const DATES = [
   "2026-03-11","2026-03-10","2026-03-07","2026-03-06",
 ];
 
-function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString("en-GB", { weekday:"short", day:"2-digit", month:"short" });
+function fmtDate(d: string, lang: "en" | "ml" = "en") {
+  return new Date(d).toLocaleDateString(lang === "ml" ? "ml-IN" : "en-GB", { weekday:"short", day:"2-digit", month:"short" });
 }
 
 function getStudent(id: string) {
@@ -49,6 +51,7 @@ function getStudent(id: string) {
 
 // ── Component ─────────────────────────────────────────────────────────────
 export default function TeacherAttendancePage() {
+  const { lang } = useLanguageStore();
   const [activeClass, setActiveClass]   = useState("Class 4");
   const [dateIdx,     setDateIdx]       = useState(0);   // index into DATES
   const [view,        setView]          = useState<ViewTab>("mark");
@@ -161,8 +164,8 @@ export default function TeacherAttendancePage() {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Attendance"
-        subtitle={`${activeClass} · ${fmtDate(selectedDate)}`}
+        title={tr("teacherPages", "attendanceTitle", lang)}
+        subtitle={`${activeClass} · ${fmtDate(selectedDate, lang)}`}
         icon={ClipboardList}
         back
         backHref="/teacher"
@@ -219,7 +222,7 @@ export default function TeacherAttendancePage() {
 
       {/* ── View tabs ── */}
       <div className="flex gap-1.5 mb-5 bg-gray-100 p-1 rounded-2xl">
-        {([["mark","Mark","✏️"],["history","History","📋"],["stats","Stats","📊"]] as const).map(([key,label,emoji]) => (
+        {([["mark",tr("teacherPages","markAtt",lang),"✏️"],["history",tr("teacherPages","history",lang),"📋"],["stats",tr("teacherPages","stats",lang),"📊"]] as [ViewTab,string,string][]).map(([key,label,emoji]) => (
           <button key={key} onClick={() => setView(key)}
             className={cn(
               "flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all",
@@ -244,7 +247,7 @@ export default function TeacherAttendancePage() {
               return (
                 <div key={s} className={cn("rounded-2xl p-2.5 text-center border", STATUS_ROW_BG[s])}>
                   <p className={cn("text-xl font-bold", m.color)}>{counts[s]}</p>
-                  <p className={cn("text-xs mt-0.5", m.color)}>{m.label}</p>
+                  <p className={cn("text-xs mt-0.5", m.color)}>{tr("teacherPages", m.label as any, lang)}</p>
                 </div>
               );
             })}
@@ -253,7 +256,7 @@ export default function TeacherAttendancePage() {
           {/* Collection progress bar */}
           <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-semibold text-gray-700">Today&apos;s Attendance</p>
+              <p className="text-sm font-semibold text-gray-700">{tr("common", "today", lang)}</p>
               <p className="text-sm font-bold text-emerald-700">{pct}%</p>
             </div>
             <div className="h-3 bg-gray-100 rounded-full overflow-hidden flex">
@@ -274,16 +277,16 @@ export default function TeacherAttendancePage() {
               />
             </div>
             <div className="flex gap-3 mt-2 text-xs text-gray-500">
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"/>Present</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block"/>Late</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-400 inline-block"/>Excused</span>
-              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block"/>Absent</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"/>{tr("common", "present", lang)}</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block"/>{tr("teacherPages", "late", lang)}</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-400 inline-block"/>{tr("teacherPages", "excused", lang)}</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block"/>{tr("common", "absent", lang)}</span>
             </div>
           </div>
 
           {/* Bulk actions */}
           <div className="flex gap-2 mb-4">
-            <p className="text-xs text-gray-500 my-auto mr-1 shrink-0">Mark all:</p>
+            <p className="text-xs text-gray-500 my-auto mr-1 shrink-0">{tr("teacherPages", "markAll", lang)}</p>
             {(["present","absent","late"] as AttStatus[]).map((s) => {
               const m = STATUS_META[s];
               return (
@@ -293,7 +296,7 @@ export default function TeacherAttendancePage() {
                     STATUS_ROW_BG[s], m.color
                   )}
                 >
-                  {m.icon}{m.label}
+                  {m.icon}{tr("teacherPages", m.label as any, lang)}
                 </button>
               );
             })}
@@ -330,10 +333,10 @@ export default function TeacherAttendancePage() {
                           meta.bg
                         )}
                       >
-                        <option value="present">Present</option>
-                        <option value="absent">Absent</option>
-                        <option value="late">Late</option>
-                        <option value="excused">Excused</option>
+                        <option value="present">{tr("teacherPages", "present", lang)}</option>
+                        <option value="absent">{tr("teacherPages", "absent", lang)}</option>
+                        <option value="late">{tr("teacherPages", "late", lang)}</option>
+                        <option value="excused">{tr("teacherPages", "excused", lang)}</option>
                       </select>
                     </div>
                   </div>
@@ -342,7 +345,7 @@ export default function TeacherAttendancePage() {
                     <div className="px-4 pb-3">
                       <input
                         type="text"
-                        placeholder="Add remark (optional)…"
+                        placeholder={tr("teacherPages", "addRemarkOpt", lang)}
                         value={remarks[student.id] ?? ""}
                         onChange={(e) => setRemarks((p) => ({ ...p, [student.id]: e.target.value }))}
                         onClick={(e) => e.stopPropagation()}
@@ -369,15 +372,15 @@ export default function TeacherAttendancePage() {
             {saved ? (
               <>
                 <Check className="w-5 h-5" />
-                Saved! {counts.absent > 0 ? `${counts.absent} parent${counts.absent > 1 ? "s" : ""} notified` : "All present 🎉"}
+                {tr("teacherPages", "savedNotif", lang)} {counts.absent > 0 ? `${counts.absent} ${counts.absent > 1 ? tr("teacherPages", "parentsNotifiedAtt", lang) : tr("teacherPages", "parentNotifiedAtt", lang)}` : tr("teacherPages", "allPresentMsg", lang)}
               </>
             ) : (
               <>
                 <Save className="w-5 h-5" />
-                Save Attendance
+                {tr("teacherPages", "saveAttendance", lang)}
                 {counts.absent > 0 && (
                   <span className="ml-1 flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full text-xs">
-                    <Bell className="w-3 h-3" />Notify {counts.absent}
+                    <Bell className="w-3 h-3" />{tr("teacherPages", "notifyCount", lang)} {counts.absent}
                   </span>
                 )}
               </>
@@ -394,15 +397,15 @@ export default function TeacherAttendancePage() {
 
           {/* Student heatmap */}
           <div className="bg-white rounded-2xl border border-gray-100 p-4 overflow-x-auto">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Weekly Heatmap</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{tr("teacherPages", "weeklyHeatmap", lang)}</p>
             <div className="min-w-max">
               {/* Header row */}
               <div className="flex gap-2 mb-2 pl-28">
                 {heatmapDates.map((d) => (
                   <div key={d} className="w-10 text-center text-xs text-gray-400 font-medium">
-                    {new Date(d).toLocaleDateString("en-GB", { day:"2-digit" })}
+                    {new Date(d).toLocaleDateString(lang === "ml" ? "ml-IN" : "en-GB", { day:"2-digit" })}
                     <br />
-                    <span className="text-gray-300">{new Date(d).toLocaleDateString("en-GB", { weekday:"short" })}</span>
+                    <span className="text-gray-300">{new Date(d).toLocaleDateString(lang === "ml" ? "ml-IN" : "en-GB", { weekday:"short" })}</span>
                   </div>
                 ))}
               </div>
@@ -437,9 +440,9 @@ export default function TeacherAttendancePage() {
             </div>
             {/* Legend */}
             <div className="flex gap-3 mt-3 flex-wrap text-xs text-gray-500">
-              {[["✓","bg-emerald-100","Present"],["✗","bg-red-100","Absent"],["L","bg-amber-100","Late"],["E","bg-blue-100","Excused"]].map(([sym,bg,label]) => (
-                <span key={label} className="flex items-center gap-1.5">
-                  <span className={cn("w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold", bg)}>{sym}</span>{label}
+              {[["✓","bg-emerald-100","present"],["✗","bg-red-100","absent"],["L","bg-amber-100","late"],["E","bg-blue-100","excused"]].map(([sym,bg,key]) => (
+                <span key={key} className="flex items-center gap-1.5">
+                  <span className={cn("w-5 h-5 rounded-md flex items-center justify-center text-xs font-bold", bg)}>{sym}</span>{tr("teacherPages", key as any, lang)}
                 </span>
               ))}
             </div>
@@ -457,8 +460,8 @@ export default function TeacherAttendancePage() {
               <div key={rec.date + rec.classId} className="bg-white rounded-2xl border border-gray-100 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="font-bold text-gray-900 text-sm">{fmtDate(rec.date)}</p>
-                    <p className="text-xs text-gray-400">{total} students</p>
+                    <p className="font-bold text-gray-900 text-sm">{fmtDate(rec.date, lang)}</p>
+                    <p className="text-xs text-gray-400">{total} {tr("teacherPages", "studentsLabel", lang)}</p>
                   </div>
                   <span className={cn(
                     "text-sm font-bold px-2.5 py-1 rounded-xl",
@@ -506,7 +509,7 @@ export default function TeacherAttendancePage() {
           {/* Bar chart */}
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-              <BarChart2 className="w-3.5 h-3.5" />Daily Attendance Trend
+              <BarChart2 className="w-3.5 h-3.5" />{tr("teacherPages", "dailyTrend", lang)}
             </p>
             {barData.length > 0 ? (
               <ResponsiveContainer width="100%" height={180}>
@@ -521,13 +524,13 @@ export default function TeacherAttendancePage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-center text-sm text-gray-400 py-8">No data available</p>
+              <p className="text-center text-sm text-gray-400 py-8">{tr("teacherPages", "noDataAvail", lang)}</p>
             )}
           </div>
 
           {/* Per-student attendance percentage */}
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Student Attendance %</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{tr("teacherPages", "studentAttPct", lang)}</p>
             <div className="space-y-3">
               {studentStats.map(({ stu, present, absent, late, total, pct: sPct }) => (
                 <div key={stu.id}>
@@ -539,7 +542,7 @@ export default function TeacherAttendancePage() {
                       )}>{stu.name.charAt(0)}</div>
                       <div>
                         <p className="text-sm font-semibold text-gray-900 leading-tight">{stu.name}</p>
-                        <p className="text-xs text-gray-400">{present}P · {absent}A · {late}L · {total} days</p>
+                        <p className="text-xs text-gray-400">{present}P · {absent}A · {late}L · {total} {tr("teacherPages", "daysLabel", lang)}</p>
                       </div>
                     </div>
                     <span className={cn(
@@ -561,7 +564,7 @@ export default function TeacherAttendancePage() {
                   </div>
                   {sPct < 75 && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />Below 75% — notify parents
+                      <AlertCircle className="w-3 h-3" />{tr("teacherPages", "below75", lang)}
                     </p>
                   )}
                 </div>
@@ -571,13 +574,13 @@ export default function TeacherAttendancePage() {
 
           {/* Monthly overview */}
           <div className="bg-white rounded-2xl border border-gray-100 p-4">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">This Month Summary</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{tr("teacherPages", "thisMonthSummary", lang)}</p>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label:"Total Days Recorded", val: historyRecs.length, color:"text-gray-800" },
-                { label:"Class Average",        val: `${historyRecs.length > 0 ? Math.round(historyRecs.reduce((a,r) => a + (r.records.filter((x) => x.status==="present").length / r.records.length)*100, 0) / historyRecs.length) : 0}%`, color:"text-emerald-700" },
-                { label:"Chronic Absent (<75%)", val: studentStats.filter((s) => s.pct < 75).length, color:"text-red-600" },
-                { label:"Perfect Attendance",  val: studentStats.filter((s) => s.pct === 100).length, color:"text-emerald-700" },
+                { label: tr("teacherPages", "totalDaysRecorded", lang), val: historyRecs.length, color:"text-gray-800" },
+                { label: tr("teacherPages", "classAverage", lang),      val: `${historyRecs.length > 0 ? Math.round(historyRecs.reduce((a,r) => a + (r.records.filter((x) => x.status==="present").length / r.records.length)*100, 0) / historyRecs.length) : 0}%`, color:"text-emerald-700" },
+                { label: tr("teacherPages", "chronicAbsent", lang),     val: studentStats.filter((s) => s.pct < 75).length, color:"text-red-600" },
+                { label: tr("teacherPages", "perfectAtt", lang),        val: studentStats.filter((s) => s.pct === 100).length, color:"text-emerald-700" },
               ].map(({ label, val, color }) => (
                 <div key={label} className="bg-gray-50 rounded-2xl p-3 text-center">
                   <p className={cn("text-2xl font-bold", color)}>{val}</p>
@@ -591,7 +594,7 @@ export default function TeacherAttendancePage() {
           {studentStats.filter((s) => s.pct < 75).length > 0 && (
             <div className="bg-red-50 rounded-2xl border border-red-200 p-4">
               <p className="text-sm font-bold text-red-700 flex items-center gap-2 mb-2">
-                <AlertCircle className="w-4 h-4" />Low Attendance Alert
+                <AlertCircle className="w-4 h-4" />{tr("teacherPages", "lowAttAlert", lang)}
               </p>
               {studentStats.filter((s) => s.pct < 75).map(({ stu, pct: sPct }) => (
                 <div key={stu.id} className="flex items-center justify-between py-2 border-b border-red-100 last:border-0">
@@ -600,7 +603,7 @@ export default function TeacherAttendancePage() {
                 </div>
               ))}
               <button className="w-full mt-3 py-2.5 bg-red-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2">
-                <Bell className="w-3.5 h-3.5" />Send Alert to Parents
+                <Bell className="w-3.5 h-3.5" />{tr("teacherPages", "sendAlertParents", lang)}
               </button>
             </div>
           )}
