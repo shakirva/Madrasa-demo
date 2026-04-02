@@ -115,6 +115,10 @@ const translations = {
     results:            { en: "Results",                        ml: "ഫലങ്ങൾ" },
     alerts:             { en: "Alerts",                         ml: "അറിയിപ്പുകൾ" },
     elections:          { en: "Elections",                      ml: "തിരഞ്ഞെടുപ്പ്" },
+    overview:           { en: "Overview",                       ml: "അവലോകനം" },
+    finance:            { en: "Finance",                        ml: "ഫിനാൻസ്" },
+    committee:          { en: "Committee",                      ml: "കമ്മിറ്റി" },
+    announcements:      { en: "Announcements",                  ml: "അറിയിപ്പുകൾ" },
   },
 
   // ── Admin Dashboard ───────────────────────────────────────────────────────

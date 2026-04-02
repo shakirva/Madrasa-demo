@@ -1688,3 +1688,188 @@ export const elections: Election[] = [
     ],
   },
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Committee Dashboard Data
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface CommitteeFeeMonth {
+  month: string;
+  month_ml: string;
+  collected: number;
+  target: number;
+}
+
+export interface CommitteeAttendanceWeek {
+  day: string;
+  day_ml: string;
+  present: number;
+  absent: number;
+}
+
+export interface CommitteeClassStat {
+  className: string;
+  students: number;
+  attendancePct: number;
+  avgScore: number;
+  hwCompletion: number;
+}
+
+export interface CommitteeAnnouncement {
+  id: string;
+  title: string;
+  title_ml: string;
+  date: string;
+  priority: "high" | "medium" | "low";
+}
+
+export interface CommitteeTopStudent {
+  name: string;
+  class: string;
+  achievement: string;
+  achievement_ml: string;
+  score?: number;
+}
+
+export interface CommitteeSummary {
+  madrasa: {
+    name: string;
+    name_ml: string;
+    established: string;
+    location: string;
+    location_ml: string;
+    session: string;
+  };
+  overview: {
+    totalStudents: number;
+    totalTeachers: number;
+    totalClasses: number;
+    activeSince: string;
+  };
+  fees: {
+    totalAnnualTarget: number;
+    collectedSoFar: number;
+    pendingAmount: number;
+    paidStudents: number;
+    unpaidStudents: number;
+    collectionPct: number;
+    monthlyTrend: CommitteeFeeMonth[];
+  };
+  attendance: {
+    overallPct: number;
+    todayPresent: number;
+    todayAbsent: number;
+    weeklyTrend: CommitteeAttendanceWeek[];
+    lowAttendanceStudents: number;
+  };
+  academic: {
+    lastExamAvgScore: number;
+    passRate: number;
+    topStudents: CommitteeTopStudent[];
+    classStats: CommitteeClassStat[];
+  };
+  ibadah: {
+    quranCompletionPct: number;
+    prayerTrackedStudents: number;
+    ibadahChampions: { name: string; class: string; score: number }[];
+  };
+  elections: {
+    activeCount: number;
+    completedCount: number;
+    sksbvUnionMembers: { post: string; post_ml: string; name: string }[];
+  };
+  announcements: CommitteeAnnouncement[];
+}
+
+export const committeeSummary: CommitteeSummary = {
+  madrasa: {
+    name: "Darul Huda Madrasa",
+    name_ml: "ദാറുൽ ഹുദാ മദ്‌റസ",
+    established: "1998",
+    location: "Malappuram, Kerala",
+    location_ml: "മലപ്പുറം, കേരള",
+    session: "2025–2026",
+  },
+  overview: {
+    totalStudents: 124,
+    totalTeachers: 8,
+    totalClasses: 7,
+    activeSince: "June 2025",
+  },
+  fees: {
+    totalAnnualTarget: 372000,
+    collectedSoFar: 289600,
+    pendingAmount: 82400,
+    paidStudents: 98,
+    unpaidStudents: 26,
+    collectionPct: 78,
+    monthlyTrend: [
+      { month: "Oct", month_ml: "ഒക്ടോ", collected: 41200,  target: 31000 },
+      { month: "Nov", month_ml: "നവം",   collected: 38800,  target: 31000 },
+      { month: "Dec", month_ml: "ഡിസ",   collected: 29400,  target: 31000 },
+      { month: "Jan", month_ml: "ജനു",   collected: 52000,  target: 31000 },
+      { month: "Feb", month_ml: "ഫെബ്",  collected: 68200,  target: 62000 },
+      { month: "Mar", month_ml: "മാർ",   collected: 60000,  target: 62000 },
+    ],
+  },
+  attendance: {
+    overallPct: 87,
+    todayPresent: 108,
+    todayAbsent: 16,
+    weeklyTrend: [
+      { day: "Sat",  day_ml: "ശനി", present: 112, absent: 12 },
+      { day: "Sun",  day_ml: "ഞായർ", present: 109, absent: 15 },
+      { day: "Mon",  day_ml: "തിങ്ക", present: 118, absent: 6  },
+      { day: "Tue",  day_ml: "ചൊവ്വ", present: 115, absent: 9  },
+      { day: "Wed",  day_ml: "ബുധൻ", present: 113, absent: 11 },
+      { day: "Thu",  day_ml: "വ്യാഴം", present: 108, absent: 16 },
+    ],
+    lowAttendanceStudents: 7,
+  },
+  academic: {
+    lastExamAvgScore: 74,
+    passRate: 91,
+    topStudents: [
+      { name: "Fathima Noor",   class: "Class 7", achievement: "1st Rank – 95%",     achievement_ml: "1-ആം സ്ഥാനം – 95%" },
+      { name: "Ahmed Siraj",    class: "Class 6", achievement: "2nd Rank – 92%",     achievement_ml: "2-ആം സ്ഥാനം – 92%" },
+      { name: "Zainab Kareem",  class: "Class 5", achievement: "3rd Rank – 90%",     achievement_ml: "3-ആം സ്ഥാനം – 90%" },
+      { name: "Ibrahim Hamza",  class: "Class 7", achievement: "Best Quran – 98%",   achievement_ml: "മികച്ച ഖുർആൻ – 98%" },
+    ],
+    classStats: [
+      { className: "Class 1", students: 18, attendancePct: 91, avgScore: 78, hwCompletion: 88 },
+      { className: "Class 2", students: 20, attendancePct: 89, avgScore: 76, hwCompletion: 85 },
+      { className: "Class 3", students: 19, attendancePct: 84, avgScore: 72, hwCompletion: 80 },
+      { className: "Class 4", students: 17, attendancePct: 88, avgScore: 75, hwCompletion: 83 },
+      { className: "Class 5", students: 16, attendancePct: 90, avgScore: 80, hwCompletion: 90 },
+      { className: "Class 6", students: 18, attendancePct: 86, avgScore: 71, hwCompletion: 79 },
+      { className: "Class 7", students: 16, attendancePct: 83, avgScore: 74, hwCompletion: 82 },
+    ],
+  },
+  ibadah: {
+    quranCompletionPct: 68,
+    prayerTrackedStudents: 98,
+    ibadahChampions: [
+      { name: "Ibrahim Hamza",  class: "Class 7", score: 98 },
+      { name: "Mariam Salih",   class: "Class 6", score: 95 },
+      { name: "Yusuf Ali",      class: "Class 5", score: 93 },
+    ],
+  },
+  elections: {
+    activeCount: 4,
+    completedCount: 6,
+    sksbvUnionMembers: [
+      { post: "President",  post_ml: "പ്രസിഡൻ്റ്",  name: "Bilal Hassan" },
+      { post: "Chairman",   post_ml: "ചെയർമാൻ",     name: "Omar Farouk" },
+      { post: "Convener",   post_ml: "കൺവീനർ",      name: "Hamza Nabil" },
+      { post: "Secretary",  post_ml: "സെക്രട്ടറി",   name: "Pending Election" },
+      { post: "Treasurer",  post_ml: "ട്രഷറർ",       name: "Salman Rafiq" },
+    ],
+  },
+  announcements: [
+    { id: "AN001", title: "Annual Day Preparations",          title_ml: "വാർഷിക ദിന തയ്യാറെടുപ്പ്",     date: "2026-04-05", priority: "high"   },
+    { id: "AN002", title: "Fee Payment Deadline – April 15",  title_ml: "ഫീസ് അടക്കൽ – ഏപ്രിൽ 15",    date: "2026-04-02", priority: "high"   },
+    { id: "AN003", title: "SKSBV Secretary Election Opens",   title_ml: "SKSBV സെക്രട്ടറി തിരഞ്ഞെടുപ്പ്", date: "2026-04-03", priority: "medium" },
+    { id: "AN004", title: "Quran Competition – April 20",     title_ml: "ഖുർആൻ മത്സരം – ഏപ്രിൽ 20",   date: "2026-04-01", priority: "medium" },
+    { id: "AN005", title: "Mid-term Exams Schedule Released", title_ml: "മിഡ്‌ടേം പരീക്ഷ ഷെഡ്യൂൾ",    date: "2026-03-28", priority: "low"    },
+  ],
+};

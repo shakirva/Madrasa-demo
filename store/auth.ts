@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type UserRole = "admin" | "teacher" | "parent";
+export type UserRole = "admin" | "teacher" | "parent" | "committee";
 
 interface User {
   id: string;
@@ -45,5 +45,12 @@ export const demoCredentials = [
     password: "parent123",
     name: "Abdullah Rahman",
     id: "P001",
+  },
+  {
+    role: "committee" as UserRole,
+    email: "committee@madrasa.com",
+    password: "committee123",
+    name: "Hajiyar Abdul Latheef",
+    id: "CMT001",
   },
 ];

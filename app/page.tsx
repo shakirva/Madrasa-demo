@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { BookMarked, Eye, EyeOff, Shield, GraduationCap, Users } from "lucide-react";
+import { BookMarked, Eye, EyeOff, Shield, GraduationCap, Users, Building2 } from "lucide-react";
 import { useAuthStore, demoCredentials } from "@/store/auth";
 import { useLanguageStore } from "@/store/language";
 import { t } from "@/lib/i18n";
@@ -39,9 +39,10 @@ export default function LoginPage() {
   };
 
   const roleCards = [
-    { label: t("common", "admin", lang), icon: Shield, color: "bg-emerald-50 border-emerald-200 text-emerald-700", cred: demoCredentials[0] },
-    { label: t("common", "teacher", lang), icon: GraduationCap, color: "bg-teal-50 border-teal-200 text-teal-700", cred: demoCredentials[1] },
-    { label: t("common", "parent", lang), icon: Users, color: "bg-amber-50 border-amber-200 text-amber-700", cred: demoCredentials[2] },
+    { label: t("common", "admin", lang),     icon: Shield,       color: "bg-emerald-50 border-emerald-200 text-emerald-700", cred: demoCredentials[0] },
+    { label: t("common", "teacher", lang),   icon: GraduationCap,color: "bg-teal-50 border-teal-200 text-teal-700",          cred: demoCredentials[1] },
+    { label: t("common", "parent", lang),    icon: Users,        color: "bg-amber-50 border-amber-200 text-amber-700",       cred: demoCredentials[2] },
+    { label: lang === "ml" ? "കമ്മിറ്റി" : "Committee", icon: Building2, color: "bg-purple-50 border-purple-200 text-purple-700", cred: demoCredentials[3] },
   ];
 
   return (
@@ -125,7 +126,7 @@ export default function LoginPage() {
 
         <div className="mt-6">
           <p className="text-center text-xs text-gray-500 mb-3">{t("login", "quickDemo", lang)}</p>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-2">
             {roleCards.map(({ label, icon: Icon, color, cred }) => (
               <button
                 key={label}

@@ -11,8 +11,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore();
   const { lang } = useLanguageStore();
 
-  const roleLabel = (role: string) =>
-    t("common", role as "admin" | "teacher" | "parent", lang);
+  const roleLabel = (role: string) => {
+    if (role === "committee") return lang === "ml" ? "കമ്മിറ്റി" : "Committee";
+    return t("common", role as "admin" | "teacher" | "parent", lang);
+  };
 
   return (
     <div className="min-h-screen bg-[#faf9f6]">
@@ -37,7 +39,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               className="relative w-9 h-9 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center active:scale-95 transition-transform"
             >
               <Bell className="w-4.5 h-4.5 text-gray-600" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white" />
+              {user?.role !== "committee" && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white" />}
             </Link>
             <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0">
               {user?.name?.charAt(0) ?? "U"}
