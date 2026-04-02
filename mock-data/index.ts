@@ -1087,3 +1087,604 @@ export const sksbvData = {
     totalBudget: 15500, fundsRaised: 8500,
   },
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ELECTIONS MODULE
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Election Type 1: Parent Portal Vote (one vote per parent per election)
+// Election Type 2: Class Vote via Teacher (teacher opens session, students vote)
+
+export type ElectionType = "parent_vote" | "class_vote";
+export type ElectionStatus = "draft" | "active" | "closed" | "results_published";
+export type VoteStatus = "not_voted" | "voted";
+
+// Category determines the post being contested
+export type ElectionCategory =
+  | "madrasa_leader"
+  | "sksbv_chairman"
+  | "sksbv_convener"
+  | "sksbv_secretary"
+  | "sksbv_president"
+  | "sksbv_treasurer"
+  | "class_monitor"
+  | "best_student"
+  | "ibadah_champion"
+  | "quran_reciter"
+  | "custom";
+
+export const CATEGORY_META: Record<ElectionCategory, { label: string; label_ml: string; color: string; bg: string; emoji: string; group: string }> = {
+  madrasa_leader:   { label: "Madrasa Leader",   label_ml: "മദ്‌റസ ലീഡർ",          color: "text-emerald-700", bg: "bg-emerald-100", emoji: "🏫", group: "Madrasa"  },
+  sksbv_chairman:   { label: "SKSBV Chairman",    label_ml: "SKSBV ചെയർമാൻ",        color: "text-teal-700",    bg: "bg-teal-100",    emoji: "👑", group: "SKSBV"    },
+  sksbv_convener:   { label: "SKSBV Convener",    label_ml: "SKSBV കൺവീനർ",         color: "text-teal-700",    bg: "bg-teal-100",    emoji: "📋", group: "SKSBV"    },
+  sksbv_secretary:  { label: "SKSBV Secretary",   label_ml: "SKSBV സെക്രട്ടറി",     color: "text-teal-700",    bg: "bg-teal-100",    emoji: "✍️", group: "SKSBV"    },
+  sksbv_president:  { label: "SKSBV President",   label_ml: "SKSBV പ്രസിഡൻ്റ്",    color: "text-purple-700",  bg: "bg-purple-100",  emoji: "🎖️", group: "SKSBV"    },
+  sksbv_treasurer:  { label: "SKSBV Treasurer",   label_ml: "SKSBV ട്രഷറർ",         color: "text-blue-700",    bg: "bg-blue-100",    emoji: "💰", group: "SKSBV"    },
+  class_monitor:    { label: "Class Monitor",     label_ml: "ക്ലാസ് മോണിറ്റർ",     color: "text-orange-700",  bg: "bg-orange-100",  emoji: "📌", group: "Class"    },
+  best_student:     { label: "Best Student",      label_ml: "മികച്ച വിദ്യാർത്ഥി",   color: "text-amber-700",   bg: "bg-amber-100",   emoji: "🌟", group: "Class"    },
+  ibadah_champion:  { label: "Ibadah Champion",   label_ml: "ഇബാദത്ത് ചാമ്പ്യൻ",   color: "text-green-700",   bg: "bg-green-100",   emoji: "🌙", group: "Class"    },
+  quran_reciter:    { label: "Quran Reciter",     label_ml: "ഖുർആൻ പാരായണം",       color: "text-rose-700",    bg: "bg-rose-100",    emoji: "📖", group: "Madrasa"  },
+  custom:           { label: "Custom",            label_ml: "ഇഷ്ടാനുസൃതം",          color: "text-gray-700",    bg: "bg-gray-100",    emoji: "⚙️", group: "Custom"   },
+};
+
+export interface ElectionCandidate {
+  id: string;
+  name: string;
+  class: string;
+  position: string;
+  photo: string | null;
+  bio: string;
+  bio_ml: string;
+  voteCount: number;
+  symbol: string;
+}
+
+export interface ParentVoteRecord {
+  parentId: string;
+  studentId: string;    // which child they voted for/from
+  candidateId: string;
+  votedAt: string;
+}
+
+export interface ClassVoteRecord {
+  studentId: string;
+  candidateId: string;
+  votedAt: string;
+}
+
+export interface Election {
+  id: string;
+  type: ElectionType;
+  category: ElectionCategory;
+  madrasaId?: string;          // for multi-madrasa support
+  madrasaName?: string;
+  title: string;
+  title_ml: string;
+  description: string;
+  description_ml: string;
+  position: string;
+  position_ml: string;
+  status: ElectionStatus;
+  startDate: string;
+  endDate: string;
+  class: string | "all";
+  teacherId?: string;
+  candidates: ElectionCandidate[];
+  totalEligibleVoters: number;
+  totalVotesCast: number;
+  parentVotes?: ParentVoteRecord[];
+  classVotes?: ClassVoteRecord[];
+  winnerCandidateId?: string;
+  sessionOpenedAt?: string;
+  sessionClosedAt?: string;
+}
+
+export const elections: Election[] = [
+  // ── TYPE 1: Parent Vote Elections ──────────────────────────────────────
+  {
+    id: "EL001",
+    type: "parent_vote",
+    category: "madrasa_leader",
+    madrasaId: "MDA001",
+    madrasaName: "Noor ul Islam Madrasa",
+    title: "Madrasa School Leader Election 2026",
+    title_ml: "മദ്‌റസ സ്‌കൂൾ ലീഡർ തിരഞ്ഞെടുപ്പ് 2026",
+    description: "Parents vote to elect the School Leader for the academic year 2026. Each parent gets one vote for one candidate.",
+    description_ml: "2026 അദ്ധ്യയന വർഷത്തെ സ്‌കൂൾ ലീഡറെ തിരഞ്ഞെടുക്കാൻ രക്ഷിതാക്കൾ വോട്ട് ചെയ്യുന്നു. ഓരോ രക്ഷിതാവിനും ഒരു സ്ഥാനാർത്ഥിക്ക് ഒരു വോട്ട് ചെയ്യാം.",
+    position: "School Leader",
+    position_ml: "സ്‌കൂൾ ലീഡർ",
+    status: "active",
+    startDate: "2026-04-01",
+    endDate: "2026-04-10",
+    class: "all",
+    totalEligibleVoters: 8,
+    totalVotesCast: 5,
+    candidates: [
+      {
+        id: "EC001",
+        name: "Ahmed Bin Abdullah",
+        class: "Class 4",
+        position: "School Leader",
+        photo: null,
+        symbol: "⭐",
+        bio: "Dedicated student with excellent academic record. Has been class representative for 2 years. Committed to improving madrasa activities.",
+        bio_ml: "മികച്ച അക്കാദമിക് റെക്കോർഡുള്ള സമർപ്പിത വിദ്യാർത്ഥി. 2 വർഷം ക്ലാസ് റെപ്രസന്റേറ്റിവ് ആയിരുന്നു.",
+        voteCount: 3,
+      },
+      {
+        id: "EC002",
+        name: "Ibrahim Khaleel",
+        class: "Class 4",
+        position: "School Leader",
+        photo: null,
+        symbol: "🌙",
+        bio: "Active in Islamic activities and Quran competitions. Wants to organise more community events and strengthen ibadah culture.",
+        bio_ml: "ഇസ്‌ലാമിക് പ്രവർത്തനങ്ങളിലും ഖുർആൻ മത്സരങ്ങളിലും സജീവം. കൂടുതൽ കമ്മ്യൂണിറ്റി ഇവൻ്റുകൾ സംഘടിപ്പിക്കാൻ ആഗ്രഹിക്കുന്നു.",
+        voteCount: 2,
+      },
+      {
+        id: "EC003",
+        name: "Yusuf Salim",
+        class: "Class 4",
+        position: "School Leader",
+        photo: null,
+        symbol: "📖",
+        bio: "Top student in Arabic and Quran studies. Believes in disciplined learning and wants to build a stronger homework culture.",
+        bio_ml: "അറബിക്, ഖുർആൻ പഠനത്തിൽ മുൻനിര വിദ്യാർത്ഥി. അച്ചടക്കമുള്ള പഠനത്തിൽ വിശ്വസിക്കുന്നു.",
+        voteCount: 0,
+      },
+    ],
+    parentVotes: [
+      { parentId: "P001", studentId: "S001", candidateId: "EC001", votedAt: "2026-04-02T09:15:00" },
+      { parentId: "P002", studentId: "S002", candidateId: "EC002", votedAt: "2026-04-02T10:30:00" },
+      { parentId: "P003", studentId: "S003", candidateId: "EC001", votedAt: "2026-04-03T08:45:00" },
+      { parentId: "P004", studentId: "S004", candidateId: "EC002", votedAt: "2026-04-03T11:00:00" },
+      { parentId: "P005", studentId: "S005", candidateId: "EC001", votedAt: "2026-04-04T09:00:00" },
+    ],
+  },
+  {
+    id: "EL002",
+    type: "parent_vote",
+    category: "quran_reciter",
+    madrasaId: "MDA001",
+    madrasaName: "Noor ul Islam Madrasa",
+    title: "Best Quran Reciter Award 2026",
+    title_ml: "മികച്ച ഖുർആൻ പാരായണക്കാർക്കുള്ള അവാർഡ് 2026",
+    description: "Parents nominate the best Quran reciter from their child's class. Results will be announced at Annual Day.",
+    description_ml: "രക്ഷിതാക്കൾ അവരുടെ കുട്ടിയുടെ ക്ലാസ്സിൽ നിന്ന് മികച്ച ഖുർആൻ പാരായണക്കാരനെ നോമിനേറ്റ് ചെയ്യുന്നു.",
+    position: "Best Quran Reciter",
+    position_ml: "മികച്ച ഖുർആൻ പാരായണക്കാർ",
+    status: "closed",
+    startDate: "2026-03-01",
+    endDate: "2026-03-20",
+    class: "all",
+    totalEligibleVoters: 8,
+    totalVotesCast: 8,
+    winnerCandidateId: "EC005",
+    candidates: [
+      {
+        id: "EC004",
+        name: "Fatima Zahra",
+        class: "Class 4",
+        position: "Best Quran Reciter",
+        photo: null,
+        symbol: "🌸",
+        bio: "Memorised 5 Juz of Quran. Melodious voice and precise tajweed. Won 1st place in district-level competition.",
+        bio_ml: "ഖുർആനിലെ 5 ജുസ്ഉ് ഹിഫ്ദ് ചെയ്തു. ജില്ലാ മത്സരത്തിൽ ഒന്നാം സ്ഥാനം.",
+        voteCount: 3,
+      },
+      {
+        id: "EC005",
+        name: "Aisha Siddiqui",
+        class: "Class 4",
+        position: "Best Quran Reciter",
+        photo: null,
+        symbol: "🌟",
+        bio: "Completed Hifz of 10 Juz. Known for beautiful and accurate recitation with proper maqamat.",
+        bio_ml: "10 ജുസ്ഉ് ഹിഫ്ദ് പൂർത്തിയാക്കി. ഒഴുക്കുള്ള ഓത്ത് ശൈലിക്ക് പ്രശസ്തി.",
+        voteCount: 5,
+      },
+    ],
+    parentVotes: [
+      { parentId: "P001", studentId: "S001", candidateId: "EC005", votedAt: "2026-03-05T09:00:00" },
+      { parentId: "P002", studentId: "S002", candidateId: "EC004", votedAt: "2026-03-06T10:00:00" },
+      { parentId: "P003", studentId: "S003", candidateId: "EC005", votedAt: "2026-03-07T09:30:00" },
+      { parentId: "P004", studentId: "S004", candidateId: "EC004", votedAt: "2026-03-08T11:00:00" },
+      { parentId: "P005", studentId: "S005", candidateId: "EC004", votedAt: "2026-03-09T09:00:00" },
+      { parentId: "P006", studentId: "S007", candidateId: "EC005", votedAt: "2026-03-10T08:00:00" },
+      { parentId: "P007", studentId: "S008", candidateId: "EC005", votedAt: "2026-03-11T10:30:00" },
+      { parentId: "P008", studentId: "S008", candidateId: "EC005", votedAt: "2026-03-12T09:45:00" },
+    ],
+  },
+
+  // ── TYPE 2: Class Vote via Teacher ─────────────────────────────────────
+  {
+    id: "EL003",
+    type: "class_vote",
+    category: "class_monitor",
+    madrasaId: "MDA001",
+    madrasaName: "Noor ul Islam Madrasa",
+    title: "Class 4-A Monitor Election",
+    title_ml: "ക്ലാസ് 4-A മോണിറ്റർ തിരഞ്ഞെടുപ്പ്",
+    description: "Students of Class 4-A vote to elect their class monitor for the term.",
+    description_ml: "ക്ലാസ് 4-A-ലെ വിദ്യാർത്ഥികൾ അവരുടെ ക്ലാസ് മോണിറ്ററെ തിരഞ്ഞെടുക്കുന്നു.",
+    position: "Class Monitor",
+    position_ml: "ക്ലാസ് മോണിറ്റർ",
+    status: "active",
+    startDate: "2026-04-02",
+    endDate: "2026-04-02",
+    class: "Class 4",
+    teacherId: "T001",
+    sessionOpenedAt: "2026-04-02T09:00:00",
+    totalEligibleVoters: 5,
+    totalVotesCast: 3,
+    candidates: [
+      {
+        id: "EC006",
+        name: "Ahmed Bin Abdullah",
+        class: "Class 4",
+        position: "Class Monitor",
+        photo: null,
+        symbol: "🏅",
+        bio: "Responsible and punctual. Always helps classmates.",
+        bio_ml: "ഉത്തരവാദിത്തമുള്ള, ക്ലാസ്‌മേറ്റ്‌സിനെ സഹായിക്കുന്ന വിദ്യാർത്ഥി.",
+        voteCount: 2,
+      },
+      {
+        id: "EC007",
+        name: "Fatima Zahra",
+        class: "Class 4",
+        position: "Class Monitor",
+        photo: null,
+        symbol: "🌺",
+        bio: "Excellent in studies and discipline. Great communication skills.",
+        bio_ml: "പഠനത്തിലും അച്ചടക്കത്തിലും മികച്ചവൾ.",
+        voteCount: 1,
+      },
+    ],
+    classVotes: [
+      { studentId: "S001", candidateId: "EC006", votedAt: "2026-04-02T09:10:00" },
+      { studentId: "S002", candidateId: "EC006", votedAt: "2026-04-02T09:12:00" },
+      { studentId: "S003", candidateId: "EC007", votedAt: "2026-04-02T09:14:00" },
+    ],
+  },
+  {
+    id: "EL004",
+    type: "class_vote",
+    category: "best_student",
+    madrasaId: "MDA001",
+    madrasaName: "Noor ul Islam Madrasa",
+    title: "Class 3 Best Student Award",
+    title_ml: "ക്ലാസ് 3 മികച്ച വിദ്യാർത്ഥി അവാർഡ്",
+    description: "Class 3 students vote for the most hardworking and disciplined student of the term.",
+    description_ml: "ക്ലാസ് 3 വിദ്യാർത്ഥികൾ ഏറ്റവും കഠിനാധ്വാനിയും അച്ചടക്കമുള്ളവനുമായ വിദ്യാർത്ഥിക്ക് വോട്ട് ചെയ്യുന്നു.",
+    position: "Best Student",
+    position_ml: "മികച്ച വിദ്യാർത്ഥി",
+    status: "results_published",
+    startDate: "2026-03-15",
+    endDate: "2026-03-15",
+    class: "Class 3",
+    teacherId: "T003",
+    sessionOpenedAt: "2026-03-15T10:00:00",
+    sessionClosedAt: "2026-03-15T10:30:00",
+    totalEligibleVoters: 2,
+    totalVotesCast: 2,
+    winnerCandidateId: "EC008",
+    candidates: [
+      {
+        id: "EC008",
+        name: "Umar Farooq",
+        class: "Class 3",
+        position: "Best Student",
+        photo: null,
+        symbol: "🥇",
+        bio: "Consistent top scorer. Never absent. Helps peers with studies.",
+        bio_ml: "സ്ഥിരമായി ഒന്നാം സ്ഥാനം. ഒരിക്കലും ഗൈർഹാജർ ആകില്ല.",
+        voteCount: 2,
+      },
+      {
+        id: "EC009",
+        name: "Maryam Noor",
+        class: "Class 3",
+        position: "Best Student",
+        photo: null,
+        symbol: "🌈",
+        bio: "Creative student with excellent Quran memorisation and artistic talents.",
+        bio_ml: "ഖുർആൻ ഹിഫ്ദും കലാ കഴിവുകളും ഉള്ള സർഗ്ഗശേഷിയുള്ള വിദ്യാർത്ഥി.",
+        voteCount: 0,
+      },
+    ],
+    classVotes: [
+      { studentId: "S006", candidateId: "EC008", votedAt: "2026-03-15T10:05:00" },
+      { studentId: "S007", candidateId: "EC008", votedAt: "2026-03-15T10:08:00" },
+    ],
+  },
+  {
+    id: "EL005",
+    type: "class_vote",
+    category: "ibadah_champion",
+    madrasaId: "MDA001",
+    madrasaName: "Noor ul Islam Madrasa",
+    title: "Class 2 Ibadah Champion",
+    title_ml: "ക്ലാസ് 2 ഇബാദത്ത് ചാമ്പ്യൻ",
+    description: "Class 2 students vote for the student who has shown the best ibadah consistency this term.",
+    description_ml: "ക്ലാസ് 2 വിദ്യാർത്ഥികൾ ഈ ടേം മികച്ച ഇബാദത്ത് കാണിച്ച വിദ്യാർത്ഥിക്ക് വോട്ട് ചെയ്യുന്നു.",
+    position: "Ibadah Champion",
+    position_ml: "ഇബാദത്ത് ചാമ്പ്യൻ",
+    status: "draft",
+    startDate: "2026-04-10",
+    endDate: "2026-04-10",
+    class: "Class 2",
+    teacherId: "T002",
+    totalEligibleVoters: 1,
+    totalVotesCast: 0,
+    candidates: [
+      {
+        id: "EC010",
+        name: "Hamza Rashid",
+        class: "Class 2",
+        position: "Ibadah Champion",
+        photo: null,
+        symbol: "🌙",
+        bio: "Never missed a single day of Fard prayers tracking. Perfect ibadah score.",
+        bio_ml: "ഒരു ദിവസം പോലും ഫർദ് നമസ്‌കാരം ഒഴിവാക്കിയിട്ടില്ല. പൂർണ ഇബാദത്ത് സ്‌കോർ.",
+        voteCount: 0,
+      },
+    ],
+    classVotes: [],
+  },
+
+  // ── SKSBV Elections ─────────────────────────────────────────────────────
+  {
+    id: "EL006",
+    type: "parent_vote",
+    category: "sksbv_chairman",
+    madrasaId: "MDA001",
+    madrasaName: "Noor ul Islam Madrasa",
+    title: "SKSBV Chairman Election 2026",
+    title_ml: "SKSBV ചെയർമാൻ തിരഞ്ഞെടുപ്പ് 2026",
+    description: "Parents elect the SKSBV (Student Union) Chairman for the academic year 2026-27. The Chairman leads all student union activities and represents students to the management.",
+    description_ml: "2026-27 അദ്ധ്യയന വർഷത്തേക്ക് SKSBV (വിദ്യാർത്ഥി യൂണിയൻ) ചെയർമാനെ തിരഞ്ഞെടുക്കാൻ രക്ഷിതാക്കൾ വോട്ട് ചെയ്യുന്നു. ചെയർമാൻ എല്ലാ വിദ്യാർത്ഥി യൂണിയൻ പ്രവർത്തനങ്ങളും നയിക്കും.",
+    position: "SKSBV Chairman",
+    position_ml: "SKSBV ചെയർമാൻ",
+    status: "active",
+    startDate: "2026-04-01",
+    endDate: "2026-04-15",
+    class: "all",
+    totalEligibleVoters: 8,
+    totalVotesCast: 6,
+    candidates: [
+      {
+        id: "EC011",
+        name: "Ahmed Bin Abdullah",
+        class: "Class 4",
+        position: "SKSBV Chairman",
+        photo: null,
+        symbol: "👑",
+        bio: "Strong leadership skills. Organised 3 major events. Committed to making SKSBV more inclusive and active.",
+        bio_ml: "ശക്തമായ നേതൃത്വ കഴിവുകൾ. 3 പ്രധാന ഇവൻ്റുകൾ സംഘടിപ്പിച്ചു. SKSBV-യെ കൂടുതൽ ഉൾക്കൊള്ളുന്നതും സജീവവും ആക്കാൻ പ്രതിജ്ഞാബദ്ധൻ.",
+        voteCount: 4,
+      },
+      {
+        id: "EC012",
+        name: "Ibrahim Khaleel",
+        class: "Class 4",
+        position: "SKSBV Chairman",
+        photo: null,
+        symbol: "🌟",
+        bio: "Experienced class representative with excellent communication. Plans to strengthen inter-class bonding and Islamic culture.",
+        bio_ml: "മികച്ച ആശയ വിനിമയ ശേഷിയുള്ള പരിചയസമ്പന്ന ക്ലാസ് പ്രതിനിധി. ക്ലാസ്സ് ബന്ധവും ഇസ്‌ലാമിക് സംസ്‌കാരവും ശക്തിപ്പെടുത്താൻ ആഗ്രഹിക്കുന്നു.",
+        voteCount: 2,
+      },
+    ],
+    parentVotes: [
+      { parentId: "P001", studentId: "S001", candidateId: "EC011", votedAt: "2026-04-02T09:00:00" },
+      { parentId: "P002", studentId: "S002", candidateId: "EC012", votedAt: "2026-04-02T10:00:00" },
+      { parentId: "P003", studentId: "S003", candidateId: "EC011", votedAt: "2026-04-03T09:30:00" },
+      { parentId: "P004", studentId: "S004", candidateId: "EC011", votedAt: "2026-04-03T11:00:00" },
+      { parentId: "P005", studentId: "S005", candidateId: "EC012", votedAt: "2026-04-04T09:00:00" },
+      { parentId: "P006", studentId: "S007", candidateId: "EC011", votedAt: "2026-04-04T10:00:00" },
+    ],
+  },
+  {
+    id: "EL007",
+    type: "parent_vote",
+    category: "sksbv_convener",
+    madrasaId: "MDA001",
+    madrasaName: "Noor ul Islam Madrasa",
+    title: "SKSBV Convener Election 2026",
+    title_ml: "SKSBV കൺവീനർ തിരഞ്ഞെടുപ്പ് 2026",
+    description: "Parents elect the SKSBV Convener who will coordinate meetings, plan agendas and ensure smooth functioning of the student union activities throughout the year.",
+    description_ml: "യോഗങ്ങൾ ഏകോപിപ്പിക്കുകയും അജണ്ട ആസൂത്രണം ചെയ്യുകയും വർഷം മുഴുവൻ വിദ്യാർത്ഥി യൂണിയൻ പ്രവർത്തനങ്ങൾ സുഗമമായി നടത്തിക്കൊണ്ടുപോകുകയും ചെയ്യുന്ന SKSBV കൺവീനറെ രക്ഷിതാക്കൾ തിരഞ്ഞെടുക്കുന്നു.",
+    position: "SKSBV Convener",
+    position_ml: "SKSBV കൺവീനർ",
+    status: "active",
+    startDate: "2026-04-01",
+    endDate: "2026-04-15",
+    class: "all",
+    totalEligibleVoters: 8,
+    totalVotesCast: 5,
+    candidates: [
+      {
+        id: "EC013",
+        name: "Fatima Zahra",
+        class: "Class 4",
+        position: "SKSBV Convener",
+        photo: null,
+        symbol: "📋",
+        bio: "Detail-oriented and organised. Has successfully coordinated 5 inter-class events. Excellent at follow-up and documentation.",
+        bio_ml: "ആസൂത്രണ കഴിവ് മികച്ചത്. 5 ഇൻ്റർ-ക്ലാസ് ഇവൻ്റുകൾ ഏകോപിപ്പിച്ചു. ഡോക്യുമെൻ്റേഷനിൽ മികവ്.",
+        voteCount: 3,
+      },
+      {
+        id: "EC014",
+        name: "Aisha Siddiqui",
+        class: "Class 4",
+        position: "SKSBV Convener",
+        photo: null,
+        symbol: "🌸",
+        bio: "Active in all school committees. Strong planner with a track record of completing projects on time.",
+        bio_ml: "എല്ലാ സ്കൂൾ കമ്മിറ്റികളിലും സജീവം. സമയബന്ധിതമായി പ്രോജക്‌ടുകൾ പൂർത്തിയാക്കുന്ന ശക്തമായ ആസൂത്രകൻ.",
+        voteCount: 2,
+      },
+    ],
+    parentVotes: [
+      { parentId: "P001", studentId: "S001", candidateId: "EC013", votedAt: "2026-04-02T09:10:00" },
+      { parentId: "P002", studentId: "S002", candidateId: "EC014", votedAt: "2026-04-02T10:10:00" },
+      { parentId: "P003", studentId: "S003", candidateId: "EC013", votedAt: "2026-04-03T09:40:00" },
+      { parentId: "P004", studentId: "S004", candidateId: "EC013", votedAt: "2026-04-03T11:10:00" },
+      { parentId: "P005", studentId: "S005", candidateId: "EC014", votedAt: "2026-04-04T09:10:00" },
+    ],
+  },
+  {
+    id: "EL008",
+    type: "parent_vote",
+    category: "sksbv_secretary",
+    madrasaId: "MDA001",
+    madrasaName: "Noor ul Islam Madrasa",
+    title: "SKSBV Secretary Election 2026",
+    title_ml: "SKSBV സെക്രട്ടറി തിരഞ്ഞെടുപ്പ് 2026",
+    description: "Parents elect the SKSBV Secretary responsible for maintaining records, minutes of meetings, correspondence and official documentation of the student union.",
+    description_ml: "രേഖകൾ, മിനിറ്റ്‌സ്, കത്തിടപാടുകൾ, ഔദ്യോഗിക ഡോക്യുമെൻ്റേഷൻ എന്നിവ സൂക്ഷിക്കേണ്ട SKSBV സെക്രട്ടറിയെ രക്ഷിതാക്കൾ തിരഞ്ഞെടുക്കുന്നു.",
+    position: "SKSBV Secretary",
+    position_ml: "SKSBV സെക്രട്ടറി",
+    status: "draft",
+    startDate: "2026-04-05",
+    endDate: "2026-04-18",
+    class: "all",
+    totalEligibleVoters: 8,
+    totalVotesCast: 0,
+    candidates: [
+      {
+        id: "EC015",
+        name: "Yusuf Salim",
+        class: "Class 4",
+        position: "SKSBV Secretary",
+        photo: null,
+        symbol: "✍️",
+        bio: "Excellent writing skills. Always punctual with submissions. Has maintained class diary perfectly for 2 years.",
+        bio_ml: "മികച്ച എഴുത്ത് കഴിവ്. സമർപ്പണത്തിൽ കൃത്യനിഷ്ഠ. 2 വർഷം ക്ലാസ് ഡയറി മികവോടെ സൂക്ഷിച്ചു.",
+        voteCount: 0,
+      },
+      {
+        id: "EC016",
+        name: "Maryam Noor",
+        class: "Class 3",
+        position: "SKSBV Secretary",
+        photo: null,
+        symbol: "📝",
+        bio: "Creative writer with excellent memory and organisational skills. Represented school in essay competitions.",
+        bio_ml: "മികച്ച മെമ്മറി, ഓർഗനൈസേഷൻ സ്‌കിൽ. ഉപന്യാസ മത്സരങ്ങളിൽ സ്‌കൂളിനെ പ്രതിനിധീകരിച്ചു.",
+        voteCount: 0,
+      },
+    ],
+    parentVotes: [],
+  },
+  {
+    id: "EL009",
+    type: "parent_vote",
+    category: "sksbv_president",
+    madrasaId: "MDA001",
+    madrasaName: "Noor ul Islam Madrasa",
+    title: "SKSBV President Election 2026",
+    title_ml: "SKSBV പ്രസിഡൻ്റ് തിരഞ്ഞെടുപ്പ് 2026",
+    description: "Parents elect the SKSBV President — the highest student office bearer who will represent the student body at all official functions and liaise with teachers and management.",
+    description_ml: "ഏറ്റവും ഉയർന്ന വിദ്യാർത്ഥി ഓഫീസ് ഹോൾഡർ — SKSBV പ്രസിഡൻ്റ് — എല്ലാ ഔദ്യോഗിക ചടങ്ങുകളിലും വിദ്യാർത്ഥി സമൂഹത്തെ പ്രതിനിധീകരിക്കും.",
+    position: "SKSBV President",
+    position_ml: "SKSBV പ്രസിഡൻ്റ്",
+    status: "closed",
+    startDate: "2026-03-10",
+    endDate: "2026-03-25",
+    class: "all",
+    totalEligibleVoters: 8,
+    totalVotesCast: 8,
+    winnerCandidateId: "EC017",
+    candidates: [
+      {
+        id: "EC017",
+        name: "Umar Farooq",
+        class: "Class 3",
+        position: "SKSBV President",
+        photo: null,
+        symbol: "🎖️",
+        bio: "Charismatic leader. Organised the Annual Day programme with great success. Known for fairness and approachability.",
+        bio_ml: "ആകർഷകനായ നേതാവ്. വാർഷിക ദിന പരിപാടി വിജയകരമായി സംഘടിപ്പിച്ചു. നേർമയ്ക്കും സൗഹൃദ സ്വഭാവത്തിനും പ്രശസ്തൻ.",
+        voteCount: 5,
+      },
+      {
+        id: "EC018",
+        name: "Hamza Rashid",
+        class: "Class 2",
+        position: "SKSBV President",
+        photo: null,
+        symbol: "⚡",
+        bio: "Energetic and passionate about madrasa improvement. Has a concrete 5-point plan for student welfare.",
+        bio_ml: "മദ്‌റസ വികസനത്തിൽ ഊർജ്ജസ്വലനും ആവേശഭരിതനും. വിദ്യാർത്ഥി ക്ഷേമത്തിനായി 5 പോയിൻ്റ് പ്ലാൻ.",
+        voteCount: 3,
+      },
+    ],
+    parentVotes: [
+      { parentId: "P001", studentId: "S001", candidateId: "EC017", votedAt: "2026-03-12T09:00:00" },
+      { parentId: "P002", studentId: "S002", candidateId: "EC018", votedAt: "2026-03-12T10:00:00" },
+      { parentId: "P003", studentId: "S003", candidateId: "EC017", votedAt: "2026-03-13T09:30:00" },
+      { parentId: "P004", studentId: "S004", candidateId: "EC017", votedAt: "2026-03-13T11:00:00" },
+      { parentId: "P005", studentId: "S005", candidateId: "EC018", votedAt: "2026-03-14T09:00:00" },
+      { parentId: "P006", studentId: "S007", candidateId: "EC017", votedAt: "2026-03-14T10:00:00" },
+      { parentId: "P007", studentId: "S008", candidateId: "EC018", votedAt: "2026-03-15T09:00:00" },
+      { parentId: "P008", studentId: "S008", candidateId: "EC017", votedAt: "2026-03-15T11:00:00" },
+    ],
+  },
+  {
+    id: "EL010",
+    type: "parent_vote",
+    category: "sksbv_treasurer",
+    madrasaId: "MDA001",
+    madrasaName: "Noor ul Islam Madrasa",
+    title: "SKSBV Treasurer Election 2026",
+    title_ml: "SKSBV ട്രഷറർ തിരഞ്ഞെടുപ്പ് 2026",
+    description: "Parents elect the SKSBV Treasurer who will manage student union funds, maintain accounts and ensure transparent financial operations of all student activities.",
+    description_ml: "വിദ്യാർത്ഥി യൂണിയൻ ഫണ്ടുകൾ കൈകാര്യം ചെയ്യുകയും അക്കൗണ്ടുകൾ സൂക്ഷിക്കുകയും എല്ലാ വിദ്യാർത്ഥി പ്രവർത്തനങ്ങളുടെ സുതാര്യമായ സാമ്പത്തിക കാര്യങ്ങൾ ഉറപ്പുവരുത്തുകയും ചെയ്യുന്ന SKSBV ട്രഷററെ രക്ഷിതാക്കൾ തിരഞ്ഞെടുക്കുന്നു.",
+    position: "SKSBV Treasurer",
+    position_ml: "SKSBV ട്രഷറർ",
+    status: "results_published",
+    startDate: "2026-03-01",
+    endDate: "2026-03-15",
+    class: "all",
+    totalEligibleVoters: 8,
+    totalVotesCast: 7,
+    winnerCandidateId: "EC019",
+    candidates: [
+      {
+        id: "EC019",
+        name: "Ahmed Bin Abdullah",
+        class: "Class 4",
+        position: "SKSBV Treasurer",
+        photo: null,
+        symbol: "💰",
+        bio: "Math topper for 3 consecutive years. Transparent and trustworthy. Has managed class fund collection with zero discrepancy.",
+        bio_ml: "തുടർച്ചയായി 3 വർഷം ഗണിതത്തിൽ ഒന്നാം സ്ഥാനം. ക്ലാസ് ഫണ്ട് ശേഖരണം കൃത്യതയോടെ നടത്തി.",
+        voteCount: 5,
+      },
+      {
+        id: "EC020",
+        name: "Ibrahim Khaleel",
+        class: "Class 4",
+        position: "SKSBV Treasurer",
+        photo: null,
+        symbol: "📊",
+        bio: "Excellent in Mathematics and accounting basics. Has proposed a digital tracking system for student union funds.",
+        bio_ml: "ഗണിതം, അക്കൗണ്ടിംഗ് ബേസിക്‌സ്. ഡിജിറ്റൽ ട്രാക്കിംഗ് സിസ്‌റ്റം നിർദ്ദേശിച്ചു.",
+        voteCount: 2,
+      },
+    ],
+    parentVotes: [
+      { parentId: "P001", studentId: "S001", candidateId: "EC019", votedAt: "2026-03-03T09:00:00" },
+      { parentId: "P002", studentId: "S002", candidateId: "EC020", votedAt: "2026-03-04T10:00:00" },
+      { parentId: "P003", studentId: "S003", candidateId: "EC019", votedAt: "2026-03-05T09:30:00" },
+      { parentId: "P004", studentId: "S004", candidateId: "EC019", votedAt: "2026-03-06T11:00:00" },
+      { parentId: "P005", studentId: "S005", candidateId: "EC020", votedAt: "2026-03-07T09:00:00" },
+      { parentId: "P006", studentId: "S007", candidateId: "EC019", votedAt: "2026-03-08T10:00:00" },
+      { parentId: "P007", studentId: "S008", candidateId: "EC019", votedAt: "2026-03-09T09:00:00" },
+    ],
+  },
+];

@@ -5,13 +5,13 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Users, ClipboardList, BookOpen, FileText,
   CreditCard, BarChart3, Bell, Settings, Star, BookMarked,
-  UserCircle, Home, GraduationCap, Moon, Image, IndianRupee, BadgeCheck
+  UserCircle, Home, GraduationCap, Moon, Image, IndianRupee, BadgeCheck, Vote
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useLanguageStore } from "@/store/language";
 import { t } from "@/lib/i18n";
 
-type NavKey = "dashboard" | "students" | "fees" | "otherPayments" | "idCards" | "exams" | "reports" | "seats" | "sksbv" | "posters" | "config" | "attendance" | "homework" | "diary" | "ibadah" | "performance" | "home" | "results" | "alerts";
+type NavKey = "dashboard" | "students" | "fees" | "otherPayments" | "idCards" | "exams" | "reports" | "seats" | "sksbv" | "posters" | "config" | "attendance" | "homework" | "diary" | "ibadah" | "performance" | "home" | "results" | "alerts" | "elections";
 
 const adminLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[] = [
   { href: "/admin",                icon: LayoutDashboard, key: "dashboard"      },
@@ -24,6 +24,7 @@ const adminLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[] 
   { href: "/admin/seats",          icon: BookMarked,      key: "seats"          },
   { href: "/admin/sksbv",          icon: Star,            key: "sksbv"          },
   { href: "/admin/posters",        icon: Image,           key: "posters"        },
+  { href: "/admin/elections",      icon: Vote,            key: "elections"      },
   { href: "/admin/config",         icon: Settings,        key: "config"         },
 ];
 
@@ -35,6 +36,7 @@ const teacherLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[
   { href: "/teacher/ibadah",      icon: Moon,            key: "ibadah"      },
   { href: "/teacher/exams",       icon: GraduationCap,   key: "exams"       },
   { href: "/teacher/performance", icon: Star,            key: "performance" },
+  { href: "/teacher/elections",   icon: Vote,            key: "elections"   },
 ];
 
 const parentLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[] = [
@@ -44,6 +46,7 @@ const parentLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[]
   { href: "/parent/ibadah",         icon: Moon,           key: "ibadah"     },
   { href: "/parent/fees",           icon: CreditCard,     key: "fees"       },
   { href: "/parent/results",        icon: GraduationCap,  key: "results"    },
+  { href: "/parent/elections",      icon: Vote,           key: "elections"  },
   { href: "/parent/notifications",  icon: Bell,           key: "alerts"     },
 ];
 

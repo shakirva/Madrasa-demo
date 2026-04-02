@@ -114,6 +114,7 @@ const translations = {
     home:               { en: "Home",                           ml: "ഹോം" },
     results:            { en: "Results",                        ml: "ഫലങ്ങൾ" },
     alerts:             { en: "Alerts",                         ml: "അറിയിപ്പുകൾ" },
+    elections:          { en: "Elections",                      ml: "തിരഞ്ഞെടുപ്പ്" },
   },
 
   // ── Admin Dashboard ───────────────────────────────────────────────────────
@@ -1015,6 +1016,92 @@ const translations = {
     collectionRate:     { en: "Collection Rate",                ml: "പിരിവ് നിരക്ക്" },
     paidStudents:       { en: "Paid Students",                  ml: "അടച്ച വിദ്യാർത്ഥികൾ" },
     pendingStudents:    { en: "Pending Students",               ml: "ബാക്കിയുള്ള വിദ്യാർത്ഥികൾ" },
+  },
+
+  // ── Elections Module ──────────────────────────────────────────────────────
+  elections: {
+    // Nav / Titles
+    elections:          { en: "Elections",                      ml: "തിരഞ്ഞെടുപ്പ്" },
+    electionsModule:    { en: "Elections Module",               ml: "തിരഞ്ഞെടുപ്പ് മോഡ്യൂൾ" },
+    classElections:     { en: "Class Elections",                ml: "ക്ലാസ് തിരഞ്ഞെടുപ്പ്" },
+    adminSubtitle:      { en: "Parent & Class election results overview", ml: "രക്ഷിതാവ് & ക്ലാസ് തിരഞ്ഞെടുപ്പ് ഫലങ്ങൾ" },
+    teacherSubtitle:    { en: "Open sessions, record student votes & publish results", ml: "വോട്ടിംഗ് സെഷൻ തുറക്കുക, ഫലങ്ങൾ പ്രസിദ്ധീകരിക്കുക" },
+    parentSubtitle:     { en: "Cast your vote as a parent",     ml: "നിങ്ങളുടെ വോട്ട് ഇവിടെ രേഖപ്പെടുത്തുക" },
+
+    // Types
+    parentVote:         { en: "Parent Vote",                    ml: "രക്ഷിതാവ് വോട്ട്" },
+    classVote:          { en: "Class Vote",                     ml: "ക്ലാസ് വോട്ട്" },
+    allElections:       { en: "All Elections",                  ml: "എല്ലാ തിരഞ്ഞെടുപ്പുകളും" },
+    parentVotes:        { en: "Parent Votes",                   ml: "രക്ഷിതാവ് വോട്ടുകൾ" },
+    classVotes:         { en: "Class Votes",                    ml: "ക്ലാസ് വോട്ടുകൾ" },
+
+    // Status
+    draft:              { en: "Draft",                          ml: "ഡ്രാഫ്റ്റ്" },
+    active:             { en: "Active",                         ml: "സജീവം" },
+    closed:             { en: "Closed",                         ml: "അടഞ്ഞു" },
+    resultsPublished:   { en: "Results Published",              ml: "ഫലം പ്രസിദ്ധീകരിച്ചു" },
+    live:               { en: "LIVE",                           ml: "LIVE" },
+    ready:              { en: "Ready",                          ml: "തയ്യാർ" },
+
+    // Stats
+    totalElections:     { en: "Total Elections",                ml: "ആകെ തിരഞ്ഞെടുപ്പ്" },
+    activeNow:          { en: "Active Now",                     ml: "ഇപ്പോൾ സജീവം" },
+    totalVotesCast:     { en: "Total Votes Cast",               ml: "ആകെ ഇട്ട വോട്ടുകൾ" },
+    turnout:            { en: "Turnout",                        ml: "ടേർനൗട്ട്" },
+    candidates:         { en: "Candidates",                     ml: "സ്ഥാനാർത്ഥികൾ" },
+    votesCast:          { en: "Votes Cast",                     ml: "ഇട്ട വോട്ടുകൾ" },
+    votes:              { en: "votes",                          ml: "വോട്ടുകൾ" },
+    vote:               { en: "vote",                           ml: "വോട്ട്" },
+    eligibleVoters:     { en: "eligible voters",                ml: "യോഗ്യരായ വോട്ടർമാർ" },
+    leading:            { en: "Leading",                        ml: "മുൻനിരക്കാർ" },
+    winner:             { en: "Winner",                         ml: "ജേതാവ്" },
+    results:            { en: "Results",                        ml: "ഫലം" },
+    timeline:           { en: "Timeline",                       ml: "ടൈംലൈൻ" },
+    start:              { en: "Start",                          ml: "ആരംഭം" },
+    end:                { en: "End",                            ml: "അവസാനം" },
+    sessionOpened:      { en: "Session Opened",                 ml: "സെഷൻ തുറന്നു" },
+    sessionClosed:      { en: "Session Closed",                 ml: "സെഷൻ അടഞ്ഞു" },
+    details:            { en: "View Details",                   ml: "വിശദാംശങ്ങൾ" },
+
+    // Voting
+    votingBooth:        { en: "Voting Booth",                   ml: "വോട്ടിംഗ് ബൂത്ത്" },
+    chooseCandidate:    { en: "Choose one candidate — your vote cannot be changed", ml: "ഒരു സ്ഥാനാർത്ഥിയെ തിരഞ്ഞെടുക്കുക — വോട്ട് മാറ്റം വരുത്താൻ കഴിയില്ല" },
+    oneVoteWarning:     { en: "Once submitted, your vote cannot be changed. Choose carefully.", ml: "ഒരു തവണ വോട്ട് ചെയ്‌തുകഴിഞ്ഞാൽ മാറ്റാൻ കഴിയില്ല. ശ്രദ്ധയോടെ തിരഞ്ഞെടുക്കുക." },
+    castVoteNow:        { en: "Cast Your Vote Now",             ml: "ഇപ്പോൾ വോട്ट് ചെയ്യുക" },
+    continue:           { en: "Continue →",                     ml: "തുടരുക →" },
+    confirmVote:        { en: "Confirm Your Vote",              ml: "നിങ്ങളുടെ വോട്ട് ഉറപ്പുവരുത്തുക" },
+    cannotUndo:         { en: "This action cannot be undone",   ml: "ഒരിക്കൽ സ്ഥിരീകരിച്ചാൽ മാറ്റം വരുത്താൻ കഴിയില്ല" },
+    votingFor:          { en: "You are voting for this candidate", ml: "ഈ സ്ഥാനാർത്ഥിക്ക് വോട്ട് ചെയ്യുന്നു" },
+    submitConfirm:      { en: "✅ Confirm Vote",                 ml: "✅ വോട്ട് സ്ഥിരീകരിക്കുക" },
+    voteSubmitted:      { en: "Vote submitted successfully! ✅", ml: "വോട്ട് വിജയകരമായി രേഖപ്പെടുത്തി! ✅" },
+    alreadyVoted:       { en: "✅ Your Vote Submitted",          ml: "✅ നിങ്ങൾ വോട്ട് ചെയ്തു" },
+    votedFor:           { en: "Voted for",                      ml: "തിരഞ്ഞെടുത്തത്" },
+
+    // Parent portal
+    onBehalfOf:         { en: "Voting on behalf of your children", ml: "നിങ്ങളുടെ കുട്ടികളുടെ പ്രതിനിധിയായി വോട്ട് ചെയ്യുന്നു" },
+    activeElections:    { en: "🗳️ Active Elections — Cast Your Vote", ml: "🗳️ തിരഞ്ഞെടുപ്പ് നടന്നുകൊണ്ടിരിക്കുന്നു" },
+    pastElections:      { en: "📁 Past Elections",               ml: "📁 കഴിഞ്ഞ തിരഞ്ഞെടുപ്പുകൾ" },
+    endsOn:             { en: "Ends",                           ml: "അവസാന തീയതി" },
+    noElections:        { en: "No elections available right now", ml: "ഇപ്പോൾ തിരഞ്ഞെടുപ്പൊന്നും ലഭ്യമല്ല" },
+
+    // Teacher portal
+    liveSession:        { en: "Live Voting Session",            ml: "ലൈവ് വോട്ടിംഗ്" },
+    activeSessions:     { en: "⚡ Your Active Sessions",        ml: "⚡ നിങ്ങളുടെ സജീവ സെഷനുകൾ" },
+    readyToOpen:        { en: "📋 Ready to Open",               ml: "📋 തുറക്കാൻ തയ്യാർ" },
+    pastResults:        { en: "📁 Past Results",                 ml: "📁 കഴിഞ്ഞ ഫലങ്ങൾ" },
+    openSession:        { en: "Open Session",                   ml: "സെഷൻ തുറക്കുക" },
+    closeSession:       { en: "Close Voting Session",           ml: "സെഷൻ അടയ്ക്കുക" },
+    recordVotes:        { en: "Record Votes",                   ml: "വോട്ടുകൾ നൽകുക" },
+    selectStudent:      { en: "Select student to record vote",  ml: "വിദ്യാർത്ഥി തിരഞ്ഞെടുക്കുക" },
+    selectCandidate:    { en: "Select a candidate",             ml: "ഒരു സ്ഥാനാർത്ഥിയെ തിരഞ്ഞെടുക്കൂ" },
+    nowVoting:          { en: "Now voting",                     ml: "ഇപ്പോൾ വോട്ട് ചെയ്യുന്നു" },
+    submitVote:         { en: "Submit Vote",                    ml: "വോട്ട് നൽകുക" },
+    noClassElections:   { en: "No elections for your classes",  ml: "നിങ്ങളുടെ ക്ലാസിൽ ഇപ്പോൾ തിരഞ്ഞെടുപ്പൊന്നുമില്ല" },
+
+    // Admin alert
+    activeAlert:        { en: "election(s) currently active",  ml: "തിരഞ്ഞെടുപ്പ് നടന്നുകൊണ്ടിരിക്കുന്നു" },
+    liveUpdate:         { en: "Live results updating in real-time", ml: "ലൈവ് ഫലങ്ങൾ തൽസമയം അപ്‌ഡേറ്റ് ആകുന്നു" },
+    noElectionsFound:   { en: "No elections found",             ml: "തിരഞ്ഞെടുപ്പൊന്നും കണ്ടെത്തിയില്ല" },
   },
 } as const;
 
