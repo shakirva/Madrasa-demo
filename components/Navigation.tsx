@@ -6,13 +6,13 @@ import {
   LayoutDashboard, Users, ClipboardList, BookOpen, FileText,
   CreditCard, BarChart3, Bell, Settings, Star, BookMarked,
   UserCircle, Home, GraduationCap, Moon, Image, IndianRupee,
-  BadgeCheck, Vote, FileBarChart2, Megaphone,
+  BadgeCheck, Vote, FileBarChart2, Megaphone, Receipt,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useLanguageStore } from "@/store/language";
 import { t } from "@/lib/i18n";
 
-type NavKey = "dashboard" | "students" | "fees" | "otherPayments" | "idCards" | "exams" | "reports" | "seats" | "sksbv" | "posters" | "config" | "attendance" | "homework" | "diary" | "ibadah" | "performance" | "home" | "results" | "alerts" | "elections" | "overview" | "finance" | "committee" | "announcements";
+type NavKey = "dashboard" | "students" | "fees" | "otherPayments" | "idCards" | "exams" | "reports" | "seats" | "sksbv" | "posters" | "config" | "attendance" | "homework" | "diary" | "ibadah" | "performance" | "home" | "results" | "alerts" | "elections" | "overview" | "finance" | "committee" | "announcements" | "expenses";
 
 const adminLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[] = [
   { href: "/admin",                icon: LayoutDashboard, key: "dashboard"      },
@@ -54,6 +54,7 @@ const parentLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[]
 const committeeLinks: { href: string; icon: typeof LayoutDashboard; key: NavKey }[] = [
   { href: "/committee",                icon: BarChart3,      key: "overview"       },
   { href: "/committee/finance",        icon: IndianRupee,    key: "finance"        },
+  { href: "/committee/expenses",       icon: Receipt,        key: "expenses"       },
   { href: "/committee/students",       icon: Users,          key: "students"       },
   { href: "/committee/attendance",     icon: ClipboardList,  key: "attendance"     },
   { href: "/committee/elections",      icon: Vote,           key: "elections"      },

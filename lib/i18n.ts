@@ -119,6 +119,7 @@ const translations = {
     finance:            { en: "Finance",                        ml: "ഫിനാൻസ്" },
     committee:          { en: "Committee",                      ml: "കമ്മിറ്റി" },
     announcements:      { en: "Announcements",                  ml: "അറിയിപ്പുകൾ" },
+    expenses:           { en: "Expenses",                        ml: "ചെലവുകൾ" },
   },
 
   // ── Admin Dashboard ───────────────────────────────────────────────────────

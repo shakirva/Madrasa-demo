@@ -1723,6 +1723,43 @@ export interface CommitteeAnnouncement {
   priority: "high" | "medium" | "low";
 }
 
+export type ExpenseCategoryId =
+  | "infrastructure"
+  | "programs"
+  | "salaries"
+  | "maintenance"
+  | "utilities"
+  | "stationery";
+
+export interface ExpenseCategory {
+  id: ExpenseCategoryId;
+  label: string;
+  label_ml: string;
+  budget: number;
+  spent: number;
+  color: string;
+  icon: string;
+}
+
+export interface ExpenseItem {
+  id: string;
+  category: ExpenseCategoryId;
+  title: string;
+  title_ml: string;
+  amount: number;
+  date: string;
+  paidTo: string;
+  paidTo_ml: string;
+  status: "paid" | "pending";
+  note?: string;
+}
+
+export interface CommitteeExpenseMonth {
+  month: string;
+  month_ml: string;
+  amount: number;
+}
+
 export interface CommitteeTopStudent {
   name: string;
   class: string;
@@ -1795,6 +1832,15 @@ export interface CommitteeSummary {
     activeCount: number;
     completedCount: number;
     sksbvUnionMembers: { post: string; post_ml: string; name: string }[];
+  };
+  expenses: {
+    annualBudget: number;
+    totalSpent: number;
+    balance: number;
+    spentPct: number;
+    categories: ExpenseCategory[];
+    recentExpenses: ExpenseItem[];
+    monthlyTrend: CommitteeExpenseMonth[];
   };
   announcements: CommitteeAnnouncement[];
 }
@@ -1906,6 +1952,86 @@ export const committeeSummary: CommitteeSummary = {
       { post: "Convener",   post_ml: "കൺവീനർ",      name: "Hamza Nabil" },
       { post: "Secretary",  post_ml: "സെക്രട്ടറി",   name: "Pending Election" },
       { post: "Treasurer",  post_ml: "ട്രഷറർ",       name: "Salman Rafiq" },
+    ],
+  },
+  expenses: {
+    annualBudget: 480000,
+    totalSpent: 312400,
+    balance: 167600,
+    spentPct: 65,
+    categories: [
+      {
+        id: "salaries",
+        label: "Staff Salaries",        label_ml: "ഉസ്താദ് ശമ്പളം",
+        budget: 240000, spent: 200000,
+        color: "violet", icon: "Users",
+      },
+      {
+        id: "infrastructure",
+        label: "Infrastructure",        label_ml: "ഇൻഫ്രാസ്ട്രക്ചർ",
+        budget: 80000,  spent: 52400,
+        color: "blue",  icon: "Building2",
+      },
+      {
+        id: "programs",
+        label: "Programs & Events",     label_ml: "പ്രോഗ്രാം & ഇവൻ്റ്",
+        budget: 60000,  spent: 38000,
+        color: "rose",  icon: "Star",
+      },
+      {
+        id: "maintenance",
+        label: "Maintenance",           label_ml: "അറ്റകുറ്റ പണി",
+        budget: 40000,  spent: 12000,
+        color: "amber", icon: "Wrench",
+      },
+      {
+        id: "utilities",
+        label: "Utilities",             label_ml: "യൂട്ടിലിറ്റി",
+        budget: 30000,  spent: 7200,
+        color: "teal",  icon: "Zap",
+      },
+      {
+        id: "stationery",
+        label: "Stationery & Books",    label_ml: "സ്റ്റേഷനറി & പുസ്തകം",
+        budget: 30000,  spent: 2800,
+        color: "emerald", icon: "BookOpen",
+      },
+    ],
+    recentExpenses: [
+      // ── Salaries ──
+      { id: "EX001", category: "salaries",       title: "Staff Salaries – March 2026",       title_ml: "ഉസ്താദ് ശമ്പളം – മാർ 2026",          amount: 40000, date: "2026-03-31", paidTo: "All 8 Ustads",          paidTo_ml: "8 ഉസ്താദ്",              status: "paid"    },
+      { id: "EX002", category: "salaries",       title: "Staff Salaries – February 2026",    title_ml: "ഉസ്താദ് ശമ്പളം – ഫെബ് 2026",         amount: 40000, date: "2026-02-28", paidTo: "All 8 Ustads",          paidTo_ml: "8 ഉസ്താദ്",              status: "paid"    },
+      { id: "EX003", category: "salaries",       title: "Staff Salaries – April 2026",       title_ml: "ഉസ്താദ് ശമ്പളം – ഏപ്രിൽ 2026",       amount: 40000, date: "2026-04-30", paidTo: "All 8 Ustads",          paidTo_ml: "8 ഉസ്താദ്",              status: "pending" },
+      // ── Infrastructure ──
+      { id: "EX004", category: "infrastructure", title: "New Benches & Desks – Class 1–3",  title_ml: "പുതിയ ബെഞ്ച് & ഡെസ്ക് – ക്ലാ 1–3",  amount: 18500, date: "2026-02-10", paidTo: "Al-Ameen Furniture",    paidTo_ml: "അൽ-അമീൻ ഫർണ്ണിച്ചർ",   status: "paid"    },
+      { id: "EX005", category: "infrastructure", title: "Whiteboard Replacement – 4 Rooms", title_ml: "വൈറ്റ്ബോർഡ് – 4 ക്ലാസ്",             amount: 9200,  date: "2026-01-25", paidTo: "National Stationery",   paidTo_ml: "നാഷണൽ സ്റ്റേഷനറി",      status: "paid"    },
+      { id: "EX006", category: "infrastructure", title: "Chairs for Staff Room",             title_ml: "സ്റ്റാഫ് റൂം ചെയർ",                  amount: 6800,  date: "2026-01-18", paidTo: "Al-Ameen Furniture",    paidTo_ml: "അൽ-അമീൻ ഫർണ്ണിച്ചർ",   status: "paid"    },
+      { id: "EX007", category: "infrastructure", title: "Notice Board – 2 units",            title_ml: "നോട്ടീസ് ബോർഡ് – 2 എണ്ണം",           amount: 3200,  date: "2026-01-10", paidTo: "City Hardware",         paidTo_ml: "സിറ്റി ഹാർഡ്‌വെയർ",     status: "paid"    },
+      { id: "EX008", category: "infrastructure", title: "Steel Almirahs – Library",          title_ml: "ലൈബ്രറി അൽമേറ",                       amount: 14700, date: "2026-03-05", paidTo: "National Stationery",   paidTo_ml: "നാഷണൽ സ്റ്റേഷനറി",      status: "paid"    },
+      // ── Programs ──
+      { id: "EX009", category: "programs",       title: "Nabidhinam Celebration 2026",       title_ml: "നബിദിനം ആഘോഷം 2026",                  amount: 22000, date: "2026-09-05", paidTo: "Event Committee",       paidTo_ml: "ഇവൻ്റ് കമ്മിറ്റി",       status: "paid"    },
+      { id: "EX010", category: "programs",       title: "Annual Day Programme",              title_ml: "വാർഷിക ദിന പ്രോഗ്രാം",                amount: 8000,  date: "2026-04-10", paidTo: "Event Committee",       paidTo_ml: "ഇവൻ്റ് കമ്മിറ്റി",       status: "pending" },
+      { id: "EX011", category: "programs",       title: "Quran Competition – Prizes",        title_ml: "ഖുർആൻ മത്സര സമ്മാനം",               amount: 4500,  date: "2026-04-20", paidTo: "Purchase Committee",    paidTo_ml: "വാങ്ങൽ കമ്മിറ്റി",       status: "pending" },
+      { id: "EX012", category: "programs",       title: "Republic Day Programme",            title_ml: "റിപ്പബ്ലിക് ദിന പ്രോഗ്രാം",          amount: 3500,  date: "2026-01-26", paidTo: "Event Committee",       paidTo_ml: "ഇവൻ്റ് കമ്മിറ്റി",       status: "paid"    },
+      // ── Maintenance ──
+      { id: "EX013", category: "maintenance",    title: "Classroom Fan Repairs",             title_ml: "ക്ലാസ്‌ ഫാൻ നന്നാക്കൽ",              amount: 3200,  date: "2026-02-15", paidTo: "Electro Service",       paidTo_ml: "ഇലക്‌ട്രോ സർവ്വീസ്",    status: "paid"    },
+      { id: "EX014", category: "maintenance",    title: "Toilet Block Renovation",           title_ml: "ടോയ്‌ലറ്റ് നവീകരണം",                amount: 5800,  date: "2026-03-12", paidTo: "P.M. Builders",         paidTo_ml: "P.M. ബിൽഡേഴ്‌സ്",        status: "paid"    },
+      { id: "EX015", category: "maintenance",    title: "Roof Leak Repair",                  title_ml: "മേൽക്കൂര ചോർച്ച നന്നാക്കൽ",          amount: 3000,  date: "2026-02-20", paidTo: "P.M. Builders",         paidTo_ml: "P.M. ബിൽഡേഴ്‌സ്",        status: "paid"    },
+      // ── Utilities ──
+      { id: "EX016", category: "utilities",      title: "Electricity Bill – Q2 2026",        title_ml: "കറൻ്റ് ബിൽ – Q2 2026",                amount: 3600,  date: "2026-03-15", paidTo: "KSEB",                  paidTo_ml: "KSEB",                    status: "paid"    },
+      { id: "EX017", category: "utilities",      title: "Water Charges – Q2 2026",           title_ml: "ജലനിരക്ക് – Q2 2026",                 amount: 1200,  date: "2026-03-15", paidTo: "KWA",                   paidTo_ml: "KWA",                     status: "paid"    },
+      { id: "EX018", category: "utilities",      title: "Internet & Broadband",              title_ml: "ഇൻ്റർനെറ്റ്",                         amount: 2400,  date: "2026-03-01", paidTo: "BSNL",                  paidTo_ml: "BSNL",                    status: "paid"    },
+      // ── Stationery ──
+      { id: "EX019", category: "stationery",     title: "Notebooks & Pens – Term 2",         title_ml: "നോട്ട്ബുക്ക് & പേന – ടേം 2",         amount: 1800,  date: "2026-01-05", paidTo: "National Stationery",   paidTo_ml: "നാഷണൽ സ്റ്റേഷനറി",      status: "paid"    },
+      { id: "EX020", category: "stationery",     title: "Printer Ink & A4 Paper",            title_ml: "പ്രിൻ്റർ ഇങ്ക് & പേപ്പർ",            amount: 1000,  date: "2026-02-10", paidTo: "City Computers",        paidTo_ml: "സിറ്റി കമ്പ്യൂട്ടേഴ്‌സ്", status: "paid"    },
+    ],
+    monthlyTrend: [
+      { month: "Oct",  month_ml: "ഒക്ടോ", amount: 44000 },
+      { month: "Nov",  month_ml: "നവം",   amount: 41200 },
+      { month: "Dec",  month_ml: "ഡിസ",   amount: 39600 },
+      { month: "Jan",  month_ml: "ജനു",   amount: 58800 },
+      { month: "Feb",  month_ml: "ഫെബ്",  amount: 71400 },
+      { month: "Mar",  month_ml: "മാർ",   amount: 57400 },
     ],
   },
   announcements: [
