@@ -1,13 +1,14 @@
 "use client";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLanguageStore } from "@/store/language";
-import { committeeSummary } from "@/mock-data";
+import { committeeSummary, ExpenseCategoryId, ExpenseItem } from "@/mock-data";
 import { useState } from "react";
 import {
   Receipt, IndianRupee, TrendingDown, Wallet, PiggyBank,
   Users, Building2, Star, Wrench, Zap, BookOpen,
   CheckCircle2, Clock, AlertTriangle, ChevronDown, ChevronUp,
+  Plus, X, Save,
 } from "lucide-react";
 
 const d = committeeSummary;
@@ -53,6 +54,24 @@ const categoryColorMap: Record<string, { bar: string; bg: string; text: string; 
 
 type FilterId = "all" | "salaries" | "infrastructure" | "programs" | "maintenance" | "utilities" | "stationery";
 
+type NewExpense = {
+  title: string;
+  title_ml: string;
+  category: ExpenseCategoryId;
+  amount: string;
+  date: string;
+  paidTo: string;
+  paidTo_ml: string;
+  status: "paid" | "pending";
+  note: string;
+};
+
+const EMPTY_FORM: NewExpense = {
+  title: "", title_ml: "", category: "infrastructure",
+  amount: "", date: new Date().toISOString().slice(0, 10),
+  paidTo: "", paidTo_ml: "", status: "paid", note: "",
+};
+
 // ── component ─────────────────────────────────────────────────────────────────
 
 export default function CommitteeExpensesPage() {
@@ -60,36 +79,271 @@ export default function CommitteeExpensesPage() {
   const exp = d.expenses;
 
   const [activeFilter, setActiveFilter] = useState<FilterId>("all");
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll]           = useState(false);
+  const [showForm, setShowForm]         = useState(false);
+  const [form, setForm]                 = useState<NewExpense>(EMPTY_FORM);
+  const [localExpenses, setLocalExpenses] = useState<ExpenseItem[]>([]);
+  const [saved, setSaved]               = useState(false);
 
+  const allExpenses: ExpenseItem[] = [...localExpenses, ...exp.recentExpenses];
   const maxMonth = Math.max(...exp.monthlyTrend.map((m) => m.amount));
 
   const filteredExpenses = activeFilter === "all"
-    ? exp.recentExpenses
-    : exp.recentExpenses.filter((e) => e.category === activeFilter);
+    ? allExpenses
+    : allExpenses.filter((e) => e.category === activeFilter);
 
   const displayedExpenses = showAll ? filteredExpenses : filteredExpenses.slice(0, 8);
 
-  const totalPending = exp.recentExpenses.filter((e) => e.status === "pending").reduce((s, e) => s + e.amount, 0);
+  const totalPending = allExpenses.filter((e) => e.status === "pending").reduce((s, e) => s + e.amount, 0);
+  const localSpent   = localExpenses.reduce((s, e) => s + e.amount, 0);
+  const totalSpent   = exp.totalSpent + localSpent;
+  const spentPct     = Math.round((totalSpent / exp.annualBudget) * 100);
+  const balance      = exp.annualBudget - totalSpent;
+
+  function handleSave() {
+    if (!form.title || !form.amount || !form.paidTo || !form.date) return;
+    const newItem: ExpenseItem = {
+      id:       `EX-LOCAL-${Date.now()}`,
+      category: form.category,
+      title:    form.title,
+      title_ml: form.title_ml || form.title,
+      amount:   Number(form.amount),
+      date:     form.date,
+      paidTo:   form.paidTo,
+      paidTo_ml: form.paidTo_ml || form.paidTo,
+      status:   form.status,
+      note:     form.note,
+    };
+    setLocalExpenses((prev) => [newItem, ...prev]);
+    setForm(EMPTY_FORM);
+    setSaved(true);
+    setTimeout(() => { setSaved(false); setShowForm(false); }, 1200);
+  }
+
+  const isFormValid = form.title.trim() && form.amount && Number(form.amount) > 0 && form.paidTo.trim() && form.date;
 
   return (
     <DashboardLayout>
 
+      {/* ── Add Expense modal / drawer ── */}
+      <AnimatePresence>
+        {showForm && (
+          <>
+            {/* Backdrop */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 z-40" onClick={() => setShowForm(false)}
+            />
+            {/* Drawer */}
+            <motion.div initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl max-h-[92vh] overflow-y-auto"
+            >
+              {/* Handle */}
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 bg-gray-300 rounded-full" />
+              </div>
+
+              <div className="px-5 pb-8">
+                {/* Drawer header */}
+                <div className="flex items-center justify-between mb-5 pt-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center">
+                      <Plus className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <h2 className="text-base font-black text-gray-900">
+                        {lang === "ml" ? "പുതിയ ചെലവ് ചേർക്കുക" : "Add New Expense"}
+                      </h2>
+                      <p className="text-[11px] text-gray-400">
+                        {lang === "ml" ? "വിശദാംശം നൽകുക" : "Fill in the details below"}
+                      </p>
+                    </div>
+                  </div>
+                  <button onClick={() => setShowForm(false)}
+                    className="w-8 h-8 bg-gray-100 rounded-xl flex items-center justify-center"
+                  >
+                    <X className="w-4 h-4 text-gray-500" />
+                  </button>
+                </div>
+
+                {/* Form fields */}
+                <div className="space-y-4">
+
+                  {/* Category */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      {lang === "ml" ? "ഇനം (Category)" : "Category"} *
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {exp.categories.map((cat) => {
+                        const c    = categoryColorMap[cat.id] ?? categoryColorMap.stationery;
+                        const Icon = categoryIconMap[cat.id] ?? BookOpen;
+                        return (
+                          <button key={cat.id} type="button"
+                            onClick={() => setForm((f) => ({ ...f, category: cat.id as ExpenseCategoryId }))}
+                            className={`flex items-center gap-2 rounded-xl border p-2.5 text-left transition-all ${
+                              form.category === cat.id
+                                ? `${c.bg} ${c.border} ring-2 ${c.ring}`
+                                : "bg-gray-50 border-gray-100"
+                            }`}
+                          >
+                            <div className={`w-6 h-6 ${c.bg} rounded-lg flex items-center justify-center`}>
+                              <Icon className={`w-3 h-3 ${c.text}`} />
+                            </div>
+                            <span className={`text-xs font-bold ${form.category === cat.id ? c.text : "text-gray-600"}`}>
+                              {lang === "ml" ? cat.label_ml : cat.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      {lang === "ml" ? "ചെലവ് പേര്" : "Expense Title"} *
+                    </label>
+                    <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                      placeholder={lang === "ml" ? "ഉദാ: പുതിയ ബെഞ്ച് വാങ്ങൽ" : "e.g. New Benches Purchase"}
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                    />
+                  </div>
+
+                  {/* Title Malayalam */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      {lang === "ml" ? "മലയാളം പേര്" : "Malayalam Title"}{" "}
+                      <span className="font-normal text-gray-400">({lang === "ml" ? "ഓപ്ഷണൽ" : "optional"})</span>
+                    </label>
+                    <input value={form.title_ml} onChange={(e) => setForm((f) => ({ ...f, title_ml: e.target.value }))}
+                      placeholder={lang === "ml" ? "ഉദാ: പുതിയ ബെഞ്ച് വാങ്ങൽ" : "e.g. പുതിയ ബെഞ്ച് വാങ്ങൽ"}
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                    />
+                  </div>
+
+                  {/* Amount + Date */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                        {lang === "ml" ? "തുക (₹)" : "Amount (₹)"} *
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">₹</span>
+                        <input type="number" min="0" value={form.amount}
+                          onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+                          placeholder="0"
+                          className="w-full rounded-xl border border-gray-200 bg-gray-50 pl-7 pr-3 py-2.5 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                        {lang === "ml" ? "തീയതി" : "Date"} *
+                      </label>
+                      <input type="date" value={form.date}
+                        onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                        className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm font-medium text-gray-800 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Paid To */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      {lang === "ml" ? "നൽകിയത് ആർക്ക്" : "Paid To"} *
+                    </label>
+                    <input value={form.paidTo} onChange={(e) => setForm((f) => ({ ...f, paidTo: e.target.value }))}
+                      placeholder={lang === "ml" ? "ഉദാ: National Stationery" : "e.g. National Stationery"}
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                    />
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      {lang === "ml" ? "നില" : "Payment Status"}
+                    </label>
+                    <div className="flex gap-2">
+                      {(["paid", "pending"] as const).map((st) => (
+                        <button key={st} type="button"
+                          onClick={() => setForm((f) => ({ ...f, status: st }))}
+                          className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-xs font-bold transition-all ${
+                            form.status === st
+                              ? st === "paid"
+                                ? "bg-emerald-50 border-emerald-300 text-emerald-700 ring-2 ring-emerald-200"
+                                : "bg-orange-50 border-orange-300 text-orange-700 ring-2 ring-orange-200"
+                              : "bg-gray-50 border-gray-200 text-gray-500"
+                          }`}
+                        >
+                          {st === "paid"
+                            ? <><CheckCircle2 className="w-3.5 h-3.5" />{lang === "ml" ? "അടച്ചു" : "Paid"}</>
+                            : <><Clock className="w-3.5 h-3.5" />{lang === "ml" ? "ബാക്കി" : "Pending"}</>
+                          }
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Note */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                      {lang === "ml" ? "കുറിപ്പ്" : "Note"}{" "}
+                      <span className="font-normal text-gray-400">({lang === "ml" ? "ഓപ്ഷണൽ" : "optional"})</span>
+                    </label>
+                    <textarea value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
+                      rows={2} placeholder={lang === "ml" ? "അധിക വിവരം..." : "Additional details..."}
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 resize-none"
+                    />
+                  </div>
+
+                  {/* Save button */}
+                  <button onClick={handleSave} disabled={!isFormValid}
+                    className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-black transition-all ${
+                      saved
+                        ? "bg-emerald-500 text-white"
+                        : isFormValid
+                          ? "bg-orange-500 text-white hover:bg-orange-600 active:scale-95"
+                          : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    }`}
+                  >
+                    {saved
+                      ? <><CheckCircle2 className="w-4 h-4" />{lang === "ml" ? "സേവ് ആയി!" : "Saved!"}</>
+                      : <><Save className="w-4 h-4" />{lang === "ml" ? "ചെലവ് സേവ് ചെയ്യുക" : "Save Expense"}</>
+                    }
+                  </button>
+
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* ── Header ── */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-5">
         <div className="bg-linear-to-r from-orange-600 to-amber-500 rounded-3xl p-5 lg:p-6 text-white">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
-              <Receipt className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
+                <Receipt className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-orange-200 text-xs font-semibold uppercase tracking-widest">
+                  {lang === "ml" ? "കമ്മിറ്റി" : "Management Committee"}
+                </p>
+                <h1 className="text-xl font-bold">
+                  {lang === "ml" ? "ചെലവ് നിയന്ത്രണം" : "Expense Management"}
+                </h1>
+              </div>
             </div>
-            <div>
-              <p className="text-orange-200 text-xs font-semibold uppercase tracking-widest">
-                {lang === "ml" ? "കമ്മിറ്റി" : "Management Committee"}
-              </p>
-              <h1 className="text-xl font-bold">
-                {lang === "ml" ? "ചെലവ് നിയന്ത്രണം" : "Expense Management"}
-              </h1>
-            </div>
+            {/* ── Add button ── */}
+            <button onClick={() => { setShowForm(true); setSaved(false); }}
+              className="flex items-center gap-1.5 bg-white text-orange-600 text-xs font-black px-3.5 py-2 rounded-xl shadow-sm hover:bg-orange-50 active:scale-95 transition-all shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              {lang === "ml" ? "ചേർക്കുക" : "Add"}
+            </button>
           </div>
           {/* Budget progress */}
           <div className="bg-white/15 rounded-2xl p-4">
@@ -97,13 +351,13 @@ export default function CommitteeExpensesPage() {
               <span className="text-sm text-orange-200 font-semibold">
                 {lang === "ml" ? "വാർഷിക ബജറ്റ് ഉപയോഗം" : "Annual Budget Usage"}
               </span>
-              <span className="text-2xl font-black">{exp.spentPct}%</span>
+              <span className="text-2xl font-black">{spentPct}%</span>
             </div>
             <div className="h-3 bg-white/20 rounded-full overflow-hidden mb-2">
-              <div className="h-full bg-white rounded-full transition-all duration-1000" style={{ width: `${exp.spentPct}%` }} />
+              <div className="h-full bg-white rounded-full transition-all duration-1000" style={{ width: `${spentPct}%` }} />
             </div>
             <div className="flex justify-between text-xs text-orange-200">
-              <span>{lang === "ml" ? "ചെലവ്" : "Spent"}: {fmt(exp.totalSpent)}</span>
+              <span>{lang === "ml" ? "ചെലവ്" : "Spent"}: {fmt(totalSpent)}</span>
               <span>{lang === "ml" ? "ബജറ്റ്" : "Budget"}: {fmt(exp.annualBudget)}</span>
             </div>
           </div>
@@ -121,14 +375,14 @@ export default function CommitteeExpensesPage() {
           },
           {
             label: lang === "ml" ? "ആകെ ചെലവ്"    : "Total Spent",
-            value: fmt(exp.totalSpent),
-            sub:   `${exp.spentPct}% ${lang === "ml" ? "ബജറ്റിൽ" : "of budget"}`,
+            value: fmt(totalSpent),
+            sub:   `${spentPct}% ${lang === "ml" ? "ബജറ്റിൽ" : "of budget"}`,
             icon: TrendingDown, color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200",
           },
           {
             label: lang === "ml" ? "ബാക്കി ബജറ്റ്" : "Remaining",
-            value: fmt(exp.balance),
-            sub:   `${100 - exp.spentPct}% ${lang === "ml" ? "ബാക്കി" : "left"}`,
+            value: fmt(balance),
+            sub:   `${100 - spentPct}% ${lang === "ml" ? "ബാക്കി" : "left"}`,
             icon: PiggyBank,    color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200",
           },
           {
