@@ -1761,6 +1761,24 @@ export interface CommitteeSummary {
     todayAbsent: number;
     weeklyTrend: CommitteeAttendanceWeek[];
     lowAttendanceStudents: number;
+    staff: {
+      totalStaff: number;
+      presentToday: number;
+      absentToday: number;
+      onLeaveToday: number;
+      overallPct: number;
+      weeklyTrend: CommitteeAttendanceWeek[];
+      staffList: {
+        id: string;
+        name: string;
+        role: string;
+        role_ml: string;
+        subject: string;
+        subject_ml: string;
+        todayStatus: "present" | "absent" | "leave";
+        attendancePct: number;
+      }[];
+    };
   };
   academic: {
     lastExamAvgScore: number;
@@ -1825,6 +1843,31 @@ export const committeeSummary: CommitteeSummary = {
       { day: "Thu",  day_ml: "വ്യാഴം", present: 108, absent: 16 },
     ],
     lowAttendanceStudents: 7,
+    staff: {
+      totalStaff: 8,
+      presentToday: 7,
+      absentToday: 1,
+      onLeaveToday: 0,
+      overallPct: 93,
+      weeklyTrend: [
+        { day: "Sat",  day_ml: "ശനി",   present: 8, absent: 0 },
+        { day: "Sun",  day_ml: "ഞായർ",  present: 7, absent: 1 },
+        { day: "Mon",  day_ml: "തിങ്ക", present: 8, absent: 0 },
+        { day: "Tue",  day_ml: "ചൊവ്വ", present: 8, absent: 0 },
+        { day: "Wed",  day_ml: "ബുധൻ",  present: 7, absent: 1 },
+        { day: "Thu",  day_ml: "വ്യാഴം", present: 7, absent: 1 },
+      ],
+      staffList: [
+        { id: "T001", name: "Usthad Abdul Kareem",  role: "Senior Teacher",   role_ml: "സീനിയർ ടീച്ചർ",  subject: "Quran & Islamic Studies", subject_ml: "ഖുർആൻ & ഇസ്ലാമിക്", todayStatus: "present", attendancePct: 97 },
+        { id: "T002", name: "Usthada Zubeda",        role: "Teacher",          role_ml: "ടീച്ചർ",          subject: "Arabic",                  subject_ml: "അറബിക്",             todayStatus: "present", attendancePct: 95 },
+        { id: "T003", name: "Usthad Rasheed",        role: "Teacher",          role_ml: "ടീച്ചർ",          subject: "Fiqh & Hadith",           subject_ml: "ഫിഖ്ഹ് & ഹദീസ്",    todayStatus: "absent",  attendancePct: 88 },
+        { id: "T004", name: "Usthada Naseema",       role: "Teacher",          role_ml: "ടീച്ചർ",          subject: "Malayalam & General",     subject_ml: "മലയാളം & ജനറൽ",     todayStatus: "present", attendancePct: 92 },
+        { id: "T005", name: "Usthad Hamid",          role: "Teacher",          role_ml: "ടീച്ചർ",          subject: "Mathematics",             subject_ml: "ഗണിതം",              todayStatus: "present", attendancePct: 98 },
+        { id: "T006", name: "Usthada Ruhana",        role: "Teacher",          role_ml: "ടീച്ചർ",          subject: "Islamic History",         subject_ml: "ഇസ്ലാമിക ചരിത്രം",  todayStatus: "present", attendancePct: 90 },
+        { id: "T007", name: "Usthad Basheer",        role: "Quran Teacher",    role_ml: "ഖുർആൻ ടീച്ചർ",   subject: "Quran Recitation",        subject_ml: "ഖുർആൻ പാരായണം",    todayStatus: "present", attendancePct: 96 },
+        { id: "T008", name: "Usthada Shaheena",      role: "Asst. Teacher",    role_ml: "അസി. ടീച്ചർ",    subject: "General Studies",         subject_ml: "ജനറൽ പഠനം",         todayStatus: "present", attendancePct: 85 },
+      ],
+    },
   },
   academic: {
     lastExamAvgScore: 74,
